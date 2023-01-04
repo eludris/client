@@ -1,0 +1,27 @@
+:root {
+  --white: #eeeeee;
+  --gray: #aaaaaa;
+  --bg: #211233;
+  --accent: #bc13fe;
+  --accent2: #563277;
+}
+
+body {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  background-color: var(--bg);
+  color: var(--white);
+}
+
+a {
+  text-decoration: none;
+  color: var(--gray);
+  border-bottom: 1px solid var(--gray);
+  transition: color ease-in-out 100ms, border-color ease-in-out 100ms;
+}
+
+a:hover {
+  color: var(--white);
+  border-bottom: 1px solid var(--white);
+}
