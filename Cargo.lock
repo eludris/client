@@ -1600,7 +1600,7 @@ checksum = "cda74da7e1a664f795bb1f8a87ec406fb89a02522cf6e50620d016add6dbbf5c"
 [[package]]
 name = "todel"
 version = "0.3.1"
-source = "git+https://github.com/eludris/eludris?branch=next#7557f5b90b0a70399e49d5e774fdbc94adef4b28"
+source = "git+https://github.com/eludris/eludris?branch=next#21a37588c61760e49c32f51af3846461c1c9b3e0"
 dependencies = [
  "serde",
  "serde_with",
