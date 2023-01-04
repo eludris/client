@@ -1,0 +1,23 @@
+[package]
+name = "pengin"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+perseus = { version = "0.4.0-beta.14", features = [ "hydrate" ] }
+sycamore = "0.8"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+todel = { git = "https://github.com/eludris/eludris", version = "0.3.1", branch = "next" }
+
+[target.'cfg(engine)'.dependencies]
+tokio = { version = "1", features = [ "macros", "rt", "rt-multi-thread" ] }
+perseus-warp = { version = "0.4.0-beta.14", features = [ "dflt-server" ] }
+
+[target.'cfg(client)'.dependencies]
+web-sys = { version = "0.3.60", features = ["Storage"] }
+gloo-net = "0.2.5"
+gloo-timers = { version="0.2.5", features = ["futures"] }
+futures-util = "0.3.25"
