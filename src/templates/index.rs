@@ -22,8 +22,7 @@ pub fn index_page<G: Html>(cx: Scope) -> View<G> {
     view! { cx,
         (match &*state.name.get() {
             Some(name) => view! { cx,
-                div(class = "message-channel")
-                {
+                div(class = "message-channel") {
                     ul(id = "messages") {
                         Indexed(
                             iterable = &state.messages,
@@ -62,7 +61,7 @@ pub fn index_page<G: Html>(cx: Scope) -> View<G> {
                             id = "message-input",
                             placeholder = "Send a message to Eludris",
                             bind:value = content
-                        ) {}
+                        )
                         button(id = "send-button") { "Send" }
                     }
                 }
