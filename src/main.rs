@@ -1,4 +1,4 @@
-mod error_pages;
+mod error_views;
 mod global_state;
 mod templates;
 
@@ -23,6 +23,6 @@ pub fn main<G: Html>() -> PerseusApp<G> {
                 }
             }
         })
-        .error_views(error_pages::get_error_pages())
+        .error_views(error_views::get_error_views())
         .global_state_creator(global_state::get_global_state_creator())
 }

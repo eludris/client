@@ -1,7 +1,7 @@
 use perseus::prelude::*;
 use sycamore::prelude::*;
 
-pub fn get_error_pages<G: Html>() -> ErrorViews<G> {
+pub fn get_error_views<G: Html>() -> ErrorViews<G> {
     ErrorViews::new(|cx, err, _, _| {
         (
             view! { cx,
