@@ -1,7 +1,6 @@
 use perseus::{prelude::*, state::GlobalStateCreator};
 use serde::{Deserialize, Serialize};
-use sycamore::futures::spawn_local;
-use todel::models::{Message, Payload};
+use todel::models::Message;
 
 pub fn get_global_state_creator() -> GlobalStateCreator {
     GlobalStateCreator::new().build_state_fn(get_build_state)
@@ -15,7 +14,7 @@ async fn get_build_state(_locale: String) -> AppState {
     }
 }
 
-#[derive(Serialize, Deserialize, ReactiveState)]
+#[derive(Debug, Serialize, Deserialize, ReactiveState)]
 #[rx(alias = "AppStateRx")]
 pub struct AppState {
     pub name: Option<String>,
@@ -26,13 +25,11 @@ pub struct AppState {
 impl AppStateRx {
     pub fn load_name(&self) {
         use web_sys::window;
-        if self.name.get().is_none() {
-            let storage = window().unwrap().local_storage().unwrap().unwrap();
-            self.name.set(storage.get("name").unwrap());
-        }
+        let storage = window().unwrap().local_storage().unwrap().unwrap();
+        self.name.set(storage.get("name").unwrap());
     }
 
-    pub fn set_name<'a>(&self, name: &'a str) {
+    pub fn set_name(&self, name: &str) {
         use web_sys::window;
         let storage = window().unwrap().local_storage().unwrap().unwrap();
         storage.set("name", name).unwrap();
@@ -43,6 +40,11 @@ impl AppStateRx {
         use web_sys::window;
         let storage = window().unwrap().local_storage().unwrap().unwrap();
         storage.delete("name").unwrap();
+        self.name.set(None);
+    }
+
+    pub fn get_name(&self) -> Option<String> {
+        self.name.get().as_ref().as_ref().map(|n| n.to_string())
     }
 }
 
@@ -53,7 +55,10 @@ impl AppStateRx {
         use gloo_net::websocket::futures::WebSocket;
         use gloo_net::websocket::Message as WebSocketMessage;
         use gloo_timers::future::IntervalStream;
-        let mut ws = WebSocket::open("wss://eludris.tooty.xyz/ws/").unwrap();
+        use sycamore::futures::spawn_local;
+        use todel::models::Payload;
+
+        let ws = WebSocket::open("wss://eludris.tooty.xyz/ws/").unwrap();
         let (mut tx, mut rx) = ws.split();
         spawn_local(async move {
             let mut stream = IntervalStream::new(45_0000);
