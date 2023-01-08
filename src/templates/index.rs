@@ -1,12 +1,15 @@
-use std::rc::Rc;
-
 use crate::global_state::AppStateRx;
 use perseus::prelude::*;
 use sycamore::prelude::*;
-use todel::models::Message;
+use sycamore::web::NoSsr;
+use web_sys::Event;
 
 #[cfg(client)]
-use web_sys::Event;
+use gloo_net::http::Request;
+#[cfg(client)]
+use std::rc::Rc;
+#[cfg(client)]
+use todel::models::Message;
 
 pub fn index_page<G: Html>(cx: Scope) -> View<G> {
     let state = Reactor::<G>::from_cx(cx).get_global_state::<AppStateRx>(cx);
@@ -16,37 +19,34 @@ pub fn index_page<G: Html>(cx: Scope) -> View<G> {
     #[cfg(client)]
     {
         state.load_name();
-        state.start_websocket()
+        state.start_websocket();
     }
 
     view! { cx,
-        (match &*state.name.get() {
-            Some(name) => view! { cx,
-                div(class = "message-channel") {
-                    ul(id = "messages") {
-                        Indexed(
-                            iterable = &state.messages,
-                            view = |cx, x| view! { cx,
-                                div(class = "message") {
-                                    span(class = "author") { (format!("[{}]: ", x.author)) }
-                                    span(class = "content") { (x.content) }
+        NoSsr {(
+            match *state.name.get() {
+                Some(_) => view! { cx,
+                    div(class = "message-channel") {
+                        ul(id = "messages") {
+                            Indexed(
+                                iterable = &state.messages,
+                                view = |cx, x| view! { cx,
+                                    div(class = "message") {
+                                        span(class = "author") { (format!("[{}]: ", x.author)) }
+                                        span(class = "content") { (x.content) }
+                                    }
                                 }
-                            }
-                        )
-                    }
-                    form(
-                        id = "message-input-form",
-                        on:submit = move |e| {
-                            #[cfg(client)]
-                            {
-                                use gloo_net::http::Request;
-
-                                let e: Event = e;
+                            )
+                        }
+                        form(
+                            id = "message-input-form",
+                            on:submit = move |e :Event| {
                                 e.prevent_default();
+                                #[cfg(client)]
                                 spawn_local_scoped(cx, async {
                                     Request::post("https://eludris.tooty.xyz/messages")
                                         .json(&Message {
-                                            author: state.name.get().as_ref().clone().unwrap(),
+                                            author: state.get_name().unwrap(),
                                             content: Rc::try_unwrap(content.take()).unwrap(),
                                         })
                                         .unwrap()
@@ -55,38 +55,35 @@ pub fn index_page<G: Html>(cx: Scope) -> View<G> {
                                         .unwrap();
                                 })
                             }
+                        ) {
+                            input(
+                                id = "message-input",
+                                placeholder = "Send a message to Eludris",
+                                bind:value = content
+                            )
+                            button(id = "send-button") { "Send" }
                         }
-                    ) {
+                    }
+                },
+                None => view! { cx,
+                    h3 { "Please log in to continue" }
+                    form(
+                        id = "login-form",
+                        on:submit = move |e: Event| {
+                                e.prevent_default();
+                                #[cfg(client)]
+                                state.set_name(&entered_name.get())
+                        }
+                        ) {
+                        label(for = "name") { "Username" }
                         input(
-                            id = "message-input",
-                            placeholder = "Send a message to Eludris",
-                            bind:value = content
-                        )
-                        button(id = "send-button") { "Send" }
+                            id = "name",
+                            placeholder = "Enter your username",
+                            bind:value = entered_name) {}
                     }
-                }
-            },
-            None => view! { cx,
-                h3 { "Please log in to continue" }
-                form(
-                    id = "login-form",
-                    on:submit = move |e| {
-                        #[cfg(client)]
-                        {
-                            let e: Event = e;
-                            e.prevent_default();
-                            state.set_name(&*entered_name.get())
-                        }
-                    }
-                    ) {
-                    label(for = "name") { "Username" }
-                    input(
-                        id = "name",
-                        placeholder = "Enter your username",
-                        bind:value = entered_name) {}
-                }
+                },
             }
-        })
+        )}
     }
 }
 
