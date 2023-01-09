@@ -1,22 +1,51 @@
 use crate::global_state::AppStateRx;
 use perseus::prelude::*;
-use pulldown_cmark::{escape::escape_html, html, Parser};
+use pulldown_cmark::{escape::escape_html, html, Options, Parser};
 use sycamore::prelude::*;
+use sycamore::rt::JsCast;
 use sycamore::web::NoSsr;
-use web_sys::{window, Event};
+use web_sys::{Event, HtmlSpanElement, KeyboardEvent};
 
 #[cfg(client)]
 use gloo_net::http::Request;
-#[cfg(client)]
-use std::rc::Rc;
 #[cfg(client)]
 use todel::models::Message;
 
 pub fn index_page<G: Html>(cx: Scope) -> View<G> {
     let state = Reactor::<G>::from_cx(cx).get_global_state::<AppStateRx>(cx);
-    let content = create_signal(cx, String::new());
     let entered_name = create_signal(cx, String::new());
     let last_name = create_signal(cx, String::new());
+    let input_ref = create_node_ref(cx);
+
+    on_mount(cx, || {
+        let input = input_ref
+            .get::<HydrateNode>()
+            .unchecked_into::<HtmlSpanElement>();
+        input.focus().unwrap();
+    });
+
+    let on_submit = move |e: Event| {
+        e.prevent_default();
+        let input = input_ref
+            .get::<HydrateNode>()
+            .unchecked_into::<HtmlSpanElement>();
+        #[cfg(client)]
+        let content = input.inner_text();
+        input.set_inner_text("");
+        input.focus().unwrap();
+        #[cfg(client)]
+        spawn_local_scoped(cx, async move {
+            Request::post("https://eludris.tooty.xyz/messages")
+                .json(&Message {
+                    author: state.get_name().unwrap(),
+                    content,
+                })
+                .unwrap()
+                .send()
+                .await
+                .unwrap();
+        })
+    };
 
     #[cfg(client)]
     {
@@ -24,7 +53,7 @@ pub fn index_page<G: Html>(cx: Scope) -> View<G> {
         state.start_websocket();
     }
 
-    view! { cx,
+    let v = view! { cx,
         NoSsr {(
             match *state.name.get() {
                 Some(_) => view! { cx,
@@ -33,12 +62,18 @@ pub fn index_page<G: Html>(cx: Scope) -> View<G> {
                             Indexed(
                                 iterable = &state.messages,
                                 view = move |cx, x| {
+                                    let mut opts = Options::empty();
+                                    opts.insert(Options::ENABLE_TABLES);
+                                    opts.insert(Options::ENABLE_STRIKETHROUGH);
+                                    opts.insert(Options::ENABLE_TASKLISTS);
+
                                     let mut s = String::new();
                                     escape_html(&mut s, x.content.trim()).unwrap();
-                                    let parser = Parser::new(&s);
+                                    let s = s.trim().replace('\n', "<br>");
+                                    let parser = Parser::new_ext(&s, opts);
+
                                     let mut content = String::new();
                                     html::push_html(&mut content, parser);
-                                    let content = content.trim().replace('\n', "<br>");
                                     let author = x.author.clone();
                                     view! { cx,
                                         div(class = "message") {
@@ -62,29 +97,23 @@ pub fn index_page<G: Html>(cx: Scope) -> View<G> {
                         }
                         form(
                             id = "message-input-form",
-                            on:submit = move |e: Event| {
-                                e.prevent_default();
-                                #[cfg(client)]
-                                spawn_local_scoped(cx, async {
-                                    Request::post("https://eludris.tooty.xyz/messages")
-                                        .json(&Message {
-                                            author: state.get_name().unwrap(),
-                                            content: Rc::try_unwrap(content.take()).unwrap(),
-                                        })
-                                        .unwrap()
-                                        .send()
-                                        .await
-                                        .unwrap();
-                                })
-                            }
+                            on:submit = on_submit
                         ) {
-                            input(
+                            span(
+                                ref = input_ref,
                                 id = "message-input",
                                 placeholder = "Send a message to Eludris",
                                 autofocus = true,
                                 autocomplete = "off",
-                                spellcheck = "on",
-                                bind:value = content
+                                spellcheck = true,
+                                contenteditable = true,
+                                role = "textbox",
+                                on:keypress = move |e: Event| {
+                                    let e = e.unchecked_into::<KeyboardEvent>();
+                                    if  e.key() == "Enter" && !e.shift_key() {
+                                        on_submit(e.into());
+                                    }
+                                }
                             )
                             button(id = "send-button") { "Send" }
                         }
@@ -109,7 +138,8 @@ pub fn index_page<G: Html>(cx: Scope) -> View<G> {
                 },
             }
         )}
-    }
+    };
+    v
 }
 
 pub fn get_template<G: Html>() -> Template<G> {
