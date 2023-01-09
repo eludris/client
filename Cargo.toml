@@ -11,7 +11,7 @@ sycamore = "0.8"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 todel = { git = "https://github.com/eludris/eludris", version = "0.3.1", branch = "next" }
-web-sys = { version = "0.3.60", features = ["Storage"] }
+web-sys = { version = "0.3.60", features = ["Storage", "HtmlSpanElement", "KeyboardEvent"] }
 pulldown-cmark = "0.9.2"
 
 [target.'cfg(engine)'.dependencies]
