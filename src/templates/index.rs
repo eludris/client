@@ -1,6 +1,6 @@
 use crate::global_state::AppStateRx;
+use markdown::to_html;
 use perseus::prelude::*;
-use pulldown_cmark::{escape::escape_html, html, Options, Parser};
 use sycamore::prelude::*;
 use sycamore::rt::JsCast;
 use sycamore::web::NoSsr;
@@ -62,18 +62,7 @@ pub fn index_page<G: Html>(cx: Scope) -> View<G> {
                             Indexed(
                                 iterable = &state.messages,
                                 view = move |cx, x| {
-                                    let mut opts = Options::empty();
-                                    opts.insert(Options::ENABLE_TABLES);
-                                    opts.insert(Options::ENABLE_STRIKETHROUGH);
-                                    opts.insert(Options::ENABLE_TASKLISTS);
-
-                                    let mut s = String::new();
-                                    escape_html(&mut s, x.content.trim()).unwrap();
-                                    let s = s.trim().replace('\n', "<br>");
-                                    let parser = Parser::new_ext(&s, opts);
-
-                                    let mut content = String::new();
-                                    html::push_html(&mut content, parser);
+                                    let content = to_html(&x.content);
                                     let author = x.author.clone();
                                     view! { cx,
                                         div(class = "message") {
