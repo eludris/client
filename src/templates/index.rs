@@ -99,7 +99,7 @@ pub fn index_page<G: Html>(cx: Scope) -> View<G> {
                             id = "message-input-form",
                             on:submit = on_submit
                         ) {
-                            span(
+                            div(
                                 ref = input_ref,
                                 id = "message-input",
                                 placeholder = "Send a message to Eludris",
