@@ -61,7 +61,7 @@ impl AppStateRx {
         let ws = WebSocket::open("wss://eludris.tooty.xyz/ws/").unwrap();
         let (mut tx, mut rx) = ws.split();
         spawn_local(async move {
-            let mut stream = IntervalStream::new(45_0000);
+            let mut stream = IntervalStream::new(45_000);
             loop {
                 tx.send(WebSocketMessage::Text(
                     serde_json::to_string(&Payload::Ping).unwrap(),
