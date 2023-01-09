@@ -56,8 +56,10 @@ a:hover {
   background-color: var(--gray-200);
   color: var(--gray-400);
   padding: 2px;
-  margin: 5px;
+  margin: 10px 5px;
   padding: 5px;
+  font-size: 18px;
+  min-height: 18px;
   border-radius: 10px;
 }
 
@@ -65,7 +67,19 @@ a:hover {
   flex-grow: 1;
   background: none;
   color: inherit;
+  font-size: inherit;
   border: none;
+  max-height: 40vh;
+  overflow: scroll;
+  margin: 3px 0 0 5px;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  white-space: pre-wrap;
+  user-select: text;
+}
+
+#message-input:focus {
+  outline: none;
 }
 
 #send-button {
@@ -73,15 +87,12 @@ a:hover {
   color: inherit;
   border: none;
   cursor: pointer;
+  font-size: inherit;
   transition: color ease-in-out 125ms;
 }
 
 #send-button:hover {
   color: var(--gray-500);
-}
-
-#message-input:focus {
-  outline: none;
 }
 
 .content {
