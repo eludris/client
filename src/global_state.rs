@@ -36,6 +36,7 @@ impl AppStateRx {
         self.name.set(Some(name.to_string()));
     }
 
+    #[allow(dead_code)]
     pub fn reset_name(&self) {
         use web_sys::window;
         let storage = window().unwrap().local_storage().unwrap().unwrap();
