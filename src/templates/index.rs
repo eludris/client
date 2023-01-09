@@ -1,8 +1,9 @@
 use crate::global_state::AppStateRx;
 use perseus::prelude::*;
+use pulldown_cmark::{escape::escape_html, html, Parser};
 use sycamore::prelude::*;
 use sycamore::web::NoSsr;
-use web_sys::Event;
+use web_sys::{window, Event};
 
 #[cfg(client)]
 use gloo_net::http::Request;
@@ -15,6 +16,7 @@ pub fn index_page<G: Html>(cx: Scope) -> View<G> {
     let state = Reactor::<G>::from_cx(cx).get_global_state::<AppStateRx>(cx);
     let content = create_signal(cx, String::new());
     let entered_name = create_signal(cx, String::new());
+    let last_name = create_signal(cx, String::new());
 
     #[cfg(client)]
     {
@@ -30,17 +32,37 @@ pub fn index_page<G: Html>(cx: Scope) -> View<G> {
                         ul(id = "messages") {
                             Indexed(
                                 iterable = &state.messages,
-                                view = |cx, x| view! { cx,
-                                    div(class = "message") {
-                                        span(class = "author") { (format!("[{}]: ", x.author)) }
-                                        span(class = "content") { (x.content) }
+                                view = move |cx, x| {
+                                    let mut s = String::new();
+                                    escape_html(&mut s, x.content.trim()).unwrap();
+                                    let parser = Parser::new(&s);
+                                    let mut content = String::new();
+                                    html::push_html(&mut content, parser);
+                                    let content = content.trim().replace('\n', "<br>");
+                                    let author = x.author.clone();
+                                    view! { cx,
+                                        div(class = "message") {
+                                            ({
+                                                let author = author.clone();
+                                                let html = if *last_name.get() != x.author {
+                                                    view! { cx,
+                                                        span(class = "author") { (format!("[{}]: ", author)) }
+                                                    }
+                                                } else {
+                                                    View::empty()
+                                                };
+                                                last_name.set_silent(x.author.clone());
+                                                html
+                                            })
+                                            div(class = "content", dangerously_set_inner_html = &content)
+                                        }
                                     }
                                 }
                             )
                         }
                         form(
                             id = "message-input-form",
-                            on:submit = move |e :Event| {
+                            on:submit = move |e: Event| {
                                 e.prevent_default();
                                 #[cfg(client)]
                                 spawn_local_scoped(cx, async {
@@ -59,6 +81,9 @@ pub fn index_page<G: Html>(cx: Scope) -> View<G> {
                             input(
                                 id = "message-input",
                                 placeholder = "Send a message to Eludris",
+                                autofocus = true,
+                                autocomplete = "off",
+                                spellcheck = "on",
                                 bind:value = content
                             )
                             button(id = "send-button") { "Send" }
