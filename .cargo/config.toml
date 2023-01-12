@@ -1,5 +1,0 @@
-[build]
-rustflags = [
-    "--cfg", "engine",
-    "--cfg", "client"
-]
