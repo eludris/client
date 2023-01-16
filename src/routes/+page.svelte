@@ -72,6 +72,7 @@
     await tick();
     input.style.height = '1px';
     input.style.height = `${Math.min(Math.max(26, input.scrollHeight), window.outerHeight / 3)}px`;
+    input.focus(); // for mobiles
   };
 
   const onInputKeyPress = (e: KeyboardEvent) => {
