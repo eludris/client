@@ -2,8 +2,8 @@ import { browser } from '$app/environment';
 import { writable } from 'svelte/store';
 
 interface UserData {
-  name: String;
-  instanceURL: String;
+  name: string;
+  instanceURL: string;
 }
 
 const data = writable<null | UserData>(null);
