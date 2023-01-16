@@ -15,11 +15,13 @@
   let lastAuthor: string | null = null;
   let value = '';
   let messagesUList: HTMLUListElement;
+  let input: HTMLInputElement;
   let uiMessages: Array<UiMessage> = [];
 
   onMount(() => {
     if (!$data) goto('/login');
     messagesUList.scroll(0, 1);
+    input.focus();
   });
 
   const checkAuthor = (author: string, index: number): boolean => {
@@ -86,6 +88,7 @@
   </ul>
   <form id="message-input-form" on:submit|preventDefault={onSubmit}>
     <input
+      bind:this={input}
       bind:value
       type="text"
       id="message-input"
