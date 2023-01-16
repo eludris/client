@@ -71,7 +71,7 @@ body {
   border: none;
   height: 26px;
   overflow-y: auto;
-  margin: 3px 0 3px 5px;
+  margin: 10px 0 3px 5px;
   overflow-wrap: break-word;
   word-break: break-word;
   white-space: pre-wrap;
@@ -165,4 +165,8 @@ body {
 #login-form > button:hover {
   box-shadow: 0 5px 20px var(--purple-200);
   background-color: var(--pink-600);
+}
+
+.error {
+  color: var(--pink-700);
 }
