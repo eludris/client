@@ -50,7 +50,7 @@
     tick().then(() => {
       if (
         messagesUList?.scrollHeight - messagesUList?.offsetHeight - messagesUList?.scrollTop <
-        100
+        window.outerHeight / 4
       )
         // this also runs on the server
         messagesUList.scroll(0, messagesUList.scrollHeight);
