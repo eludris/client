@@ -4,6 +4,7 @@
   import data from '$lib/data';
   import messages from '$lib/ws';
   import type { Message } from '$lib/types/message';
+  import { tick } from 'svelte';
 
   interface UiMessage {
     message: Message;
@@ -12,10 +13,13 @@
   }
 
   let lastAuthor: string | null = null;
-  let value: string = '';
+  let value = '';
+  let messagesUList: HTMLUListElement;
+  let uiMessages: Array<UiMessage> = [];
 
   onMount(() => {
     if (!$data) goto('/login');
+    messagesUList.scroll(0, 1);
   });
 
   const checkAuthor = (author: string, index: number): boolean => {
@@ -39,7 +43,17 @@
     return newMessages;
   };
 
-  $: uiMessages = mapMessages($messages);
+  $: {
+    uiMessages = mapMessages($messages);
+    tick().then(() => {
+      if (
+        messagesUList?.scrollHeight - messagesUList?.offsetHeight - messagesUList?.scrollTop <
+        100
+      )
+        // this also runs on the server
+        messagesUList.scroll(0, messagesUList.scrollHeight);
+    });
+  }
 
   const logOut = () => {
     data.set(null);
@@ -51,7 +65,7 @@
       fetch($data?.instanceURL + '/messages', {
         method: 'POST',
         body: JSON.stringify({ author: $data?.name, content: value }) // data?.name is fine here
-      });
+      }).then(() => messagesUList.scroll(0, messagesUList.scrollHeight));
     value = '';
   };
 </script>
@@ -60,7 +74,7 @@
   <div id="options-div">
     <button on:click={logOut}> Logout </button>
   </div>
-  <ul id="messages">
+  <ul bind:this={messagesUList} id="messages">
     {#each uiMessages as { message, showAuthor, index } (index)}
       <div class="message">
         {#if showAuthor}
