@@ -34,6 +34,7 @@ if (browser) {
       }
     } else {
       instanceUrl = null;
+      messages.set([]);
       ws?.close();
       if (pingInterval) clearInterval(pingInterval);
       ws = null;
