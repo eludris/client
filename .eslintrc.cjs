@@ -17,5 +17,7 @@ module.exports = {
     es2017: true,
     node: true
   },
-  indent: ['error', 2]
+  rules: {
+    indent: ['error', 2]
+  }
 };
