@@ -48,7 +48,7 @@ body {
 #messages {
   flex-grow: 1;
   padding: 10px;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 #message-input-form {
@@ -70,7 +70,7 @@ body {
   font-size: inherit;
   border: none;
   height: 26px;
-  overflow: scroll;
+  overflow-y: auto;
   margin: 3px 0 3px 5px;
   overflow-wrap: break-word;
   word-break: break-word;
