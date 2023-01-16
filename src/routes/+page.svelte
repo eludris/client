@@ -63,7 +63,7 @@
   };
 
   const onSubmit = async () => {
-    if (value)
+    if (value.trim())
       fetch($data?.instanceURL + '/messages', {
         method: 'POST',
         body: JSON.stringify({ author: $data?.name, content: value }) // data?.name is fine here
