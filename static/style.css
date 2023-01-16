@@ -69,17 +69,16 @@ body {
   color: inherit;
   font-size: inherit;
   border: none;
-  max-height: 40vh;
+  height: 26px;
   overflow: scroll;
-  margin: 3px 0 0 5px;
+  margin: 3px 0 3px 5px;
   overflow-wrap: break-word;
   word-break: break-word;
   white-space: pre-wrap;
   user-select: text;
-}
-
-#message-input:focus {
   outline: none;
+  resize: none;
+  font-family: inherit;
 }
 
 #send-button {
@@ -87,6 +86,7 @@ body {
   color: inherit;
   border: none;
   cursor: pointer;
+  margin: 3px 5px 3px 0;
   font-size: inherit;
   transition: color ease-in-out 125ms;
   cursor: pointer;
