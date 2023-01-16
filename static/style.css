@@ -26,6 +26,15 @@
   --color-border: var(--purple-300);
 }
 
+body {
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  min-width: 100vw;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
 .message-channel {
   width: 100vw;
   height: 100vh;
@@ -43,10 +52,9 @@
   width: calc(100% - 10px);
   display: flex;
   background-color: var(--gray-200);
-  color: var(--gray-400);
+  color: var(--gray-600);
   padding: 2px;
   margin: 10px 5px;
-  padding: 5px;
   font-size: 18px;
   min-height: 18px;
   border-radius: 10px;
@@ -82,4 +90,13 @@
 
 #send-button:hover {
   color: var(--gray-500);
+}
+
+.content {
+  margin: 0;
+  margin-left: 20px;
+}
+
+.author {
+  margin: 10px 0;
 }
