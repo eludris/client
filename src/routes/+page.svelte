@@ -5,6 +5,7 @@
   import messages from '$lib/ws';
   import type { Message } from '$lib/types/message';
   import { tick } from 'svelte';
+  import { browser } from '$app/environment';
 
   interface UiMessage {
     message: Message;
@@ -47,14 +48,14 @@
 
   $: {
     uiMessages = mapMessages($messages);
-    tick().then(() => {
-      if (
-        messagesUList?.scrollHeight - messagesUList?.offsetHeight - messagesUList?.scrollTop <
-        window?.outerHeight / 4
-      )
-        // this also runs on the server
-        messagesUList.scroll(0, messagesUList.scrollHeight);
-    });
+    if (browser)
+      tick().then(() => {
+        if (
+          messagesUList.scrollHeight - messagesUList.offsetHeight - messagesUList.scrollTop <
+          window.outerHeight / 4
+        )
+          messagesUList.scroll(0, messagesUList.scrollHeight);
+      });
   }
 
   const logOut = () => {
