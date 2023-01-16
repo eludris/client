@@ -19,11 +19,13 @@
   };
 </script>
 
-<form id="login-form" on:submit|preventDefault={onSubmit}>
-  <h1>log in or else</h1>
-  <label for="username">Username</label>
-  <input bind:value name="username" />
-  <label for="instanceUrl">Instance URL</label>
-  <input bind:value={instanceURL} name="instanceUrl" />
-  <button type="submit">Log In</button>
-</form>
+<div id="login-div">
+  <form id="login-form" on:submit|preventDefault={onSubmit}>
+    <h1>Log in to Eludris</h1>
+    <label for="username">Username</label>
+    <input bind:value name="username" />
+    <label for="instanceUrl">Instance URL</label>
+    <input bind:value={instanceURL} name="instanceUrl" placeholder="https://eludris.tooty.xyz" />
+    <button type="submit">Log in</button>
+  </form>
+</div>
