@@ -1,13 +1,10 @@
 import { browser } from '$app/environment';
 import { writable } from 'svelte/store';
+import type { UserData } from '$lib/types/ui/user';
 
-interface UserData {
-  name: string;
-  instanceURL: string;
-}
+const oldData = browser ? localStorage.getItem('data') : null;
+const data = writable<UserData | null>(oldData ? JSON.parse(oldData) : null);
 
-const data = writable<null | UserData>(null);
-
-if (browser) data.subscribe((value) => window.localStorage.setItem('data', JSON.stringify(value)));
+if (browser) data.subscribe((value) => localStorage.setItem('data', JSON.stringify(value)));
 
 export default data;
