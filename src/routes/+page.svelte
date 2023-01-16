@@ -15,7 +15,7 @@
   let lastAuthor: string | null = null;
   let value = '';
   let messagesUList: HTMLUListElement;
-  let input: HTMLInputElement;
+  let input: HTMLTextAreaElement;
   let uiMessages: Array<UiMessage> = [];
 
   onMount(() => {
@@ -62,13 +62,28 @@
     goto('/login');
   };
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
     if (value)
       fetch($data?.instanceURL + '/messages', {
         method: 'POST',
         body: JSON.stringify({ author: $data?.name, content: value }) // data?.name is fine here
       }).then(() => messagesUList.scroll(0, messagesUList.scrollHeight));
     value = '';
+    await tick();
+    input.style.height = '1px';
+    input.style.height = `${Math.min(Math.max(26, input.scrollHeight), window.outerHeight / 3)}px`;
+  };
+
+  const onInputKeyPress = (e: KeyboardEvent) => {
+    if (e.key == 'Enter' && !e.shiftKey) {
+      onSubmit();
+      e.preventDefault();
+    }
+  };
+
+  const onInput = () => {
+    input.style.height = '1px'; // we do this to avoid it getting incrementally bigger with every press
+    input.style.height = `${Math.min(Math.max(26, input.scrollHeight), window.outerHeight / 3)}px`;
   };
 </script>
 
@@ -87,10 +102,11 @@
     {/each}
   </ul>
   <form id="message-input-form" on:submit|preventDefault={onSubmit}>
-    <input
+    <textarea
       bind:this={input}
       bind:value
-      type="text"
+      on:keypress={onInputKeyPress}
+      on:input={onInput}
       id="message-input"
       placeholder="Send a message to Eludris"
       autocomplete="off"
