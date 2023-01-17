@@ -80,7 +80,7 @@
     flex-direction: column;
     background-color: var(--purple-100);
     border-radius: 10px;
-    padding: 20px;
+    padding: 40px;
   }
 
   #login-form > h1 {
