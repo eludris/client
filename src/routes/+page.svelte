@@ -78,9 +78,25 @@
   };
 
   const onInputKeyPress = (e: KeyboardEvent) => {
-    if (e.key == 'Enter' && !e.shiftKey) {
+    if (
+      e.key == 'Enter' &&
+      !e.shiftKey &&
+      value.substring(0, input.selectionStart).split('```').length % 2 == 1
+    ) {
       onSubmit();
       e.preventDefault();
+    }
+  };
+
+  const onInputKeyDown = async (e: KeyboardEvent) => {
+    if (e.key == 'Tab' && value.substring(0, input.selectionStart).split('```').length % 2 == 0) {
+      console.log('tab');
+      e.preventDefault();
+      var start = input.selectionStart;
+      var end = input.selectionEnd;
+
+      value = value.substring(0, start) + '\t' + value.substring(end);
+      input.selectionStart = input.selectionEnd = start + 1;
     }
   };
 
@@ -109,6 +125,7 @@
       bind:this={input}
       bind:value
       on:keypress={onInputKeyPress}
+      on:keydown={onInputKeyDown}
       on:input={onInput}
       id="message-input"
       placeholder="Send a message to Eludris"
