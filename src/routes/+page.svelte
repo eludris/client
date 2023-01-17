@@ -6,6 +6,7 @@
   import type { Message } from '$lib/types/message';
   import { tick } from 'svelte';
   import { browser } from '$app/environment';
+  import Markdown from '$lib/components/Markdown.svelte';
 
   interface UiMessage {
     message: Message;
@@ -99,7 +100,7 @@
         {#if showAuthor}
           <div class="author">{message.author}</div>
         {/if}
-        <div class="content">{message.content}</div>
+        <div class="content"><Markdown content={message.content} /></div>
       </div>
     {/each}
   </ul>
