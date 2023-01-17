@@ -16,6 +16,9 @@ if (browser) {
     if (value) {
       if (value.instanceURL != instanceUrl) {
         instanceUrl = value.instanceURL;
+        messages.set([]);
+        ws?.close();
+        if (pingInterval) clearInterval(pingInterval);
         const res = await fetch(value.instanceURL);
         const info: InstanceInfo = await res.json();
 
