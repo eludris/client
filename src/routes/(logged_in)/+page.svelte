@@ -6,7 +6,8 @@
   import type { Message } from '$lib/types/message';
   import { tick } from 'svelte';
   import { browser } from '$app/environment';
-  import Markdown from '$lib/components/Markdown.svelte';
+  import MessageInput from './MessageInput.svelte';
+  import MessageComponent from './Message.svelte';
 
   interface UiMessage {
     message: Message;
@@ -15,13 +16,12 @@
   }
 
   let lastAuthor: string | null = null;
-  let value = '';
   let messagesUList: HTMLUListElement;
+  let value = '';
   let input: HTMLTextAreaElement;
   let uiMessages: Array<UiMessage> = [];
 
   onMount(() => {
-    if (!$data) goto('/login');
     messagesUList.scroll(0, 1);
     input.focus();
   });
@@ -76,34 +76,6 @@
     input.style.height = `${Math.min(Math.max(26, input.scrollHeight), window.outerHeight / 3)}px`;
     input.focus(); // for mobiles
   };
-
-  const onInputKeyPress = (e: KeyboardEvent) => {
-    if (
-      e.key == 'Enter' &&
-      !e.shiftKey &&
-      value.substring(0, input.selectionStart).split('```').length % 2 == 1
-    ) {
-      onSubmit();
-      e.preventDefault();
-    }
-  };
-
-  const onInputKeyDown = async (e: KeyboardEvent) => {
-    if (e.key == 'Tab' && value.substring(0, input.selectionStart).split('```').length % 2 == 0) {
-      console.log('tab');
-      e.preventDefault();
-      var start = input.selectionStart;
-      var end = input.selectionEnd;
-
-      value = value.substring(0, start) + '\t' + value.substring(end);
-      input.selectionStart = input.selectionEnd = start + 1;
-    }
-  };
-
-  const onInput = () => {
-    input.style.height = '1px'; // we do this to avoid it getting incrementally bigger with every press
-    input.style.height = `${Math.min(Math.max(26, input.scrollHeight), window.outerHeight / 3)}px`;
-  };
 </script>
 
 <div class="message-channel">
@@ -112,26 +84,11 @@
   </div>
   <ul bind:this={messagesUList} id="messages">
     {#each uiMessages as { message, showAuthor, index } (index)}
-      <div class="message">
-        {#if showAuthor}
-          <div class="author">{message.author}</div>
-        {/if}
-        <div class="content"><Markdown content={message.content} /></div>
-      </div>
+      <MessageComponent {message} {showAuthor} />
     {/each}
   </ul>
   <form id="message-input-form" on:submit|preventDefault={onSubmit}>
-    <textarea
-      bind:this={input}
-      bind:value
-      on:keypress={onInputKeyPress}
-      on:keydown={onInputKeyDown}
-      on:input={onInput}
-      id="message-input"
-      placeholder="Send a message to Eludris"
-      autocomplete="off"
-      spellcheck="true"
-    />
+    <MessageInput bind:input bind:value on:submit={onSubmit} />
     <button id="send-button">Send</button>
   </form>
 </div>
@@ -140,5 +97,40 @@
   .message-channel {
     width: 100vw;
     height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #messages {
+    flex-grow: 1;
+    padding: 10px;
+    overflow-y: auto;
+  }
+
+  #message-input-form {
+    width: calc(100% - 10px);
+    display: flex;
+    background-color: var(--gray-200);
+    color: var(--gray-600);
+    padding: 2px;
+    margin: 10px 5px;
+    font-size: 18px;
+    min-height: 31px;
+    border-radius: 10px;
+  }
+
+  #send-button {
+    background: none;
+    color: inherit;
+    border: none;
+    cursor: pointer;
+    margin: 3px 5px 3px 0;
+    font-size: inherit;
+    transition: color ease-in-out 125ms;
+    cursor: pointer;
+  }
+
+  #send-button:hover {
+    color: var(--gray-500);
   }
 </style>
