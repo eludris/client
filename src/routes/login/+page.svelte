@@ -81,6 +81,7 @@
     background-color: var(--purple-100);
     border-radius: 10px;
     padding: 40px;
+    width: 400px;
   }
 
   #login-form > h1 {
@@ -134,6 +135,7 @@
 
   .error {
     color: var(--pink-700);
+    text-align: center;
   }
 
   @media only screen and (max-width: 1200px) {
