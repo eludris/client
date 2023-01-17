@@ -63,3 +63,88 @@
     <button type="submit" disabled={!!error}>Log in</button>
   </form>
 </div>
+
+<style>
+  #login-div {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #login-form {
+    display: flex;
+    align-items: center;
+    justify-items: center;
+    flex-direction: column;
+    background-color: var(--purple-100);
+    border-radius: 10px;
+    padding: 20px;
+  }
+
+  #login-form > h1 {
+    font-size: 42px;
+  }
+
+  #login-form > label {
+    font-size: 20px;
+    margin-bottom: 5px;
+  }
+
+  #login-form > input {
+    margin: 20px;
+    margin-top: 0;
+    width: 100%;
+    font-size: 18px;
+    padding: 5px 10px;
+    outline: none;
+    border: 2px solid var(--pink-200);
+    border-radius: 10px;
+    background-color: var(--purple-200);
+    color: inherit;
+  }
+
+  #login-form > button {
+    margin: 20px;
+    margin-bottom: 10px;
+    font-size: 20px;
+    padding: 13px 20px;
+    outline: none;
+    border: unset;
+    border-radius: 25px;
+    background-color: var(--pink-500);
+    color: var(--purple-100);
+    box-shadow: 0 2px 4px var(--purple-200);
+    transition: box-shadow ease-in-out 200ms, color ease-in-out 200ms,
+      background-color ease-in-out 200ms;
+    width: 200px;
+    cursor: pointer;
+  }
+
+  #login-form > button:hover {
+    box-shadow: 0 5px 20px var(--purple-200);
+    background-color: var(--pink-600);
+  }
+
+  #login-form > button:disabled {
+    background-color: var(--pink-300);
+    box-shadow: 0 2px 2px var(--gray-100);
+  }
+
+  .error {
+    color: var(--pink-700);
+  }
+
+  @media only screen and (max-width: 1200px) {
+    #login-form > h1 {
+      font-size: 36px;
+    }
+
+    #login-div {
+      margin: 10px;
+      margin-top: 0;
+      width: 95vw;
+    }
+  }
+</style>
