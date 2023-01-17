@@ -81,6 +81,7 @@
 <div class="message-channel">
   <div id="options-div">
     <button on:click={logOut}> Logout </button>
+    <a href="/settings"> Settings </a>
   </div>
   <ul bind:this={messagesUList} id="messages">
     {#each uiMessages as { message, showAuthor, index } (index)}
