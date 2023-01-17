@@ -15,6 +15,7 @@ if (browser) {
   data.subscribe(async (value) => {
     if (value) {
       if (value.instanceURL != instanceUrl) {
+        instanceUrl = value.instanceURL;
         const res = await fetch(value.instanceURL);
         const info: InstanceInfo = await res.json();
 
