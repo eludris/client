@@ -26,6 +26,13 @@
       });
   };
 
+  const remarkExternalAnchors: Plugin = () => {
+    return (tree) =>
+      visit(tree, 'link', (node: { target: string }) => {
+        node.target = '_blank';
+      });
+  };
+
   const unScrewHtml = (
     html: string
   ): string => // I've spent so much time trying to fix this, thanks to revolt I finally managed to get it working
@@ -37,6 +44,7 @@
     .use(remarkMath)
     .use(remarkTextifyHtml)
     .use(remarkKillImages)
+    .use(remarkExternalAnchors)
     .use(remarkGFM, {
       singleTilde: false
     })
