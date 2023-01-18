@@ -40,6 +40,15 @@
       </span>
     {/if}
   </div>
+  <footer>
+    <span>
+      Pengin is fully FOSS! Check out our <a
+        href="https://github.com/eludris/pengin"
+        target="_blank"
+        rel="noreferrer">GitHub</a
+      > repository!
+    </span>
+  </footer>
 </div>
 
 <style>
@@ -59,7 +68,7 @@
   }
 
   #settings-div {
-    width: 100%;
+    margin-bottom: auto;
     margin-top: 50px;
     display: flex;
     align-items: center;
@@ -120,5 +129,13 @@
       width: auto;
       margin: 10px;
     }
+  }
+
+  footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    background-color: var(--gray-200);
   }
 </style>
