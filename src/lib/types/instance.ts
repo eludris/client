@@ -1,6 +1,6 @@
 export interface InstanceInfo {
   instance_name: string;
-  descrption: string;
+  description: string;
   version: string;
   message_limit: number;
   oprish_url: string;
