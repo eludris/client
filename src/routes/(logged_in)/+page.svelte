@@ -8,6 +8,7 @@
   import { browser } from '$app/environment';
   import MessageInput from './MessageInput.svelte';
   import MessageComponent from './Message.svelte';
+  import Markdown from '$lib/components/Markdown.svelte';
 
   interface UiMessage {
     message: Message;
@@ -80,8 +81,17 @@
 
 <div class="message-channel">
   <div id="options-div">
-    <button on:click={logOut}> Logout </button>
+    <div id="instance-info">
+      <span id="instance-name">{$data?.instanceInfo?.instance_name}</span>
+      {#if $data?.instanceInfo?.description}
+        <span id="instance-description">{$data.instanceInfo.description}</span>
+        <span id="instance-markdown">
+          <Markdown content={$data.instanceInfo.description} />
+        </span>
+      {/if}
+    </div>
     <a href="/settings"> Settings </a>
+    <button on:click={logOut}> Logout </button>
   </div>
   <ul bind:this={messagesUList} id="messages">
     {#each uiMessages as { message, showAuthor, index } (index)}
@@ -106,6 +116,7 @@
     flex-grow: 1;
     padding: 10px;
     overflow-y: auto;
+    padding: 0;
   }
 
   #message-input-form {
@@ -133,5 +144,42 @@
 
   #send-button:hover {
     color: var(--gray-500);
+  }
+
+  #options-div {
+    display: flex;
+    background-color: var(--gray-200);
+    padding: 10px;
+  }
+
+  #instance-info {
+    margin-right: auto;
+  }
+
+  #instance-name {
+    margin-right: 15px;
+    font-size: 24px;
+    align-self: baseline;
+  }
+
+  #instance-description {
+    overflow-x: hidden;
+    font-weight: 300;
+    align-self: baseline;
+  }
+
+  #instance-markdown {
+    display: none;
+    position: absolute;
+    top: 35px;
+    left: 0;
+    background-color: var(--gray-300);
+    margin: 20px;
+    padding: 10px;
+    border-radius: 10px;
+  }
+
+  #instance-info:hover > #instance-markdown {
+    display: inline;
   }
 </style>
