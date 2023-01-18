@@ -22,7 +22,7 @@
     }
   };
 
-  const onUsernameKeyUp = () => {
+  const onUsernameInput = () => {
     if (value.length < 2 || value.length > 32) {
       error = 'Your username must be between 2 and 32 characters in length';
     } else {
@@ -30,7 +30,7 @@
     }
   };
 
-  const onURLKeyUp = () => {
+  const onURLInput = () => {
     if (!instanceURL) {
       error = '';
       return;
@@ -49,11 +49,11 @@
   <form id="login-form" on:submit|preventDefault={onSubmit}>
     <h1>Log in to Eludris</h1>
     <label for="username">Username</label>
-    <input on:keyup={onUsernameKeyUp} bind:value name="username" placeholder="Username" />
+    <input bind:value on:input={onUsernameInput} name="username" placeholder="Username" />
     <label for="instanceUrl">Instance URL</label>
     <input
-      on:keyup={onURLKeyUp}
       bind:value={instanceURL}
+      on:input={onURLInput}
       name="instanceUrl"
       placeholder="https://eludris.tooty.xyz"
     />
