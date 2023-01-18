@@ -14,6 +14,16 @@
 </div>
 
 <style>
+  .message {
+    padding: 5px;
+    background-color: var(--colour-bg);
+    transition: background-color ease-in-out 75ms;
+  }
+
+  .message:hover {
+    background-color: var(--purple-100);
+  }
+
   .content {
     margin: 0;
     margin-left: 20px;
@@ -21,5 +31,6 @@
 
   .author {
     margin: 10px 0;
+    white-space: pre;
   }
 </style>
