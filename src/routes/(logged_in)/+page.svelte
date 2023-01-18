@@ -154,7 +154,9 @@
   }
 
   #instance-info {
-    margin-right: auto;
+    display: flex;
+    flex-grow: 1;
+    overflow: hidden;
   }
 
   #instance-name {
@@ -164,9 +166,9 @@
   }
 
   #instance-description {
-    overflow-x: hidden;
     font-weight: 300;
     align-self: baseline;
+    white-space: nowrap;
   }
 
   #instance-markdown {
@@ -178,6 +180,7 @@
     margin: 20px;
     padding: 10px;
     border-radius: 10px;
+    max-width: 90vw;
   }
 
   #instance-info:hover > #instance-markdown {

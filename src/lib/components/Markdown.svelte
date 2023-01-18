@@ -82,8 +82,8 @@
 </svelte:head>
 
 <style>
-  .md {
-    white-space: pre;
+  :global(.md *) {
+    white-space: pre-wrap;
   }
 
   :global(.md blockquote) {

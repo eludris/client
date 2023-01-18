@@ -102,4 +102,21 @@
     margin-left: calc(30% + 20px);
     align-self: flex-start;
   }
+
+  @media only screen and (max-width: 1200px) {
+    #settings-div > span {
+      flex-direction: column;
+    }
+
+    #settings-div > span > label {
+      width: auto;
+      text-align: center;
+    }
+
+    #settings-div input,
+    #settings-div textarea {
+      width: auto;
+      margin: 10px;
+    }
+  }
 </style>
