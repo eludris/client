@@ -16,12 +16,14 @@
     }
   };
 
-  const onKeyPress = (e: KeyboardEvent) => {
+  const onKeyDown = (e: KeyboardEvent) => {
     if (e.key == 'Escape') goto('/');
   };
 </script>
 
-<div id="settings-wrapper-div" on:keypress={onKeyPress}>
+<svelte:body on:keydown={onKeyDown} />
+
+<div id="settings-wrapper-div">
   <a id="back-link" href="/">Back</a>
   <div id="settings-div">
     {#if $data}
