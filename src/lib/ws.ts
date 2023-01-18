@@ -5,7 +5,7 @@ import type { Message } from '$lib/types/message';
 import type { InstanceInfo } from '$lib/types/instance';
 import { PayloadOP, type IncomingPayload } from '$lib/types/event';
 
-const messages = writable<Array<Message>>([]);
+const messages = writable<Array<Message> | null>(null);
 
 let instanceUrl: string | null = null;
 let ws: WebSocket | null = null;
@@ -16,11 +16,18 @@ if (browser) {
     if (value) {
       if (value.instanceURL != instanceUrl) {
         instanceUrl = value.instanceURL;
-        messages.set([]);
+        messages.set(null);
         ws?.close();
         if (pingInterval) clearInterval(pingInterval);
         const res = await fetch(value.instanceURL);
         const info: InstanceInfo = await res.json();
+
+        if (!info.pandemonium_url) {
+          instanceUrl = null;
+          setTimeout(() => data.update((d) => d), 5_000);
+          return;
+        }
+
         data.update((d) => {
           if (d) d.instanceInfo = info;
           return d;
@@ -29,13 +36,14 @@ if (browser) {
         ws = new WebSocket(info.pandemonium_url);
 
         pingInterval = setInterval(() => ws?.send(JSON.stringify({ op: PayloadOP.PING })), 45_000);
+        messages.set([]);
 
         ws?.addEventListener('message', (msg: MessageEvent) => {
           const payload: IncomingPayload = JSON.parse(msg.data);
 
           if (payload.op == PayloadOP.MESSAGE_CREATE)
             messages.update((messages) => {
-              messages.push(payload.d);
+              messages?.push(payload.d);
               return messages;
             });
         });

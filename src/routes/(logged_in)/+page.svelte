@@ -49,15 +49,17 @@
   };
 
   $: {
-    uiMessages = mapMessages($messages);
-    if (browser)
-      tick().then(() => {
-        if (
-          messagesUList.scrollHeight - messagesUList.offsetHeight - messagesUList.scrollTop <
-          window.outerHeight / 4
-        )
-          messagesUList.scroll(0, messagesUList.scrollHeight);
-      });
+    if ($messages) {
+      uiMessages = mapMessages($messages);
+      if (browser)
+        tick().then(() => {
+          if (
+            messagesUList.scrollHeight - messagesUList.offsetHeight - messagesUList.scrollTop <
+            window.outerHeight / 4
+          )
+            messagesUList.scroll(0, messagesUList.scrollHeight);
+        });
+    }
   }
 
   const logOut = () => {
