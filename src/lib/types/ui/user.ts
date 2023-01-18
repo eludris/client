@@ -1,4 +1,4 @@
-import type { InstanceInfo } from "../instance";
+import type { InstanceInfo } from '../instance';
 
 export interface UserData {
   name: string;

@@ -21,7 +21,10 @@ if (browser) {
         if (pingInterval) clearInterval(pingInterval);
         const res = await fetch(value.instanceURL);
         const info: InstanceInfo = await res.json();
-        data.update((d) => { if (d) d.instanceInfo = info; return d; });
+        data.update((d) => {
+          if (d) d.instanceInfo = info;
+          return d;
+        });
 
         ws = new WebSocket(info.pandemonium_url);
 
