@@ -32,5 +32,6 @@
   .author {
     margin: 10px 0;
     white-space: pre;
+    font-weight: bold;
   }
 </style>
