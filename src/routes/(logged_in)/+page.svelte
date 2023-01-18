@@ -82,7 +82,7 @@
 <div class="message-channel">
   <div id="options-div">
     <div id="instance-info">
-      <span id="instance-name">{$data?.instanceInfo?.instance_name}</span>
+      <span id="instance-name">{$data?.instanceInfo?.instance_name ?? 'Pengin - loading'}</span>
       {#if $data?.instanceInfo?.description}
         <span id="instance-description">{$data.instanceInfo.description}</span>
         <span id="instance-markdown">
@@ -90,8 +90,8 @@
         </span>
       {/if}
     </div>
-    <a href="/settings"> Settings </a>
-    <button on:click={logOut}> Logout </button>
+    <a id="settings-link" href="/settings"> Settings </a>
+    <button id="logout-button" on:click={logOut}> Logout </button>
   </div>
   <ul bind:this={messagesUList} id="messages">
     {#each uiMessages as { message, showAuthor, index } (index)}
@@ -150,6 +150,7 @@
     display: flex;
     background-color: var(--gray-200);
     padding: 10px;
+    gap: 20px;
   }
 
   #instance-info {
@@ -181,5 +182,29 @@
 
   #instance-info:hover > #instance-markdown {
     display: inline;
+  }
+
+  #settings-link {
+    text-decoration: none;
+    align-self: center;
+    border: unset;
+  }
+
+  #logout-button {
+    padding: 5px 10px;
+    outline: none;
+    border: unset;
+    border-radius: 25px;
+    background-color: var(--pink-500);
+    color: var(--purple-100);
+    box-shadow: 0 2px 4px var(--purple-200);
+    transition: box-shadow ease-in-out 200ms, color ease-in-out 200ms,
+      background-color ease-in-out 200ms;
+    cursor: pointer;
+  }
+
+  #logout-button:hover {
+    box-shadow: 0 5px 20px var(--purple-200);
+    background-color: var(--pink-600);
   }
 </style>
