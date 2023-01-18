@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" context="module">
   import { unified, type Plugin } from 'unified';
   import remarkParse from 'remark-parse';
   import remarkRehype from 'remark-rehype';
@@ -10,17 +10,6 @@
   import rehypeStringify from 'rehype-stringify';
 
   import { visit } from 'unist-util-visit';
-
-  import Prism from 'prismjs';
-  import 'prismjs/components/prism-rust.js';
-  import 'prismjs/components/prism-python.js';
-  import 'prismjs/components/prism-typescript.js';
-  import 'prismjs/components/prism-nasm.js';
-  import 'prismjs/components/prism-go.js';
-
-  Prism.languages['rs'] = Prism.languages['rust']; // alias
-
-  export let content: string;
 
   const remarkTextifyHtml: Plugin = () => {
     return (tree) =>
@@ -57,6 +46,19 @@
     .use(rehypePrism);
 </script>
 
+<script lang="ts">
+  import Prism from 'prismjs';
+  import 'prismjs/components/prism-rust.js';
+  import 'prismjs/components/prism-python.js';
+  import 'prismjs/components/prism-typescript.js';
+  import 'prismjs/components/prism-nasm.js';
+  import 'prismjs/components/prism-go.js';
+
+  Prism.languages['rs'] = Prism.languages['rust']; // alias
+
+  export let content: string;
+</script>
+
 {#await renderer.process(unScrewHtml(content))}
   <span> Loading markdown </span>
 {:then content}
@@ -80,10 +82,18 @@
 </svelte:head>
 
 <style>
+  .md {
+    white-space: pre;
+  }
+
   :global(.md blockquote) {
     border-left: 5px solid var(--gray-300);
     margin: 0;
     padding: 2px 20px; /* switcheroo */
+  }
+
+  :global(.md p) {
+    margin: 0;
   }
 
   :global(.md pre, pre[class*='language-'][class*='language-']) {
