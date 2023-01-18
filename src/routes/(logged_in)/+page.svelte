@@ -127,7 +127,7 @@
     padding: 2px;
     margin: 10px 5px;
     font-size: 18px;
-    min-height: 31px;
+    min-height: 41px;
     border-radius: 10px;
   }
 
