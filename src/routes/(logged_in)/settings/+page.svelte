@@ -1,8 +1,10 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import data from '$lib/data';
+  import { tick } from 'svelte';
 
   let name = $data?.name ?? '';
+  let styleInput: HTMLTextAreaElement;
   let error = '';
 
   const onNameInput = () => {
@@ -18,6 +20,23 @@
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key == 'Escape') goto('/');
+  };
+
+  const onStylesKeyDown = async (e: KeyboardEvent) => {
+    if (
+      $data?.styles &&
+      e.key == 'Tab' &&
+      $data.styles.substring(0, styleInput.selectionStart).split('{').length >
+        $data.styles.substring(0, styleInput.selectionStart).split('}').length
+    ) {
+      e.preventDefault();
+      var start = styleInput.selectionStart;
+      var end = styleInput.selectionEnd;
+
+      $data.styles = $data.styles.substring(0, start) + '  ' + $data.styles.substring(end);
+      await tick();
+      styleInput.selectionStart = styleInput.selectionEnd = start + 2;
+    }
   };
 </script>
 
@@ -36,7 +55,12 @@
       {/if}
       <span>
         <label for="styles">Custom Styles</label>
-        <textarea name="styles" bind:value={$data.styles} />
+        <textarea
+          name="styles"
+          bind:this={styleInput}
+          bind:value={$data.styles}
+          on:keydown={onStylesKeyDown}
+        />
       </span>
     {/if}
   </div>
