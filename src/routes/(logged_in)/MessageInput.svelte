@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, tick } from 'svelte';
 
   export let value = '';
   export let input: HTMLTextAreaElement;
@@ -18,12 +18,12 @@
 
   const onInputKeyDown = async (e: KeyboardEvent) => {
     if (e.key == 'Tab' && value.substring(0, input.selectionStart).split('```').length % 2 == 0) {
-      console.log('tab');
       e.preventDefault();
       var start = input.selectionStart;
       var end = input.selectionEnd;
 
       value = value.substring(0, start) + '\t' + value.substring(end);
+      await tick();
       input.selectionStart = input.selectionEnd = start + 1;
     }
   };
