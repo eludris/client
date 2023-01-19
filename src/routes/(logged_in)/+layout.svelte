@@ -45,6 +45,8 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    padding: 5px;
+    box-sizing: border-box;
   }
 
   #fact > h1 {
