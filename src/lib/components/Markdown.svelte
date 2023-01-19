@@ -11,8 +11,6 @@
 
   import { visit } from 'unist-util-visit';
 
-  import Prism from 'prismjs';
-
   const remarkTextifyHtml: Plugin = () => {
     return (tree) =>
       visit(tree, 'html', (node: { type: string }) => {
@@ -57,6 +55,10 @@
 </script>
 
 <script lang="ts">
+  export const ssr = false;
+
+  import Prism from 'prismjs';
+
   import 'prismjs/components/prism-rust.js';
   import 'prismjs/components/prism-python.js';
   import 'prismjs/components/prism-typescript.js';
