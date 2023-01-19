@@ -55,15 +55,26 @@
 </script>
 
 <script lang="ts">
+  import { browser } from '$app/environment';
   import Prism from 'prismjs';
 
-  import 'prismjs/components/prism-rust.js';
-  import 'prismjs/components/prism-python.js';
-  import 'prismjs/components/prism-typescript.js';
-  import 'prismjs/components/prism-nasm.js';
-  import 'prismjs/components/prism-go.js';
-
-  Prism.languages['rs'] = Prism.languages['rust']; // alias
+  if (browser) {
+    try {
+      // @ts-ignore
+      import('prismjs/components/prism-rust.js');
+      // @ts-ignore
+      import('prismjs/components/prism-python.js');
+      // @ts-ignore
+      import('prismjs/components/prism-typescript.js');
+      // @ts-ignore
+      import('prismjs/components/prism-nasm.js');
+      // @ts-ignore
+      import('prismjs/components/prism-go.js');
+      Prism.languages['rs'] = Prism.languages['rust'];
+    } catch (e) {
+      console.error('Could not load prism syntax highlighting');
+    }
+  }
 
   export let content: string;
 </script>
