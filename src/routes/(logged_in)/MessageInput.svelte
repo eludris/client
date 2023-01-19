@@ -32,7 +32,13 @@
     input.style.height = '1px'; // we do this to avoid it getting incrementally bigger with every press
     input.style.height = `${Math.min(Math.max(26, input.scrollHeight), window.outerHeight / 3)}px`;
   };
+
+  const onWindowKeyDown = (e: KeyboardEvent) => {
+    input.focus();
+  };
 </script>
+
+<svelte:window on:keydown={onWindowKeyDown} />
 
 <textarea
   bind:this={input}
