@@ -33,7 +33,7 @@
     input.style.height = `${Math.min(Math.max(26, input.scrollHeight), window.outerHeight / 3)}px`;
   };
 
-  const onWindowKeyDown = (e: KeyboardEvent) => {
+  const onWindowKeyDown = () => {
     input.focus();
   };
 </script>
