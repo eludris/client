@@ -36,7 +36,10 @@
   const unScrewHtml = (
     html: string
   ): string => // I've spent so much time trying to fix this, thanks to revolt I finally managed to get it working
-    html.replace(/^(<\/?[a-zA-Z0-9]+>)(.*$)/gm, (match) => `\u200E${match}`);
+    html
+      .replace(/^(<\/?[a-zA-Z0-9]+>)(.*$)/gm, (match) => `\u200E${match}`)
+      // force whitespace for blockquotes
+      .replace(/([^\\]|)\>[^>\s]/gm, (match) => `\\${match}`);
 
   const renderer = unified()
     .use(remarkParse)
