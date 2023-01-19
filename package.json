@@ -30,6 +30,7 @@
   },
   "type": "module",
   "dependencies": {
+    "prismjs": "^1.29.0",
     "rehype-katex": "^6.0.2",
     "rehype-prism": "^2.2.0",
     "rehype-stringify": "^9.0.3",

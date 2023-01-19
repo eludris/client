@@ -55,8 +55,6 @@
 </script>
 
 <script lang="ts">
-  export const ssr = false;
-
   import Prism from 'prismjs';
 
   import 'prismjs/components/prism-rust.js';
