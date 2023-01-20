@@ -11,6 +11,12 @@ let instanceUrl: string | null = null;
 let ws: WebSocket | null = null;
 let pingInterval: NodeJS.Timer | null = null;
 
+const retryConnect = (wait: number = 1_000) => {
+  messages.set(null);
+  instanceUrl = null;
+  setTimeout(() => data.update((d) => d), wait);
+};
+
 if (browser) {
   data.subscribe(async (value) => {
     if (value) {
@@ -23,9 +29,7 @@ if (browser) {
         const info: InstanceInfo = await res.json();
 
         if (!info.pandemonium_url) {
-          instanceUrl = null;
-          setTimeout(() => data.update((d) => d), 5_000);
-          return;
+          return retryConnect(5_000);
         }
 
         data.update((d) => {
@@ -35,18 +39,30 @@ if (browser) {
 
         ws = new WebSocket(info.pandemonium_url);
 
-        pingInterval = setInterval(() => ws?.send(JSON.stringify({ op: PayloadOP.PING })), 45_000);
-        messages.set([]);
+        ws.addEventListener('open', () => {
+          pingInterval = setInterval(() => ws?.send(JSON.stringify({ op: PayloadOP.PING })), 45_000);
+          messages.set([]);
 
-        ws?.addEventListener('message', (msg: MessageEvent) => {
-          const payload: IncomingPayload = JSON.parse(msg.data);
+          ws?.addEventListener('message', (msg: MessageEvent) => {
+            const payload: IncomingPayload = JSON.parse(msg.data);
 
-          if (payload.op == PayloadOP.MESSAGE_CREATE)
-            messages.update((messages) => {
-              messages?.push(payload.d);
-              return messages;
-            });
+            if (payload.op == PayloadOP.MESSAGE_CREATE)
+              messages.update((messages) => {
+                messages?.push(payload.d);
+                return messages;
+              });
+          });
         });
+
+        ws.addEventListener('error', (e) => {
+          console.error(e);
+          retryConnect();
+        });
+
+        ws.addEventListener('close', (e) => {
+          console.warn('WebSocket connection closed, reconnecting');
+          retryConnect();
+        })
       }
     } else {
       instanceUrl = null;
