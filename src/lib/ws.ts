@@ -11,7 +11,7 @@ let instanceUrl: string | null = null;
 let ws: WebSocket | null = null;
 let pingInterval: NodeJS.Timer | null = null;
 
-const retryConnect = (wait: number = 1_000) => {
+const retryConnect = (wait = 1_000) => {
   messages.set(null);
   instanceUrl = null;
   setTimeout(() => data.update((d) => d), wait);
@@ -40,7 +40,10 @@ if (browser) {
         ws = new WebSocket(info.pandemonium_url);
 
         ws.addEventListener('open', () => {
-          pingInterval = setInterval(() => ws?.send(JSON.stringify({ op: PayloadOP.PING })), 45_000);
+          pingInterval = setInterval(
+            () => ws?.send(JSON.stringify({ op: PayloadOP.PING })),
+            45_000
+          );
           messages.set([]);
 
           ws?.addEventListener('message', (msg: MessageEvent) => {
@@ -59,10 +62,10 @@ if (browser) {
           retryConnect();
         });
 
-        ws.addEventListener('close', (e) => {
+        ws.addEventListener('close', () => {
           console.warn('WebSocket connection closed, reconnecting');
           retryConnect();
-        })
+        });
       }
     } else {
       instanceUrl = null;
