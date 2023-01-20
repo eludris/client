@@ -138,6 +138,14 @@
     align-self: flex-start;
   }
 
+  footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    background-color: var(--gray-200);
+  }
+
   @media only screen and (max-width: 1200px) {
     #settings-div > span {
       flex-direction: column;
@@ -153,13 +161,9 @@
       width: auto;
       margin: 10px;
     }
-  }
 
-  footer {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px;
-    background-color: var(--gray-200);
+    footer {
+      text-align: center;
+    }
   }
 </style>
