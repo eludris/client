@@ -118,7 +118,12 @@
   }
 
   :global(.md p) {
-    margin: 0;
+    margin: 6px 0;
+    line-height: 12px;
+  }
+
+  :global(.md br) {
+    line-height: 0px;
   }
 
   :global(.md pre, pre[class*='language-'][class*='language-']) {
