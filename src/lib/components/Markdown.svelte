@@ -28,8 +28,10 @@
 
   const remarkExternalAnchors: Plugin = () => {
     return (tree) =>
-      visit(tree, 'link', (node: { target: string }) => {
-        node.target = '_blank';
+      visit(tree, 'element', (node: { tagName: string; properties: { target: string } }) => {
+        if (node.tagName == 'a') {
+          node.properties.target = '_blank';
+        }
       });
   };
 
@@ -47,13 +49,13 @@
     .use(remarkMath)
     .use(remarkTextifyHtml)
     .use(remarkKillImages)
-    .use(remarkExternalAnchors)
     .use(remarkGFM, {
       singleTilde: false
     })
     .use(remarkRehype)
     .use(rehypeStringify)
     .use(rehypeKatex, { trust: false, strict: false, output: 'html', throwOnError: false })
+    .use(remarkExternalAnchors)
     .use(rehypePrism);
 </script>
 
