@@ -51,16 +51,12 @@
   $: {
     if ($messages) {
       uiMessages = mapMessages($messages);
-      if (browser) autoScroll();
+      autoScroll();
     }
   }
 
   const autoScroll = async () => {
-    console.log('e');
-    console.log(
-      messagesUList.scrollHeight - messagesUList.offsetHeight - messagesUList.scrollTop <
-        window.outerHeight / 4
-    );
+    if (!browser) return;
     await tick();
     if (
       messagesUList.scrollHeight - messagesUList.offsetHeight - messagesUList.scrollTop <
