@@ -18,7 +18,7 @@
     "So you're telling me a morb fried this rice???",
     'What the heck is a mile',
     'Eludris is factually better than Disco- well, maybe not yet',
-    'I am the storm that is appraoching',
+    'I am the storm that is approaching',
     'Coffee is kinda pog'
   ];
 
