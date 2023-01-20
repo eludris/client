@@ -53,7 +53,7 @@
       {#if error}
         <span class="error">{error}</span>
       {/if}
-      <span>
+      <span class="has-textarea">
         <label for="styles">Custom Styles</label>
         <textarea
           name="styles"
@@ -95,9 +95,10 @@
   #settings-div {
     margin-bottom: auto;
     margin-top: 50px;
+    height: 100%;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: top;
     flex-direction: column;
     gap: 20px;
   }
@@ -129,8 +130,12 @@
     resize: none;
   }
 
+  #settings-div > span.has-textarea {
+    height: 50%;
+  }
+
   #settings-div textarea {
-    height: 40%;
+    height: 100%;
   }
 
   .error {

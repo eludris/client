@@ -57,6 +57,8 @@
 <style>
   :global(.md *) {
     white-space: pre-wrap;
+    line-break: strict;
+    word-wrap: break-word;
   }
 
   :global(.md blockquote) {
@@ -67,7 +69,7 @@
 
   :global(.md p) {
     margin: 6px 0;
-    line-height: 18px;
+    line-height: 20px;
   }
 
   :global(.md br) {

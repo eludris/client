@@ -44,7 +44,7 @@ const unScrewHtml = (
     // number list supremacy
     .replace(/^(\+|-|\*)/gm, '\\$&')
     // let the newlines live
-    .replace(/^$/gm, '\\')
+    .replace(/^\s*$/gm, '\u200E')
     // ensure ``` s have a new line before them
     .replace(new RegExp('(.)```', 'gm'), '$1\n```')
     // ... and after them
