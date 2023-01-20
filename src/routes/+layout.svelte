@@ -21,7 +21,9 @@
     left: 0;
     z-index: -1;
     width: 100vw;
+    width: -webkit-fill-available;
     height: 100vh;
+    height: -webkit-fill-available;
     padding: 0;
     margin: 0;
   }

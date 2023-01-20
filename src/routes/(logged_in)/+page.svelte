@@ -122,7 +122,9 @@
 <style>
   .message-channel {
     width: 100vw;
+    width: -webkit-fill-available;
     height: 100vh;
+    height: -webkit-fill-available;
     display: flex;
     flex-direction: column;
   }
@@ -196,7 +198,7 @@
     margin: 20px;
     padding: 10px;
     border-radius: 10px;
-    max-width: 90vw;
+    max-width: 90%;
   }
 
   #instance-info:hover > #instance-markdown {

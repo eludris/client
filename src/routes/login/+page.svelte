@@ -67,7 +67,9 @@
 <style>
   #login-div {
     width: 100vw;
+    width: -webkit-fill-available;
     height: 100vh;
+    height: -webkit-fill-available;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -146,7 +148,7 @@
     #login-div {
       margin: 10px;
       margin-top: 0;
-      width: 95vw;
+      width: 95%;
     }
   }
 </style>

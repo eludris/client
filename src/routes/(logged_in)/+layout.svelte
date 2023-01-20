@@ -41,7 +41,9 @@
 <style>
   #fact {
     width: 100vw;
+    width: -webkit-fill-available;
     height: 100vh;
+    height: -webkit-fill-available;
     display: flex;
     flex-direction: column;
     align-items: center;

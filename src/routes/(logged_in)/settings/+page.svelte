@@ -80,7 +80,9 @@
   #settings-wrapper-div {
     display: flex;
     width: 100vw;
+    width: -webkit-fill-available;
     height: 100vh;
+    height: -webkit-fill-available;
     flex-direction: column;
   }
 
@@ -125,7 +127,7 @@
     border-radius: 10px;
     background-color: var(--purple-200);
     color: inherit;
-    width: 30vw;
+    width: 30%;
     resize: none;
   }
 
