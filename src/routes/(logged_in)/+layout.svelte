@@ -19,7 +19,8 @@
     'What the heck is a mile',
     'Eludris is factually better than Disco- well, maybe not yet',
     'I am the storm that is approaching',
-    'Coffee is kinda pog'
+    'Coffee is kinda pog',
+    'The game pengin originally started as a joke about linux users while watching <a href="https://effis.tooty.xyz/447046752257344245340176389" target="_blank">this video</a> on loop'
   ];
 
   const randomFact = () => {
