@@ -20,33 +20,16 @@
      inkscape:deskcolor="#505050"
      showgrid="false"
      inkscape:zoom="4.28"
-     inkscape:cx="97.546729"
+     inkscape:cx="92.172897"
      inkscape:cy="61.214953"
      inkscape:window-width="1920"
-     inkscape:window-height="1038"
+     inkscape:window-height="1014"
      inkscape:window-x="0"
-     inkscape:window-y="42"
+     inkscape:window-y="66"
      inkscape:window-maximized="1"
      inkscape:current-layer="Looo" />
   <defs
      id="defs4">
-    <inkscape:path-effect
-       effect="fillet_chamfer"
-       id="path-effect3708"
-       is_visible="true"
-       lpeversion="1"
-       nodesatellites_param="F,0,0,1,0,10,0,1 @ F,0,0,1,0,10,0,1 @ F,0,0,1,0,10,0,1 @ F,0,0,1,0,10,0,1"
-       unit="px"
-       method="auto"
-       mode="F"
-       radius="10"
-       chamfer_steps="1"
-       flexible="false"
-       use_knot_distance="true"
-       apply_no_radius="true"
-       apply_with_radius="true"
-       only_selected="false"
-       hide_knots="false" />
     <style
        id="style2">
       .carpet {
@@ -69,8 +52,10 @@
        class="carpet"
        width="100"
        height="100"
-       inkscape:path-effect="#path-effect3708"
-       d="m 10,0 h 80 a 10,10 45 0 1 10,10 V 90 A 10,10 135 0 1 90,100 H 10 A 10,10 45 0 1 0,90 V 10 A 10,10 135 0 1 10,0 Z" />
+       d="m 10,0 h 80 a 10,10 45 0 1 10,10 V 90 A 10,10 135 0 1 90,100 H 10 A 10,10 45 0 1 0,90 V 10 A 10,10 135 0 1 10,0 Z"
+       ry="9.0851755"
+       x="0"
+       y="0" />
     <path
        id="Ding"
        class="ding"
