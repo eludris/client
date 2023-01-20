@@ -50,8 +50,14 @@
 
   $: {
     if ($messages) {
+      let scroll =
+        messagesUList &&
+        messagesUList.scrollHeight - messagesUList.offsetHeight - messagesUList.scrollTop <
+          window.outerHeight / 4;
       uiMessages = mapMessages($messages);
-      autoScroll();
+      tick().then(() => {
+        if (scroll) messagesUList.scroll(0, messagesUList.scrollHeight);
+      });
     }
   }
 
@@ -85,6 +91,8 @@
     input.focus(); // for mobiles
   };
 </script>
+
+<svelte:window on:resize={autoScroll} />
 
 <div class="message-channel">
   <div id="options-div">
@@ -124,6 +132,7 @@
     padding: 10px;
     overflow-y: auto;
     padding: 0;
+    margin-top: 0;
   }
 
   #message-input-form {
