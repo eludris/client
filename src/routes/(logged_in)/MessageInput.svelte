@@ -33,8 +33,10 @@
     input.style.height = `${Math.min(Math.max(26, input.scrollHeight), window.outerHeight / 3)}px`;
   };
 
-  const onWindowKeyDown = () => {
-    input.focus();
+  const onWindowKeyDown = (e: KeyboardEvent) => {
+    if ((!e.ctrlKey || e.key == 'v') && !e.altKey && !e.metaKey) {
+      input.focus();
+    }
   };
 </script>
 
