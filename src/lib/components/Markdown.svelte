@@ -67,7 +67,7 @@
 
   :global(.md p) {
     margin: 6px 0;
-    line-height: 12px;
+    line-height: 18px;
   }
 
   :global(.md br) {
