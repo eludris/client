@@ -60,6 +60,7 @@
           bind:this={styleInput}
           bind:value={$data.styles}
           on:keydown={onStylesKeyDown}
+          spellcheck="false"
         />
       </span>
     {/if}
