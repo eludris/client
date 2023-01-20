@@ -12,7 +12,9 @@
 </svelte:head>
 
 <div id="bg" />
-<slot />
+<div id="app">
+  <slot />
+</div>
 
 <style>
   #bg {
@@ -20,10 +22,18 @@
     top: 0;
     left: 0;
     z-index: -1;
-    width: 100vw;
-    width: -webkit-fill-available;
-    height: 100vh;
-    height: -webkit-fill-available;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+  }
+
+  #app {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     padding: 0;
     margin: 0;
   }

@@ -79,10 +79,8 @@
 <style>
   #settings-wrapper-div {
     display: flex;
-    width: 100vw;
-    width: -webkit-fill-available;
-    height: 100vh;
-    height: -webkit-fill-available;
+    width: 100%;
+    height: 100%;
     flex-direction: column;
   }
 
@@ -132,7 +130,7 @@
   }
 
   #settings-div textarea {
-    height: 40vh;
+    height: 40%;
   }
 
   .error {

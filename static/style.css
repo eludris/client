@@ -29,13 +29,16 @@
   --color-border: var(--purple-300);
 }
 
+html {
+  min-width: 100%;
+  min-height: 100%;
+}
+
 body {
   color: var(--color-text);
   background-color: var(--color-bg);
-  min-width: 100vw;
-  min-width: -webkit-fill-available;
-  min-height: 100vh;
-  min-height: -webkit-fill-available;
+  min-width: 100%;
+  min-height: 100%;
   margin: 0;
   padding: 0;
   font-family: 'Ubuntu', sans-serif;
