@@ -47,6 +47,7 @@
     align-items: center;
     justify-content: center;
     padding: 5px;
+    text-align: center;
     box-sizing: border-box;
   }
 
