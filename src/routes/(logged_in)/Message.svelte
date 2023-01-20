@@ -10,7 +10,7 @@
   {#if showAuthor}
     <div class="author">{message.author}</div>
   {/if}
-  <div class="content"><Markdown content={message.content} /></div>
+  <div class="content"><Markdown content={message.content} preRendered /></div>
 </div>
 
 <style>
