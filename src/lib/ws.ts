@@ -4,6 +4,7 @@ import data from '$lib/data';
 import type { Message } from '$lib/types/message';
 import type { InstanceInfo } from '$lib/types/instance';
 import { PayloadOP, type IncomingPayload } from '$lib/types/event';
+import markdown from '$lib/markdown';
 
 const messages = writable<Array<Message> | null>(null);
 
@@ -50,9 +51,12 @@ if (browser) {
             const payload: IncomingPayload = JSON.parse(msg.data);
 
             if (payload.op == PayloadOP.MESSAGE_CREATE)
-              messages.update((messages) => {
-                messages?.push(payload.d);
-                return messages;
+              markdown(payload.d.content).then((content) => {
+                payload.d.content = content;
+                messages.update((messages) => {
+                  messages?.push(payload.d);
+                  return messages;
+                });
               });
           });
         });
