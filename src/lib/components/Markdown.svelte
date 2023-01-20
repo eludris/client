@@ -39,9 +39,13 @@
     html: string
   ): string => // I've spent so much time trying to fix this, thanks to revolt I finally managed to get it working
     html
-      .replace(/^(<\/?[a-zA-Z0-9]+>)(.*$)/gm, (match) => `\u200E${match}`)
+      .replace(/^(<\/?[a-zA-Z0-9]+>)(.*$)/gm, '\u200E$&')
       // force whitespace for blockquotes
-      .replace(/^([^\\]|)\>[^>\s]/gm, (match) => `\\${match}`);
+      .replace(/^([^\\]|)\>[^>\s]/gm, '\\$&')
+      // ensure ``` s have a new line before them
+      .replace(new RegExp('(.)```', 'gm'), '$1\n```')
+      // ... and after them
+      .replace(new RegExp('``` (.)', 'gm'), '```\n$1');
 
   const renderer = unified()
     .use(remarkParse)
