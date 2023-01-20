@@ -41,7 +41,7 @@
     html
       .replace(/^(<\/?[a-zA-Z0-9]+>)(.*$)/gm, (match) => `\u200E${match}`)
       // force whitespace for blockquotes
-      .replace(/([^\\]|)\>[^>\s]/gm, (match) => `\\${match}`);
+      .replace(/^([^\\]|)\>[^>\s]/gm, (match) => `\\${match}`);
 
   const renderer = unified()
     .use(remarkParse)
