@@ -12,7 +12,7 @@
     "background_color": "#110e1b",
     "display": "standalone",
     "scope": "/",
-    "theme_color": "#e566ff",
+    "theme_color": "#110e1b",
     "shortcuts": [],
-    "description": "A yet elegant Eludris web frontend."
+    "description": "A simple yet elegant Eludris web frontend."
 }
