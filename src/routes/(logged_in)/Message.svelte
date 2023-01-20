@@ -1,16 +1,46 @@
 <script lang="ts">
-  import type { Message } from '$lib/types/message';
   import Markdown from '$lib/components/Markdown.svelte';
+  import MessageContext from './MessageContext.svelte';
+  import { tick } from 'svelte';
+  import type { PenginMessage } from '$lib/types/ui/message';
 
-  export let message: Message;
+  export let message: PenginMessage;
   export let showAuthor: boolean;
+  let showContext = false;
+  let contextDiv: HTMLDivElement;
+
+  const onContextMenu = async (e: MouseEvent) => {
+    showContext = true;
+    await tick();
+    if (contextDiv.clientHeight + e.clientY < window.innerHeight) {
+      contextDiv.style.top = `${e.clientY}px`;
+      contextDiv.style.bottom = `auto`;
+    } else {
+      contextDiv.style.bottom = `${window.innerHeight - e.clientY}px`;
+      contextDiv.style.top = `auto`;
+    }
+    if (contextDiv.clientWidth + e.clientX < window.innerWidth) {
+      contextDiv.style.left = `${e.clientX}px`;
+      contextDiv.style.right = `auto`;
+    } else {
+      contextDiv.style.right = `${window.innerWidth - e.clientX}px`;
+      contextDiv.style.left = `auto`;
+    }
+  };
+
+  const closeContextMenu = () => {
+    showContext = false;
+  };
 </script>
 
-<div class="message">
+<div class="message" on:contextmenu|preventDefault={onContextMenu}>
   {#if showAuthor}
     <div class="author">{message.author}</div>
   {/if}
-  <div class="content"><Markdown content={message.content} preRendered /></div>
+  <div class="content"><Markdown content={message.renderedContent} preRendered /></div>
+  {#if showContext}
+    <MessageContext bind:contextDiv {message} on:close={closeContextMenu} />
+  {/if}
 </div>
 
 <style>

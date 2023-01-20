@@ -1,12 +1,12 @@
 import { browser } from '$app/environment';
 import { writable } from 'svelte/store';
 import data from '$lib/data';
-import type { Message } from '$lib/types/message';
 import type { InstanceInfo } from '$lib/types/instance';
 import { PayloadOP, type IncomingPayload } from '$lib/types/event';
 import markdown from '$lib/markdown';
+import type { PenginMessage } from './types/ui/message';
 
-const messages = writable<Array<Message> | null>(null);
+const messages = writable<Array<PenginMessage> | null>(null);
 
 let instanceUrl: string | null = null;
 let ws: WebSocket | null = null;
@@ -52,9 +52,9 @@ if (browser) {
 
             if (payload.op == PayloadOP.MESSAGE_CREATE)
               markdown(payload.d.content).then((content) => {
-                payload.d.content = content;
+                let message = { renderedContent: content, ...payload.d };
                 messages.update((messages) => {
-                  messages?.push(payload.d);
+                  messages?.push(message);
                   return messages;
                 });
               });

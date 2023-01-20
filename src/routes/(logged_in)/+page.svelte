@@ -3,15 +3,15 @@
   import { goto } from '$app/navigation';
   import data from '$lib/data';
   import messages from '$lib/ws';
-  import type { Message } from '$lib/types/message';
   import { tick } from 'svelte';
   import { browser } from '$app/environment';
   import MessageInput from './MessageInput.svelte';
   import MessageComponent from './Message.svelte';
   import Markdown from '$lib/components/Markdown.svelte';
+  import type { PenginMessage } from '$lib/types/ui/message';
 
   interface UiMessage {
-    message: Message;
+    message: PenginMessage;
     showAuthor: boolean;
     index: number;
   }
@@ -36,7 +36,7 @@
     return res;
   };
 
-  const mapMessages = (messages: Array<Message>) => {
+  const mapMessages = (messages: Array<PenginMessage>) => {
     let newMessages: Array<UiMessage> = [];
     messages.forEach((m, i) =>
       newMessages.push({
