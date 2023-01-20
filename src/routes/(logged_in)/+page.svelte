@@ -68,11 +68,13 @@
   };
 
   const onSubmit = async () => {
-    if (value.trim())
+    if (value.trim()) {
+      if (value.startsWith('/shrug')) value = value.substring(7) + ' ¯\\\\\\_(ツ)_/¯';
       fetch($data?.instanceURL + '/messages', {
         method: 'POST',
         body: JSON.stringify({ author: $data?.name, content: value }) // data?.name is fine here
       }).then(() => messagesUList.scroll(0, messagesUList.scrollHeight));
+    }
     value = '';
     await tick();
     input.style.height = '1px';
