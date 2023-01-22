@@ -58,8 +58,8 @@
         <textarea
           name="styles"
           bind:this={styleInput}
-          bind:value={$data.styles}
           on:keydown={onStylesKeyDown}
+          bind:value={$data.styles}
           spellcheck="false"
         />
       </span>
