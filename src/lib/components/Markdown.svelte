@@ -89,4 +89,8 @@
     background-color: var(--gray-200);
     font-size: 18px;
   }
+
+  :global(.md pre code, pre code[class*='language-'][class*='language-']) {
+    background-color: transparent;
+  }
 </style>
