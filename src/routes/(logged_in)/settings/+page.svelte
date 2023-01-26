@@ -4,6 +4,7 @@
   import { tick } from 'svelte';
 
   let name = $data?.name ?? '';
+  let styles = $data?.styles ?? '';
   let styleInput: HTMLTextAreaElement;
   let error = '';
 
@@ -24,18 +25,23 @@
 
   const onStylesKeyDown = async (e: KeyboardEvent) => {
     if (
-      $data?.styles &&
       e.key == 'Tab' &&
-      $data.styles.substring(0, styleInput.selectionStart).split('{').length >
-        $data.styles.substring(0, styleInput.selectionStart).split('}').length
+      styles.substring(0, styleInput.selectionStart).split('{').length >
+        styles.substring(0, styleInput.selectionStart).split('}').length
     ) {
       e.preventDefault();
       var start = styleInput.selectionStart;
       var end = styleInput.selectionEnd;
 
-      $data.styles = $data.styles.substring(0, start) + '  ' + $data.styles.substring(end);
+      styles = styles.substring(0, start) + '  ' + styles.substring(end);
       await tick();
       styleInput.selectionStart = styleInput.selectionEnd = start + 2;
+    }
+  };
+
+  const onStylesInput = () => {
+    if ($data) {
+      $data.styles = styles;
     }
   };
 </script>
@@ -58,8 +64,9 @@
         <textarea
           name="styles"
           bind:this={styleInput}
+          bind:value={styles}
           on:keydown={onStylesKeyDown}
-          bind:value={$data.styles}
+          on:input={onStylesInput}
           spellcheck="false"
         />
       </span>
