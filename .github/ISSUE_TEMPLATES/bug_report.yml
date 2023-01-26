@@ -19,9 +19,9 @@ body:
 
   - type: textarea
     attributes:
-      label: Minimum Reproducible Steps/Code
+      label: Minimum Reproducible Steps
       description: | 
-        Insert any code or steps to help reproduce this issue
+        Insert any steps to help reproduce this issue
         Include console output, if any
 
   - type: textarea
