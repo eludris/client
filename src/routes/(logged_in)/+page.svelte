@@ -133,6 +133,7 @@
     overflow-y: auto;
     padding: 0;
     margin-top: 0;
+    margin-bottom: 0; /* where is react native marginVertical when you need it? */
   }
 
   #message-input-form {
@@ -141,9 +142,9 @@
     background-color: var(--gray-200);
     color: var(--gray-600);
     padding: 2px;
-    margin: 10px 5px;
+    margin: 0 5px 10px 5px;
     font-size: 18px;
-    min-height: 41px;
+    height: auto;
     border-radius: 10px;
   }
 
