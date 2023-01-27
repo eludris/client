@@ -9,6 +9,18 @@ import rehypePrism from 'rehype-prism';
 import rehypeStringify from 'rehype-stringify';
 
 import { visit } from 'unist-util-visit';
+import data from '$lib/data';
+
+let effisHost: string | undefined = undefined;
+
+data.subscribe((value) => {
+  if (value?.instanceInfo?.effis_url) {
+    try {
+      let url = new URL(value.instanceInfo.effis_url);
+      effisHost = url.hostname;
+    } catch { }
+  }
+})
 
 const remarkTextifyHtml: Plugin = () => {
   return (tree) =>
@@ -19,9 +31,19 @@ const remarkTextifyHtml: Plugin = () => {
 
 const remarkKillImages: Plugin = () => {
   return (tree) =>
-    visit(tree, 'image', (node: { type: string; alt: string; value: string }) => {
-      node.type = 'text';
-      node.value = node.alt;
+    visit(tree, 'image', (node: { type: string; alt: string; value: string; url: string }) => {
+      console.log(node);
+      try {
+        let url = new URL(node.url);
+        console.log(url.hostname, effisHost);
+        if (url.hostname != effisHost) {
+          node.type = 'text';
+          node.value = node.alt;
+        }
+      } catch {
+        node.type = 'text';
+        node.value = node.alt;
+      }
     });
 };
 
