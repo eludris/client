@@ -30,9 +30,7 @@
 
   const onInput = () => {
     input.style.height = '1px'; // we do this to avoid it getting incrementally bigger with every press
-    console.log(input.scrollHeight);
     input.style.height = `${Math.min(Math.max(26, input.scrollHeight), window.innerHeight / 3)}px`;
-    console.log(input.style.height);
   };
 
   const onWindowKeyDown = (e: KeyboardEvent) => {
