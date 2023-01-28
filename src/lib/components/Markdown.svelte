@@ -15,6 +15,8 @@
         import('prismjs/components/prism-nasm.js');
         // @ts-expect-error: this is untyped :(
         import('prismjs/components/prism-go.js');
+        // @ts-expect-error: this is untyped :(
+        import('prismjs/components/prism-json.js');
         Prism.languages['rs'] = Prism.languages['rust'];
       });
     } catch (e) {
