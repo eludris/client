@@ -10,7 +10,6 @@ Use keywords from https://docs.github.com/en/get-started/writing-on-github/worki
 
 <!--
 ## This is a **Logic Change**
-- [ ] Docs have been updated to reflect these changes if necessary.
 - [ ] Changes have been tested.
 -->
 
