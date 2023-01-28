@@ -20,4 +20,4 @@ export interface MessageCreatePayload {
 }
 
 export type IncomingPayload = PongPayload | MessageCreatePayload;
-export type OutgoingPaylod = PingPayload;
+export type OutgoingPayload = PingPayload;
