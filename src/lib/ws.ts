@@ -52,7 +52,7 @@ if (browser) {
 
             if (payload.op == PayloadOP.MESSAGE_CREATE)
               markdown(payload.d.content).then((content) => {
-                let message = { renderedContent: content, ...payload.d };
+                const message = { renderedContent: content, ...payload.d };
                 messages.update((messages) => {
                   messages?.push(message);
                   return messages;

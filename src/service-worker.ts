@@ -2,7 +2,7 @@
 
 import { build, files, version } from '$service-worker';
 
-const worker = (self as unknown) as ServiceWorkerGlobalScope;
+const worker = self as unknown as ServiceWorkerGlobalScope;
 const FILES = `cache${version}`;
 
 const to_cache = build.concat(files);

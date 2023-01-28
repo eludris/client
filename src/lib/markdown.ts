@@ -16,11 +16,13 @@ let effisHost: string | undefined = undefined;
 data.subscribe((value) => {
   if (value?.instanceInfo?.effis_url) {
     try {
-      let url = new URL(value.instanceInfo.effis_url);
+      const url = new URL(value.instanceInfo.effis_url);
       effisHost = url.hostname;
-    } catch { }
+    } catch {
+      console.warn('Invalid instance Effis url');
+    }
   }
-})
+});
 
 const remarkTextifyHtml: Plugin = () => {
   return (tree) =>
@@ -34,7 +36,7 @@ const remarkKillImages: Plugin = () => {
     visit(tree, 'image', (node: { type: string; alt: string; value: string; url: string }) => {
       console.log(node);
       try {
-        let url = new URL(node.url);
+        const url = new URL(node.url);
         console.log(url.hostname, effisHost);
         if (url.hostname != effisHost) {
           node.type = 'text';

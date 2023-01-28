@@ -1,18 +1,18 @@
 {
-    "short_name": "Pengin",
-    "name": "Pengin",
-    "start_url": "/",
-    "icons": [
-      {
-        "src": "das_ding_x512.png",
-        "type": "image/png",
-        "sizes": "512x512"
-      }
-    ],
-    "background_color": "#110e1b",
-    "display": "standalone",
-    "scope": "/",
-    "theme_color": "#110e1b",
-    "shortcuts": [],
-    "description": "A simple yet elegant Eludris web frontend."
+  "short_name": "Pengin",
+  "name": "Pengin",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "das_ding_x512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "background_color": "#110e1b",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#110e1b",
+  "shortcuts": [],
+  "description": "A simple yet elegant Eludris web frontend."
 }
