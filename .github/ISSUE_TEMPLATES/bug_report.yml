@@ -1,0 +1,31 @@
+name: Bug Report
+description: Please enter the details of your bug
+body:
+  - type: textarea
+    attributes:
+      label: What is the issue?
+      description: Insert a detailed description of what your issue is
+    validations:
+      required: true
+
+  - type: checkboxes
+    attributes:
+      label: Checks
+      options:
+        - label: Have you checked the documentation?
+          required: true
+        - label: Have you checked other issues to make sure this is not a duplicate?
+          required: true
+
+  - type: textarea
+    attributes:
+      label: Minimum Reproduction Steps
+      description: | 
+        Insert any steps to help reproduce this issue
+        Additionally, include console output, if any
+
+  - type: textarea
+    attributes:
+      label: Screenshots
+      description: | 
+        Insert any images/videos of the issue
