@@ -69,6 +69,8 @@ const unScrewHtml = (
     .replace(/^(\+|-|\* )/gm, '\\$&')
     // let the newlines live
     .replace(/^\s*$/gm, '\u200E')
+    // make blockquotes only one line long
+    .replace(/^>.*$/gm, '$&\n\n')
     // ensure ``` s have a new line before them
     .replace(new RegExp('(.)```', 'gm'), '$1\n```')
     // ... and after them

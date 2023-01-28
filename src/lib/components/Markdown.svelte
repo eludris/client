@@ -66,7 +66,8 @@
   :global(.md blockquote) {
     border-left: 5px solid var(--gray-300);
     margin: 0;
-    padding: 2px 20px; /* switcheroo */
+    padding: 5px 20px; /* switcheroo */
+    display: flex;
   }
 
   :global(.md p) {
