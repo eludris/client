@@ -86,8 +86,11 @@
     }
     value = '';
     await tick();
+    let scroll =
+      messagesUList.scrollHeight - messagesUList.offsetHeight - messagesUList.scrollTop == 0;
     input.style.height = '1px';
     input.style.height = `${Math.min(Math.max(26, input.scrollHeight), window.outerHeight / 3)}px`;
+    if (scroll) messagesUList.scroll(0, messagesUList.scrollHeight);
     input.focus(); // for mobiles
   };
 </script>
