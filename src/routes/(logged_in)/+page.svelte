@@ -114,7 +114,7 @@
     {/each}
   </ul>
   <form id="message-input-form" on:submit|preventDefault={onSubmit}>
-    <MessageInput bind:input bind:value on:submit={onSubmit} />
+    <MessageInput bind:input bind:value on:submit={onSubmit} scrollContainer={messagesUList} />
     <button id="send-button">Send</button>
   </form>
 </div>

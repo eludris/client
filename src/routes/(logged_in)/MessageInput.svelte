@@ -3,6 +3,7 @@
 
   export let value = '';
   export let input: HTMLTextAreaElement;
+  export let scrollContainer: HTMLElement;
   const dispatch = createEventDispatcher();
 
   const onInputKeyPress = (e: KeyboardEvent) => {
@@ -29,8 +30,11 @@
   };
 
   const onInput = () => {
+    let scroll =
+      scrollContainer.scrollHeight - scrollContainer.offsetHeight - scrollContainer.scrollTop == 0;
     input.style.height = '1px'; // we do this to avoid it getting incrementally bigger with every press
     input.style.height = `${Math.min(Math.max(26, input.scrollHeight), window.innerHeight / 3)}px`;
+    if (scroll) scrollContainer.scroll(0, scrollContainer.scrollHeight);
   };
 
   const onWindowKeyDown = (e: KeyboardEvent) => {
