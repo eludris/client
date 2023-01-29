@@ -12,8 +12,6 @@ body:
     attributes:
       label: Checks
       options:
-        - label: Have you checked the documentation?
-          required: true
         - label: Have you checked other issues to make sure this is not a duplicate?
           required: true
 
