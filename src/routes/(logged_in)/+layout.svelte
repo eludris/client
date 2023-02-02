@@ -1,41 +1,43 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import data from '$lib/data';
+  import userData from '$lib/user_data';
   import { goto } from '$app/navigation';
   import messages from '$lib/ws';
+  import type { PageData } from './$types';
 
   onMount(() => {
-    if (!$data) goto('/login');
+    if (!$userData) goto('/login');
   });
 
-  let facts = [
-    'Eludritians are eldritch demons who do not need sleep, this is why it is okay for us to be sleep deprived, no, you do not need to call Health & Safety.',
-    'Thang >>>> other mascots',
-    'We need more of these',
-    '100% of the people who saw this screen have used Eludris at least once',
-    'Why are we still here?',
-    '```',
-    "So you're telling me a morb fried this rice???",
-    'What the heck is a mile',
-    'Eludris is factually better than Disco- well, maybe not yet',
-    'I am the storm that is approaching',
-    'Coffee is kinda pog',
-    'The name pengin originally started as a joke about linux users while watching <a href="https://cdn.eludris.gay/447046752257344245340176389" target="_blank">this video</a> on loop'
-  ];
+  export let data: PageData;
+  let showHelp = false;
 
-  const randomFact = () => {
-    return facts[Math.floor(Math.random() * facts.length)];
+  setTimeout(() => {
+    showHelp = true;
+  }, 1_000); // 20 seconds
+
+  const logOut = () => {
+    userData.set(null);
+    goto('/login');
   };
 </script>
 
-{#if $data && $messages}
+{#if $userData && $messages}
   <slot />
 {:else}
   <div id="fact">
     <h1>Fun Fact</h1>
-    <p>{@html randomFact()}</p>
+    <p>{@html data.fact}</p>
     <span>Yes, this is a loading screen</span>
   </div>
+  {#if showHelp}
+    <div id="help">
+      <span>Issues connecting?</span>
+      <a class="help-option" href="https://discord.gg/vV6v2DhWQB">Get help</a>
+      <span id="seperator" />
+      <button class="help-option" on:click={logOut}>Log out</button>
+    </div>
+  {/if}
 {/if}
 
 <style>
@@ -59,5 +61,38 @@
   #fact > span {
     font-weight: 300;
     font-size: 12px;
+  }
+
+  #help {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 10px;
+  }
+
+  #seperator {
+    display: inline-block;
+    height: 1px;
+    width: 7px;
+    background-color: var(--gray-600);
+  }
+
+  .help-option {
+    border: unset;
+    background-color: transparent;
+    color: var(--gray-500);
+    font-size: inherit;
+    cursor: pointer;
+    align-self: baseline;
+    transition: color ease-in-out 125ms;
+  }
+
+  .help-option:hover {
+    color: var(--gray-600);
   }
 </style>
