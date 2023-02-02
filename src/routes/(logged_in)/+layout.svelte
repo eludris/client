@@ -14,7 +14,7 @@
 
   setTimeout(() => {
     showHelp = true;
-  }, 1_000); // 20 seconds
+  }, 10_000); // 10 seconds
 
   const logOut = () => {
     userData.set(null);
