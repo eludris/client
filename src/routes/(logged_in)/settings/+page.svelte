@@ -1,10 +1,10 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import data from '$lib/data';
+  import userData from '$lib/user_data';
   import { tick } from 'svelte';
 
-  let name = $data?.name ?? '';
-  let styles = $data?.styles ?? '';
+  let name = $userData?.name ?? '';
+  let styles = $userData?.styles ?? '';
   let styleInput: HTMLTextAreaElement;
   let error = '';
 
@@ -12,8 +12,8 @@
     if (name.length < 2 || name.length > 32) {
       error = 'Your username must be between 2 and 32 characters in length';
     } else {
-      if ($data) {
-        $data.name = name;
+      if ($userData) {
+        $userData.name = name;
       }
       error = '';
     }
@@ -40,8 +40,8 @@
   };
 
   const onStylesInput = () => {
-    if ($data) {
-      $data.styles = styles;
+    if ($userData) {
+      $userData.styles = styles;
     }
   };
 </script>
@@ -51,7 +51,7 @@
 <div id="settings-wrapper-div">
   <a id="back-link" href="/">Back</a>
   <div id="settings-div">
-    {#if $data}
+    {#if $userData}
       <span>
         <label for="username">Username</label>
         <input name="username" bind:value={name} on:keyup={onNameInput} />

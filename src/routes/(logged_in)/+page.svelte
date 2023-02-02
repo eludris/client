@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
-  import data from '$lib/data';
+  import userData from '$lib/user_data';
   import messages from '$lib/ws';
   import { tick } from 'svelte';
   import { browser } from '$app/environment';
@@ -72,16 +72,16 @@
   };
 
   const logOut = () => {
-    data.set(null);
+    userData.set(null);
     goto('/login');
   };
 
   const onSubmit = async () => {
     if (value.trim()) {
       if (value.startsWith('/shrug')) value = value.substring(7) + ' ¯\\\\\\_(ツ)_/¯';
-      fetch($data?.instanceURL + '/messages', {
+      fetch($userData?.instanceURL + '/messages', {
         method: 'POST',
-        body: JSON.stringify({ author: $data?.name, content: value }) // data?.name is fine here
+        body: JSON.stringify({ author: $userData?.name, content: value }) // data?.name is fine here
       }).then(() => messagesUList.scroll(0, messagesUList.scrollHeight));
     }
     value = '';
@@ -100,11 +100,11 @@
 <div class="message-channel">
   <div id="options-div">
     <div id="instance-info">
-      <span id="instance-name">{$data?.instanceInfo?.instance_name ?? 'Pengin - loading'}</span>
-      {#if $data?.instanceInfo?.description}
-        <span id="instance-description">{$data.instanceInfo.description}</span>
+      <span id="instance-name">{$userData?.instanceInfo?.instance_name ?? 'Pengin - loading'}</span>
+      {#if $userData?.instanceInfo?.description}
+        <span id="instance-description">{$userData.instanceInfo.description}</span>
         <span id="instance-markdown">
-          <Markdown content={$data.instanceInfo.description} />
+          <Markdown content={$userData.instanceInfo.description} />
         </span>
       {/if}
     </div>

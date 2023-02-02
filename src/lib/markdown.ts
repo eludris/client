@@ -9,7 +9,7 @@ import rehypePrism from 'rehype-prism';
 import rehypeStringify from 'rehype-stringify';
 
 import { visit } from 'unist-util-visit';
-import data from '$lib/data';
+import data from '$lib/user_data';
 
 let effisHost: string | undefined = undefined;
 

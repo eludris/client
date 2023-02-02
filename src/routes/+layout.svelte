@@ -1,12 +1,12 @@
 <script lang="ts">
-  import data from '$lib/data';
+  import userData from '$lib/user_data';
 </script>
 
 <svelte:head>
-  {#if $data?.styles}
-    {#if $data.styles.indexOf('</styles>') == -1}
+  {#if $userData?.styles}
+    {#if $userData.styles.indexOf('</styles>') == -1}
       <!-- poor man's sanitization /shrug -->
-      {@html `<style>${$data.styles}</style>`}
+      {@html `<style>${$userData.styles}</style>`}
     {/if}
   {/if}
 </svelte:head>

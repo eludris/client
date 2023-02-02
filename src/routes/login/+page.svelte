@@ -1,20 +1,20 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
-  import data from '$lib/data';
+  import userData from '$lib/user_data';
 
   let value = '';
   let instanceURL = '';
   let error = '';
 
   onMount(() => {
-    if ($data) goto('/');
+    if ($userData) goto('/');
   });
 
   const onSubmit = () => {
     if (!error && value) {
       const url: string = instanceURL.startsWith('http') ? instanceURL : 'https://' + instanceURL; // I could one line this but I like my codebases sane
-      data.set({
+      userData.set({
         name: value,
         instanceURL: instanceURL ? url : 'https://eludris.tooty.xyz'
       });
