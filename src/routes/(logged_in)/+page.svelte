@@ -23,7 +23,7 @@
   let uiMessages: Array<UiMessage> = [];
 
   onMount(() => {
-    messagesUList.scroll(0, 1);
+      messagesUList.scroll(0, messagesUList.scrollHeight);
     input.focus();
   });
 
