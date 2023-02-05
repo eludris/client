@@ -19,6 +19,9 @@
         instanceURL: instanceURL ? url : 'https://eludris.tooty.xyz'
       });
       goto('/');
+      if ('Notification' in window && Notification.permission == 'default') {
+        Notification.requestPermission();
+      }
     }
   };
 

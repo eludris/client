@@ -12,6 +12,8 @@ let instanceUrl: string | null = null;
 let ws: WebSocket | null = null;
 let pingInterval: NodeJS.Timer | null = null;
 let lastAuthor: string | null = null;
+let notification: Notification;
+
 
 const retryConnect = (wait = 1_000) => {
   messages.set(null);
@@ -59,6 +61,9 @@ if (browser) {
                   showAuthor: payload.d.author != lastAuthor,
                   ...payload.d
                 };
+                if ('Notification' in window && Notification.permission == 'granted' && message.author != value.name && !document.hasFocus()) {
+                  notification = new Notification(`New message from ${message.author}`, { body: message.content, icon: '/das_ding.png', renotify: true, tag: 'NewMessage' });
+                }
                 lastAuthor = payload.d.author;
                 messages.update((messages) => {
                   messages?.push(message);
@@ -86,6 +91,8 @@ if (browser) {
       ws = null;
     }
   });
+
+  document.addEventListener('focus', () => { notification?.close() });
 }
 
 export default messages;
