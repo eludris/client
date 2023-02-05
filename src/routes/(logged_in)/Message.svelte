@@ -42,7 +42,11 @@
   };
 </script>
 
-<div class="message" on:contextmenu|preventDefault={onContextMenu}>
+<div
+  class="message"
+  class:mentioned={message.mentioned}
+  on:contextmenu|preventDefault={onContextMenu}
+>
   {#if message.showAuthor}
     <div class="author">{message.author}</div>
   {/if}
@@ -72,5 +76,9 @@
     margin: 10px 0;
     white-space: pre;
     font-weight: bold;
+  }
+
+  .mentioned {
+    background-color: var(--pink-200);
   }
 </style>
