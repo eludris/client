@@ -8,9 +8,7 @@
   import MessageInput from './MessageInput.svelte';
   import MessageComponent from './Message.svelte';
   import Markdown from '$lib/components/Markdown.svelte';
-  import type { PenginMessage } from '$lib/types/ui/message';
 
-  let lastAuthor: string | null = null;
   let messagesUList: HTMLUListElement;
   let value = '';
   let input: HTMLTextAreaElement;
@@ -22,7 +20,6 @@
 
   $: {
     if ($messages) {
-      console.log('a');
       let scroll =
         messagesUList &&
         messagesUList.scrollHeight - messagesUList.offsetHeight - messagesUList.scrollTop <
