@@ -18,12 +18,12 @@ body:
   - type: textarea
     attributes:
       label: Minimum Reproduction Steps
-      description: | 
+      description: |
         Insert any steps to help reproduce this issue
         Additionally, include console output, if any
 
   - type: textarea
     attributes:
       label: Screenshots
-      description: | 
+      description: |
         Insert any images/videos of the issue

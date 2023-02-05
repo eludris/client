@@ -18,4 +18,3 @@ export function load() {
     fact: facts[Math.floor(Math.random() * facts.length)]
   };
 }
-
