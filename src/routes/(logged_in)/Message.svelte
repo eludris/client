@@ -1,5 +1,5 @@
 <script lang="ts" context="module">
-  let hideOtherContext = () => {};
+  let hideOtherContext: () => void;
 </script>
 
 <script lang="ts">
@@ -13,9 +13,10 @@
   let contextDiv: HTMLDivElement;
 
   const onContextMenu = async (e: MouseEvent) => {
-    hideOtherContext();
+    if (hideOtherContext) {
+      hideOtherContext();
+    }
     hideOtherContext = () => {
-      console.log(message.content);
       showContext = false;
     };
     showContext = true;
