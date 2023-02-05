@@ -69,6 +69,26 @@
           spellcheck="false"
         />
       </span>
+      <span>
+        <label for="notifications">Notifications Level</label>
+        <div id="notifications-div">
+          <datalist id="notification-opts">
+            <option value="1" label="Off"><span class="mark" /></option>
+            <option value="2" label="Mentions only"><span class="mark" /></option>
+            <option value="3" label="Everything"><span class="mark" /></option>
+          </datalist>
+          <input
+            name="notifications"
+            bind:value={$config.notifications}
+            type="range"
+            list="notification-opts"
+            min="1"
+            max="3"
+          />
+          <span id="notifications-input-track" />
+          <div />
+        </div>
+      </span>
     {/if}
   </div>
   <footer>
@@ -144,6 +164,95 @@
     height: 100%;
   }
 
+  #notifications-div {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: calc(30% + 24px);
+  }
+
+  #notifications-div > datalist {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    width: 100%;
+    place-items: center;
+    padding: 0;
+  }
+
+  #notifications-div > datalist > option::after {
+    content: '';
+    display: inline;
+    position: absolute;
+    width: 2px;
+    height: 24px;
+    top: 24px;
+    left: 50%;
+    transform: translate(-50%, 0);
+    background-color: var(--pink-700);
+    z-index: -1;
+  }
+
+  #notifications-div > input {
+    position: absolute;
+    top: 24px;
+    width: 70%;
+    margin: 10px 15%;
+    padding: 0;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+    height: 3px;
+    border: unset;
+    background-color: transparent;
+  }
+
+  #notifications-div > #notifications-input-track {
+    position: absolute;
+    top: 24px;
+    width: 80%;
+    margin: 10px 10%;
+    padding: 0;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+    height: 3px;
+    border: unset;
+    background-color: var(--pink-200);
+    z-index: -1;
+  }
+
+  input[type='range']::-moz-range-thumb {
+    appearance: none;
+    border-radius: 100%;
+    border: unset;
+    width: 18px;
+    height: 18px;
+    background: var(--pink-600);
+    cursor: pointer;
+  }
+
+  input[type='range']::-ms-thumb {
+    appearance: none;
+    border-radius: 100%;
+    border: unset;
+    width: 18px;
+    height: 18px;
+    background: var(--pink-600);
+    cursor: pointer;
+  }
+
+  input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    border-radius: 100%;
+    border: unset;
+    width: 18px;
+    height: 18px;
+    background: var(--pink-600);
+    cursor: pointer;
+  }
+
   .error {
     color: var(--pink-700);
     margin-left: calc(30% + 20px);
@@ -172,6 +281,15 @@
     #settings-div textarea {
       width: auto;
       margin: 10px;
+    }
+
+    #notifications-div {
+      width: 100%;
+    }
+
+    #notifications-div > input {
+      width: 70%;
+      margin: 10px 15%;
     }
 
     footer {

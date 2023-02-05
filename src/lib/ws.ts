@@ -1,6 +1,7 @@
 import { browser } from '$app/environment';
 import { writable } from 'svelte/store';
 import data from '$lib/user_data';
+import config from '$lib/user_config';
 import type { InstanceInfo } from '$lib/types/instance';
 import { PayloadOP, type IncomingPayload } from '$lib/types/event';
 import markdown from '$lib/markdown';
@@ -13,7 +14,7 @@ let ws: WebSocket | null = null;
 let pingInterval: NodeJS.Timer | null = null;
 let lastAuthor: string | null = null;
 let notification: Notification;
-
+let notification_opt: number;
 
 const retryConnect = (wait = 1_000) => {
   messages.set(null);
@@ -59,10 +60,28 @@ if (browser) {
                 const message = {
                   renderedContent: content,
                   showAuthor: payload.d.author != lastAuthor,
+                  mentioned: content.split(`@${value.name}`).length > 1,
                   ...payload.d
                 };
-                if ('Notification' in window && Notification.permission == 'granted' && message.author != value.name && !document.hasFocus()) {
-                  notification = new Notification(`New message from ${message.author}`, { body: message.content, icon: '/das_ding.png', renotify: true, tag: 'NewMessage' });
+                if (
+                  'Notification' in window &&
+                  Notification.permission == 'granted' &&
+                  message.author != value.name &&
+                  !document.hasFocus() &&
+                  notification_opt > 0
+                ) {
+                  if (notification_opt >= 3 || message.mentioned)
+                    notification = new Notification(
+                      message.mentioned
+                        ? `New mention from ${message.author}`
+                        : `New message from ${message.author}`,
+                      {
+                        body: message.content,
+                        icon: '/das_ding.png',
+                        renotify: true,
+                        tag: 'NewMessage'
+                      }
+                    );
                 }
                 lastAuthor = payload.d.author;
                 messages.update((messages) => {
@@ -92,7 +111,13 @@ if (browser) {
     }
   });
 
-  document.addEventListener('focus', () => { notification?.close() });
+  config.subscribe((conf) => {
+    notification_opt = conf.notifications ?? 0;
+  });
+
+  document.addEventListener('focus', () => {
+    notification?.close();
+  });
 }
 
 export default messages;
