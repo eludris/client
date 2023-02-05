@@ -5,7 +5,6 @@
   import type { PenginMessage } from '$lib/types/ui/message';
 
   export let message: PenginMessage;
-  export let showAuthor: boolean;
   let showContext = false;
   let contextDiv: HTMLDivElement;
 
@@ -34,7 +33,7 @@
 </script>
 
 <div class="message" on:contextmenu|preventDefault={onContextMenu}>
-  {#if showAuthor}
+  {#if message.showAuthor}
     <div class="author">{message.author}</div>
   {/if}
   <div class="content"><Markdown content={message.renderedContent} preRendered /></div>

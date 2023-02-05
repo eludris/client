@@ -10,51 +10,23 @@
   import Markdown from '$lib/components/Markdown.svelte';
   import type { PenginMessage } from '$lib/types/ui/message';
 
-  interface UiMessage {
-    message: PenginMessage;
-    showAuthor: boolean;
-    index: number;
-  }
-
   let lastAuthor: string | null = null;
   let messagesUList: HTMLUListElement;
   let value = '';
   let input: HTMLTextAreaElement;
-  let uiMessages: Array<UiMessage> = [];
 
   onMount(() => {
-      messagesUList.scroll(0, messagesUList.scrollHeight);
+    messagesUList.scroll(0, messagesUList.scrollHeight);
     input.focus();
   });
 
-  const checkAuthor = (author: string, index: number): boolean => {
-    const res = author !== lastAuthor;
-    lastAuthor = author;
-    if (index == 0) {
-      return true;
-    }
-    return res;
-  };
-
-  const mapMessages = (messages: Array<PenginMessage>) => {
-    let newMessages: Array<UiMessage> = [];
-    messages.forEach((m, i) =>
-      newMessages.push({
-        message: m,
-        showAuthor: checkAuthor(m.author, i),
-        index: i
-      })
-    );
-    return newMessages;
-  };
-
   $: {
     if ($messages) {
+      console.log('a');
       let scroll =
         messagesUList &&
         messagesUList.scrollHeight - messagesUList.offsetHeight - messagesUList.scrollTop <
           window.outerHeight / 4;
-      uiMessages = mapMessages($messages);
       tick().then(() => {
         if (scroll) messagesUList.scroll(0, messagesUList.scrollHeight);
       });
@@ -112,9 +84,11 @@
     <button id="logout-button" on:click={logOut}> Logout </button>
   </div>
   <ul bind:this={messagesUList} id="messages">
-    {#each uiMessages as { message, showAuthor, index } (index)}
-      <MessageComponent {message} {showAuthor} />
-    {/each}
+    {#if $messages}
+      {#each $messages as message, i (i)}
+        <MessageComponent {message} />
+      {/each}
+    {/if}
   </ul>
   <form id="message-input-form" on:submit|preventDefault={onSubmit}>
     <MessageInput bind:input bind:value on:submit={onSubmit} scrollContainer={messagesUList} />

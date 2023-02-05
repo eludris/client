@@ -11,9 +11,11 @@ const messages = writable<Array<PenginMessage> | null>(null);
 let instanceUrl: string | null = null;
 let ws: WebSocket | null = null;
 let pingInterval: NodeJS.Timer | null = null;
+let lastAuthor: string | null = null;
 
 const retryConnect = (wait = 1_000) => {
   messages.set(null);
+  lastAuthor = null;
   instanceUrl = null;
   setTimeout(() => data.update((d) => d), wait);
 };
@@ -52,7 +54,12 @@ if (browser) {
 
             if (payload.op == PayloadOP.MESSAGE_CREATE)
               markdown(payload.d.content).then((content) => {
-                const message = { renderedContent: content, ...payload.d };
+                const message = {
+                  renderedContent: content,
+                  showAuthor: payload.d.author != lastAuthor,
+                  ...payload.d
+                };
+                lastAuthor = payload.d.author;
                 messages.update((messages) => {
                   messages?.push(message);
                   return messages;
