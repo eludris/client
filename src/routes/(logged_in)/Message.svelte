@@ -1,3 +1,7 @@
+<script lang="ts" context="module">
+  let hideOtherContext = () => {};
+</script>
+
 <script lang="ts">
   import Markdown from '$lib/components/Markdown.svelte';
   import MessageContext from './MessageContext.svelte';
@@ -9,6 +13,11 @@
   let contextDiv: HTMLDivElement;
 
   const onContextMenu = async (e: MouseEvent) => {
+    hideOtherContext();
+    hideOtherContext = () => {
+      console.log(message.content);
+      showContext = false;
+    };
     showContext = true;
     await tick();
     if (contextDiv.clientHeight + e.clientY < window.innerHeight) {
