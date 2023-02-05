@@ -1,10 +1,11 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import userData from '$lib/user_data';
+  import config from '$lib/user_config';
   import { tick } from 'svelte';
 
   let name = $userData?.name ?? '';
-  let styles = $userData?.styles ?? '';
+  let styles = $config.styles ?? '';
   let styleInput: HTMLTextAreaElement;
   let error = '';
 
@@ -40,9 +41,7 @@
   };
 
   const onStylesInput = () => {
-    if ($userData) {
-      $userData.styles = styles;
-    }
+    $config.styles = styles;
   };
 </script>
 
