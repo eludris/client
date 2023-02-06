@@ -8,6 +8,7 @@
   import MessageInput from './MessageInput.svelte';
   import MessageComponent from './Message.svelte';
   import Markdown from '$lib/components/Markdown.svelte';
+  import type { PenginMessage } from '$lib/types/ui/message';
 
   let messagesUList: HTMLUListElement;
   let value = '';
@@ -62,6 +63,27 @@
     if (scroll) messagesUList.scroll(0, messagesUList.scrollHeight);
     input.focus(); // for mobiles
   };
+
+  const onReply = async (e: CustomEvent<PenginMessage>) => {
+    var start = input.selectionStart;
+    var end = input.selectionEnd;
+
+    const reply = `${value.trim() ? '\n' : ''}${e.detail.content
+      .split('\n')
+      .map((l) => `> ${l}`)
+      .join('\n')}\n@${e.detail.author}\n`;
+    value = value.substring(0, start) + reply + value.substring(end);
+    await tick();
+    let scroll =
+      messagesUList.scrollHeight - messagesUList.offsetHeight - messagesUList.scrollTop == 0;
+
+    input.selectionStart = input.selectionEnd = start + reply.length;
+
+    input.style.height = '1px';
+    input.style.height = `${Math.min(Math.max(26, input.scrollHeight), window.outerHeight / 3)}px`;
+    if (scroll) messagesUList.scroll(0, messagesUList.scrollHeight);
+    input.focus();
+  };
 </script>
 
 <svelte:window on:resize={autoScroll} />
@@ -83,7 +105,7 @@
   <ul bind:this={messagesUList} id="messages">
     {#if $messages}
       {#each $messages as message, i (i)}
-        <MessageComponent {message} />
+        <MessageComponent {message} on:reply={onReply} />
       {/each}
     {/if}
   </ul>

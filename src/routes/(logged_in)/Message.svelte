@@ -52,7 +52,7 @@
   {/if}
   <div class="content"><Markdown content={message.renderedContent} preRendered /></div>
   {#if showContext}
-    <MessageContext bind:contextDiv {message} on:close={closeContextMenu} />
+    <MessageContext bind:contextDiv {message} on:close={closeContextMenu} on:reply />
   {/if}
 </div>
 

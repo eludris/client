@@ -16,12 +16,18 @@
       dispatch('close');
     });
   };
+
+  const replyButton = () => {
+    dispatch('reply', message);
+    dispatch('close');
+  };
 </script>
 
 <svelte:window on:mousedown={onClick} />
 
 <div id="context" bind:this={contextDiv}>
   <button on:click={copyButton}>Copy</button>
+  <button on:click={replyButton}>Reply</button>
 </div>
 
 <style>
