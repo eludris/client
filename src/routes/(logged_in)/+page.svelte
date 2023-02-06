@@ -56,11 +56,6 @@
     }
     value = '';
     await tick();
-    let scroll =
-      messagesUList.scrollHeight - messagesUList.offsetHeight - messagesUList.scrollTop == 0;
-    input.style.height = '1px';
-    input.style.height = `${Math.min(Math.max(26, input.scrollHeight), window.outerHeight / 3)}px`;
-    if (scroll) messagesUList.scroll(0, messagesUList.scrollHeight);
     input.focus(); // for mobiles
   };
 
@@ -74,14 +69,9 @@
       .join('\n')}\n@${e.detail.author}\n`;
     value = value.substring(0, start) + reply + value.substring(end);
     await tick();
-    let scroll =
-      messagesUList.scrollHeight - messagesUList.offsetHeight - messagesUList.scrollTop == 0;
 
     input.selectionStart = input.selectionEnd = start + reply.length;
 
-    input.style.height = '1px';
-    input.style.height = `${Math.min(Math.max(26, input.scrollHeight), window.outerHeight / 3)}px`;
-    if (scroll) messagesUList.scroll(0, messagesUList.scrollHeight);
     input.focus();
   };
 </script>

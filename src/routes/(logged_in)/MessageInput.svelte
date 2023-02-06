@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount, tick } from 'svelte';
+  import { afterUpdate, createEventDispatcher, onMount, tick } from 'svelte';
 
   export let value = '';
   export let input: HTMLTextAreaElement;
@@ -18,6 +18,14 @@
     ) {
       mobile = true;
     }
+  });
+
+  afterUpdate(() => {
+    let scroll =
+      scrollContainer.scrollHeight - scrollContainer.offsetHeight - scrollContainer.scrollTop <= 10;
+    input.style.height = '1px'; // we do this to avoid it getting incrementally bigger with every press
+    input.style.height = `${Math.min(Math.max(26, input.scrollHeight), window.innerHeight / 3)}px`;
+    if (scroll) scrollContainer.scroll(0, scrollContainer.scrollHeight);
   });
 
   const onInputKeyPress = (e: KeyboardEvent) => {
@@ -44,14 +52,6 @@
     }
   };
 
-  const onInput = () => {
-    let scroll =
-      scrollContainer.scrollHeight - scrollContainer.offsetHeight - scrollContainer.scrollTop == 0;
-    input.style.height = '1px'; // we do this to avoid it getting incrementally bigger with every press
-    input.style.height = `${Math.min(Math.max(26, input.scrollHeight), window.innerHeight / 3)}px`;
-    if (scroll) scrollContainer.scroll(0, scrollContainer.scrollHeight);
-  };
-
   const onWindowKeyDown = (e: KeyboardEvent) => {
     if ((!e.ctrlKey || e.key == 'v') && !e.altKey && !e.metaKey) {
       input.focus();
@@ -66,7 +66,6 @@
   bind:value
   on:keypress={onInputKeyPress}
   on:keydown={onInputKeyDown}
-  on:input={onInput}
   id="message-input"
   placeholder="Send a message to Eludris"
   autocomplete="off"
