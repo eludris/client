@@ -112,7 +112,10 @@ if (browser) {
   });
 
   config.subscribe((conf) => {
-    notification_opt = conf.notifications ?? 0;
+    if (!conf.notifications) {
+      conf.notifications = 2;
+    }
+    notification_opt = conf.notifications;
   });
 
   document.addEventListener('focus', () => {
