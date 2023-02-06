@@ -60,7 +60,7 @@ if (browser) {
                 const message = {
                   renderedContent: content,
                   showAuthor: payload.d.author != lastAuthor,
-                  mentioned: content.split(`@${value.name}`).length > 1,
+                  mentioned: content.toLowerCase().split(`@${value.name.toLowerCase()}`).length > 1,
                   ...payload.d
                 };
                 if (
