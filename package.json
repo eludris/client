@@ -31,6 +31,7 @@
   },
   "type": "module",
   "dependencies": {
+    "@react-native-picker/picker": "^2.4.8",
     "prismjs": "^1.29.0",
     "rehype-katex": "^6.0.2",
     "rehype-prism": "^2.2.0",
