@@ -66,7 +66,7 @@ const unScrewHtml = (
     // force whitespace for blockquotes
     .replace(/^([^\\]|)>[^>\s]/gm, '\\$&')
     // number list supremacy
-    .replace(/^(\+|-|\* )/gm, '\\$&')
+    .replace(/^(\+|-|\*)/gm, '\\$&')
     // let the newlines live
     .replace(/^\s*$/gm, '\u200E')
     // make blockquotes only one line long
