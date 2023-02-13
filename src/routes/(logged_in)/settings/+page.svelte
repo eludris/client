@@ -295,5 +295,10 @@
     footer {
       text-align: center;
     }
+
+    .error {
+      margin: 10px;
+      text-align: center;
+    }
   }
 </style>
