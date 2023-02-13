@@ -21,11 +21,17 @@
   });
 
   afterUpdate(() => {
-    let scroll =
-      scrollContainer.scrollHeight - scrollContainer.offsetHeight - scrollContainer.scrollTop <= 10;
-    input.style.height = '1px'; // we do this to avoid it getting incrementally bigger with every press
-    input.style.height = `${Math.min(Math.max(26, input.scrollHeight), window.innerHeight / 3)}px`;
-    if (scroll) scrollContainer.scroll(0, scrollContainer.scrollHeight);
+    if (scrollContainer) {
+      let scroll =
+        scrollContainer.scrollHeight - scrollContainer.offsetHeight - scrollContainer.scrollTop <=
+        10;
+      input.style.height = '1px'; // we do this to avoid it getting incrementally bigger with every press
+      input.style.height = `${Math.min(
+        Math.max(26, input.scrollHeight),
+        window.innerHeight / 3
+      )}px`;
+      if (scroll) scrollContainer.scroll(0, scrollContainer.scrollHeight);
+    }
   });
 
   const onInputKeyPress = (e: KeyboardEvent) => {
