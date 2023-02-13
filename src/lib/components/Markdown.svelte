@@ -53,7 +53,7 @@
     integrity="sha384-Xi8rHCmBmhbuyyhbI88391ZKP2dmfnOl4rT9ZfRI7mLTdk1wblIUnrIq35nqwEvC"
     crossorigin="anonymous"
   />
-  <link rel="stylesheet" href="lazerwave.css" />
+  <link rel="stylesheet" href="/lazerwave.css" />
 </svelte:head>
 
 <style>
