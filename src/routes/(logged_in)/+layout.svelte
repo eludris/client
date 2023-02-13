@@ -33,7 +33,9 @@
   {#if showHelp}
     <div id="help">
       <span>Issues connecting?</span>
-      <a class="help-option" href="https://discord.gg/vV6v2DhWQB">Get help</a>
+      <a class="help-option" href="https://discord.gg/vV6v2DhWQB" target="_blank" rel="noreferrer"
+        >Get help</a
+      >
       <span id="seperator" />
       <button class="help-option" on:click={logOut}>Log out</button>
     </div>
