@@ -21,9 +21,15 @@
     dispatch('reply', message);
     dispatch('close');
   };
+
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.key == 'Escape') {
+      dispatch('close');
+    }
+  };
 </script>
 
-<svelte:window on:mousedown={onClick} />
+<svelte:window on:mousedown={onClick} on:keydown={onKeyDown} />
 
 <div id="context" bind:this={contextDiv}>
   <button on:click={copyButton}>Copy</button>
