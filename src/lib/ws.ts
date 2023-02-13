@@ -6,105 +6,111 @@ import type { InstanceInfo } from '$lib/types/instance';
 import { PayloadOP, type IncomingPayload } from '$lib/types/event';
 import markdown from '$lib/markdown';
 import type { PenginMessage } from './types/ui/message';
+import type { UserData } from './types/ui/user';
 
 const messages = writable<Array<PenginMessage> | null>(null);
 
-let instanceUrl: string | null = null;
+let instanceURL: string | null = null;
 let ws: WebSocket | null = null;
 let pingInterval: NodeJS.Timer | null = null;
 let lastAuthor: string | null = null;
 let notification: Notification;
 let notification_opt: number;
+let oldMessages: Array<PenginMessage> | null = null;
 
-const retryConnect = (wait = 1_000) => {
+const retryConnect = (wait = 3_000) => {
+  messages.subscribe((messages) => { if (messages) oldMessages = messages })();
   messages.set(null);
-  lastAuthor = null;
-  instanceUrl = null;
-  setTimeout(() => data.update((d) => d), wait);
+  setTimeout(() => {
+    data.subscribe((userData) => { if (userData) connect(userData, true) })();
+  }, wait);
 };
 
-if (browser) {
-  data.subscribe(async (value) => {
-    if (value) {
-      if (value.instanceURL != instanceUrl) {
-        instanceUrl = value.instanceURL;
-        messages.set(null);
-        ws?.close();
-        if (pingInterval) clearInterval(pingInterval);
-        const res = await fetch(value.instanceURL);
-        const info: InstanceInfo = await res.json();
+const connect = async (userData: UserData, reconnect = false) => {
+  if (userData.instanceURL == instanceURL && !reconnect) return;
+  instanceURL = userData.instanceURL;
+  ws?.close();
+  if (pingInterval) clearInterval(pingInterval);
+  const res = await fetch(userData.instanceURL);
+  const info: InstanceInfo = await res.json();
 
-        if (!info.pandemonium_url) {
-          return retryConnect(5_000);
-        }
+  if (!info.pandemonium_url) {
+    return retryConnect(5_000);
+  }
 
-        data.update((d) => {
-          if (d) d.instanceInfo = info;
-          return d;
-        });
+  data.update((userData) => {
+    if (userData) userData.instanceInfo = info;
+    return userData;
+  });
 
-        ws = new WebSocket(info.pandemonium_url);
+  ws = new WebSocket(info.pandemonium_url);
 
-        ws.addEventListener('open', () => {
-          pingInterval = setInterval(
-            () => ws?.send(JSON.stringify({ op: PayloadOP.PING })),
-            45_000
-          );
-          messages.set([]);
+  ws.addEventListener('open', () => {
+    pingInterval = setInterval(
+      () => ws?.send(JSON.stringify({ op: PayloadOP.PING })),
+      45_000
+    );
+    messages.set(oldMessages ?? []);
 
-          ws?.addEventListener('message', (msg: MessageEvent) => {
-            const payload: IncomingPayload = JSON.parse(msg.data);
+    ws?.addEventListener('message', (msg: MessageEvent) => {
+      const payload: IncomingPayload = JSON.parse(msg.data);
 
-            if (payload.op == PayloadOP.MESSAGE_CREATE)
-              markdown(payload.d.content).then((content) => {
-                const message = {
-                  renderedContent: content,
-                  showAuthor: payload.d.author != lastAuthor,
-                  mentioned: content.toLowerCase().split(`@${value.name.toLowerCase()}`).length > 1,
-                  ...payload.d
-                };
-                if (
-                  'Notification' in window &&
-                  Notification.permission == 'granted' &&
-                  message.author != value.name &&
-                  !document.hasFocus() &&
-                  notification_opt > 0
-                ) {
-                  if (notification_opt >= 3 || message.mentioned)
-                    notification = new Notification(
-                      message.mentioned
-                        ? `New mention from ${message.author}`
-                        : `New message from ${message.author}`,
-                      {
-                        body: message.content,
-                        icon: '/das_ding.png',
-                        renotify: true,
-                        tag: 'NewMessage'
-                      }
-                    );
+      if (payload.op == PayloadOP.MESSAGE_CREATE)
+        markdown(payload.d.content).then((content) => {
+          const message = {
+            renderedContent: content,
+            showAuthor: payload.d.author != lastAuthor,
+            mentioned: content.toLowerCase().split(`@${userData.name.toLowerCase()}`).length > 1,
+            ...payload.d
+          };
+          if (
+            'Notification' in window &&
+            Notification.permission == 'granted' &&
+            message.author != userData.name &&
+            !document.hasFocus() &&
+            notification_opt > 0
+          ) {
+            if (notification_opt >= 3 || message.mentioned)
+              notification = new Notification(
+                message.mentioned
+                  ? `New mention from ${message.author}`
+                  : `New message from ${message.author}`,
+                {
+                  body: message.content,
+                  icon: '/das_ding.png',
+                  renotify: true,
+                  tag: 'NewMessage'
                 }
-                lastAuthor = payload.d.author;
-                messages.update((messages) => {
-                  messages?.push(message);
-                  return messages;
-                });
-              });
+              );
+          }
+          lastAuthor = payload.d.author;
+          messages.update((messages) => {
+            messages?.push(message);
+            return messages;
           });
         });
+    });
 
-        ws.addEventListener('error', (e) => {
-          console.error(e);
-          retryConnect();
-        });
+    ws?.addEventListener('close', () => {
+      console.warn('WebSocket connection closed, reconnecting');
+      retryConnect();
+    });
+  });
 
-        ws.addEventListener('close', () => {
-          console.warn('WebSocket connection closed, reconnecting');
-          retryConnect();
-        });
-      }
+  ws.addEventListener('error', () => {
+    console.error('Encountered an error while connecting to WebSocket');
+    retryConnect();
+  });
+}
+
+if (browser) {
+  data.subscribe(async (userData) => {
+    // You have to log out to change the instance's url.
+    if (userData) {
+      await connect(userData);
     } else {
-      instanceUrl = null;
-      messages.set([]);
+      messages.set(null);
+      oldMessages = null;
       ws?.close();
       if (pingInterval) clearInterval(pingInterval);
       ws = null;
