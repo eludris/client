@@ -96,4 +96,9 @@
   :global(.md pre code, pre code[class*='language-'][class*='language-']) {
     background-color: transparent;
   }
+
+  :global(.md img) {
+    max-width: calc(100% - 10px);
+    border-radius: 5px;
+  }
 </style>
