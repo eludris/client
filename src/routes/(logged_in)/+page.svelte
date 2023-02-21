@@ -117,6 +117,7 @@
     flex-grow: 1;
     padding: 10px;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 0;
     margin-top: 0;
     margin-bottom: 0; /* where is react native marginVertical when you need it? */

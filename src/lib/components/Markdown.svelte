@@ -101,4 +101,8 @@
     max-width: calc(100% - 10px);
     border-radius: 5px;
   }
+
+  :global(.md:has(.math)) {
+    overflow-x: auto;
+  }
 </style>
