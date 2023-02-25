@@ -31,8 +31,8 @@
         styles.substring(0, styleInput.selectionStart).split('}').length
     ) {
       e.preventDefault();
-      var start = styleInput.selectionStart;
-      var end = styleInput.selectionEnd;
+      const start = styleInput.selectionStart;
+      const end = styleInput.selectionEnd;
 
       styles = styles.substring(0, start) + '  ' + styles.substring(end);
       await tick();

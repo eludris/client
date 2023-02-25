@@ -60,8 +60,8 @@
   };
 
   const onReply = async (e: CustomEvent<PenginMessage>) => {
-    var start = input.selectionStart;
-    var end = input.selectionEnd;
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
 
     const reply = `${value.trim() ? '\n' : ''}${e.detail.content
       .split('\n')

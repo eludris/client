@@ -19,10 +19,14 @@ let notification_opt: number;
 let oldMessages: Array<PenginMessage> | null = null;
 
 const retryConnect = (wait = 3_000) => {
-  messages.subscribe((messages) => { if (messages) oldMessages = messages })();
+  messages.subscribe((messages) => {
+    if (messages) oldMessages = messages;
+  })();
   messages.set(null);
   setTimeout(() => {
-    data.subscribe((userData) => { if (userData) connect(userData, true) })();
+    data.subscribe((userData) => {
+      if (userData) connect(userData, true);
+    })();
   }, wait);
 };
 
@@ -46,10 +50,7 @@ const connect = async (userData: UserData, reconnect = false) => {
   ws = new WebSocket(info.pandemonium_url);
 
   ws.addEventListener('open', () => {
-    pingInterval = setInterval(
-      () => ws?.send(JSON.stringify({ op: PayloadOP.PING })),
-      45_000
-    );
+    pingInterval = setInterval(() => ws?.send(JSON.stringify({ op: PayloadOP.PING })), 45_000);
     messages.set(oldMessages ?? []);
 
     ws?.addEventListener('message', (msg: MessageEvent) => {
@@ -101,7 +102,7 @@ const connect = async (userData: UserData, reconnect = false) => {
     console.error('Encountered an error while connecting to WebSocket');
     retryConnect();
   });
-}
+};
 
 if (browser) {
   data.subscribe(async (userData) => {

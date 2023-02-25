@@ -49,8 +49,8 @@
   const onInputKeyDown = async (e: KeyboardEvent) => {
     if (e.key == 'Tab' && value.substring(0, input.selectionStart).split('```').length % 2 == 0) {
       e.preventDefault();
-      var start = input.selectionStart;
-      var end = input.selectionEnd;
+      const start = input.selectionStart;
+      const end = input.selectionEnd;
 
       value = value.substring(0, start) + '\t' + value.substring(end);
       await tick();

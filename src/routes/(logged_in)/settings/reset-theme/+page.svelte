@@ -8,4 +8,3 @@
     goto('/settings');
   });
 </script>
-
