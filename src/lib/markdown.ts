@@ -34,10 +34,8 @@ const remarkTextifyHtml: Plugin = () => {
 const remarkKillImages: Plugin = () => {
   return (tree) =>
     visit(tree, 'image', (node: { type: string; alt: string; value: string; url: string }) => {
-      console.log(node);
       try {
         const url = new URL(node.url);
-        console.log(url.hostname, effisHost);
         if (url.hostname != effisHost) {
           node.type = 'text';
           node.value = node.alt;
@@ -58,23 +56,51 @@ const remarkExternalAnchors: Plugin = () => {
     });
 };
 
-const unScrewHtml = (
-  html: string
-): string => // I've spent so much time trying to fix this, thanks to revolt I finally managed to get it working
-  html
+const unScrewHtml = (html: string): string => {
+  html = html
+    // I've spent so much time trying to fix this, thanks to revolt I finally managed to get it working
     .replace(/^(<\/?[a-zA-Z0-9]+>)(.*$)/gm, '\u200E$&')
     // force whitespace for blockquotes
     .replace(/^([^\\]|)>[^>\s]/gm, '\\$&')
-    // number list supremacy
-    .replace(/^(\+|-|\*)/gm, '\\$&')
+    // better code-block escaping
+    .replace(/\\```/gm, '\\`\\`\\`')
     // let the newlines live
     .replace(/^\s*$/gm, '\u200E')
     // make blockquotes only one line long
-    .replace(/^>.*$/gm, '$&\n\n')
-    // ensure ``` s have a new line before them
-    .replace(new RegExp('(.)```', 'gm'), '$1\n```')
-    // ... and after them
-    .replace(new RegExp('``` (.)', 'gm'), '```\n$1');
+    .replace(/^>.*$/gm, '$&\n\n');
+  //
+  // we have to reassign to get the updated string
+  // ensure ``` s have a new line before and after them
+  html = html.replace(/```/gm, (_, offset) => {
+    const codeFencesBefore = html.substring(0, offset).split('```').length - 1;
+    const lastCodeFence = !html.substring(offset + 3).includes('```');
+    if (codeFencesBefore % 2 == 1 && html[offset - 1] != '\n') {
+      return '\n```';
+    }
+    if (codeFencesBefore % 2 == 0 && !lastCodeFence && html[offset + 3] != '\n') {
+      return '```\n';
+    }
+    return '```';
+  });
+
+  // number list supremacy
+  html = html.replace(/^(\+|-|\*)/gm, (match, _, offset) => {
+    if (html.substring(0, offset).split('```').length % 2 == 1) {
+      return `\\${match}`;
+    }
+    return match;
+  });
+
+  // trailing ```s leading to an entire code block is...annoying
+  if (html.includes('```')) {
+    const lastCodeFence = html.lastIndexOf('```');
+    const preCodeFence = html.substring(0, lastCodeFence);
+    if (preCodeFence.split('```').length % 2 == 1) {
+      html = preCodeFence + '\\`\\`\\`' + html.substring(lastCodeFence + 3);
+    }
+  }
+  return html;
+};
 
 const renderer = unified()
   .use(remarkParse)
