@@ -26,7 +26,7 @@
         messagesUList.scrollHeight - messagesUList.offsetHeight - messagesUList.scrollTop <
           window.outerHeight / 4;
       tick().then(() => {
-        if (scroll) messagesUList.scroll(0, messagesUList.scrollHeight);
+        if (scroll) messagesUList?.scroll(0, messagesUList.scrollHeight);
       });
     }
   }
