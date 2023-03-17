@@ -68,19 +68,22 @@ const unScrewHtml = (html: string): string => {
     .replace(/^\s*$/gm, '\u200E')
     // make blockquotes only one line long
     .replace(/^>.*$/gm, '$&\n\n');
-  //
+
   // we have to reassign to get the updated string
   // ensure ``` s have a new line before and after them
-  html = html.replace(/```/gm, (_, offset) => {
+  html = html.replace(/(\S+)```(\S+ ?)?/gm, (_, p1, p2, offset) => {
+    p1 = p1 ?? '';
+    p2 = p2 ?? '';
+    offset = offset + p1.length;
     const codeFencesBefore = html.substring(0, offset).split('```').length - 1;
     const lastCodeFence = !html.substring(offset + 3).includes('```');
     if (codeFencesBefore % 2 == 1 && html[offset - 1] != '\n') {
-      return '\n```';
+      return `${p1}\n\`\`\`${p2 ? `\n${p2}` : ''}`;
     }
-    if (codeFencesBefore % 2 == 0 && !lastCodeFence && html[offset + 3] != '\n') {
-      return '```\n';
+    if (codeFencesBefore % 2 == 0 && !lastCodeFence && html[offset + p2.length + 3] != '\n') {
+      return `${p1 ? `${p1}\n` : ''}\`\`\`${p2}\n`;
     }
-    return '```';
+    return `\`\`\`${p2}`;
   });
 
   // number list supremacy
