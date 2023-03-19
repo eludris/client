@@ -71,12 +71,13 @@
   }
 
   :global(.md p) {
-    margin: 6px 0;
+    margin: 0;
     line-height: 20px;
   }
 
   :global(.md br) {
-    line-height: 0px;
+    display: block;
+    height: 0;
   }
 
   :global(.md pre, pre[class*='language-'][class*='language-']) {

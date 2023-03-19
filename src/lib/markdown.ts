@@ -1,7 +1,6 @@
 import { unified, type Plugin } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
-import remarkBreaks from 'remark-breaks';
 import remarkMath from 'remark-math';
 import remarkGFM from 'remark-gfm';
 import rehypeKatex from 'rehype-katex';
@@ -64,8 +63,6 @@ const unScrewHtml = (html: string): string => {
     .replace(/^([^\\]|)>[^>\s]/gm, '\\$&')
     // better code-block escaping
     .replace(/\\```/gm, '\\`\\`\\`')
-    // let the newlines live
-    .replace(/^\s*$/gm, '\u200E')
     // make blockquotes only one line long
     .replace(/^>.*$/gm, '$&\n\n');
 
@@ -87,10 +84,21 @@ const unScrewHtml = (html: string): string => {
   });
 
   // number list supremacy
-  html = html.replace(/^(\+|-|\*)/gm, (match, _, offset) => {
+  html = html.replace(/^(\+ |- |\* )/gm, (match, _, offset) => {
     if (html.substring(0, offset).split('```').length % 2 == 1) {
       return `\\${match}`;
     }
+    return match;
+  });
+
+
+  // As per the markdown spec, having one newline does not result in a line break. having two
+  // means that you get two seperate <p> elements. This makes adding newlines to your messages
+  // really wack as you have to escape them. To fix this we escape them all pre-parsing.
+  html = html.replace(/\n+/gm, (match, offset) => {
+    if (html.substring(0, offset).split('```').length % 2 == 1) {
+      return match[0] + match.substring(1).replace(/\n/g, '\\\n');
+    };
     return match;
   });
 
@@ -107,7 +115,6 @@ const unScrewHtml = (html: string): string => {
 
 const renderer = unified()
   .use(remarkParse)
-  .use(remarkBreaks)
   .use(remarkMath)
   .use(remarkTextifyHtml)
   .use(remarkKillImages)
