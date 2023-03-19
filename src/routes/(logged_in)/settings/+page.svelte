@@ -8,6 +8,7 @@
   let styles = $config.styles ?? '';
   let styleInput: HTMLTextAreaElement;
   let error = '';
+  let keys: string[] = [];
 
   const onNameInput = () => {
     if (name.length < 2 || name.length > 32) {
@@ -22,6 +23,21 @@
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key == 'Escape') goto('/');
+
+    if (e.key == 'Shift') {
+      return;
+    }
+
+    if (keys.length < 2 && e.key == 'g') {
+      keys.push('g');
+    } else if (keys[0] == 'g' && keys[1] == 'g' && e.key == 'V') {
+      keys.push('V');
+    } else if (keys[0] == 'g' && keys[1] == 'g' && keys[2] == 'V' && e.key == 'G') {
+      alert('ggVG is a sensible keybind');
+      keys = [];
+    } else {
+      keys = [];
+    }
   };
 
   const onStylesKeyDown = async (e: KeyboardEvent) => {
