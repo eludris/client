@@ -93,7 +93,10 @@ const unScrewHtml = (html: string): string => {
   // number list supremacy
   html = html.replace(/^(\+ |- |\* )/gm, (match, _, offset) => {
     let preList = html.substring(0, offset);
-    if (preList.split('```').length % 2 == 1 && preList.replace(/```/gm, '').split('`').length % 2 == 1) {
+    if (
+      preList.split('```').length % 2 == 1 &&
+      preList.replace(/```/gm, '').split('`').length % 2 == 1
+    ) {
       return `\\${match}`;
     }
     return match;
@@ -105,7 +108,10 @@ const unScrewHtml = (html: string): string => {
   html = html.replace(/[^\\]\n+/gm, (match, offset) => {
     const preNewline = html.substring(0, offset);
     if (preNewline.substring(preNewline.lastIndexOf('\n')).trim().startsWith('>')) return match;
-    if (preNewline.split('```').length % 2 == 1 && preNewline.replace(/```/gm, '').split('`').length % 2 == 1) {
+    if (
+      preNewline.split('```').length % 2 == 1 &&
+      preNewline.replace(/```/gm, '').split('`').length % 2 == 1
+    ) {
       return match.substring(0, 2) + match.substring(2).replace(/\n/g, '\\\n');
     }
     return match;
