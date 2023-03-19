@@ -46,7 +46,7 @@ const remarkKillImages: Plugin = () => {
     });
 };
 
-const remarkExternalAnchors: Plugin = () => {
+const rehypeExternalAnchors: Plugin = () => {
   return (tree) =>
     visit(tree, 'element', (node: { tagName: string; properties: { target: string } }) => {
       if (node.tagName == 'a') {
@@ -57,14 +57,21 @@ const remarkExternalAnchors: Plugin = () => {
 
 const unScrewHtml = (html: string): string => {
   html = html
+    .trim()
     // I've spent so much time trying to fix this, thanks to revolt I finally managed to get it working
     .replace(/^(<\/?[a-zA-Z0-9]+>)(.*$)/gm, '\u200E$&')
+    // "properly" render empty blockquotes
+    .replace(/^> +$/gm, '> \u200E')
     // force whitespace for blockquotes
-    .replace(/^([^\\]|)>[^>\s]/gm, '\\$&')
+    .replace(/^([^\\]|)>([^>\s]|$)/gm, '\\$&')
     // better code-block escaping
     .replace(/\\```/gm, '\\`\\`\\`')
+    // make empty block quote lines actually render
+    .replace(/\\```/gm, '\\`\\`\\`')
     // make blockquotes only one line long
-    .replace(/^>.*$/gm, '$&\n\n');
+    .replace(/^>.*$/gm, '$&\n\n')
+    // solve weird bug with whitespace getting magically removed sometimes
+    .replace(/`( +\S+ +)`/gm, '` $1 `');
 
   // we have to reassign to get the updated string
   // ensure ``` s have a new line before and after them
@@ -85,20 +92,22 @@ const unScrewHtml = (html: string): string => {
 
   // number list supremacy
   html = html.replace(/^(\+ |- |\* )/gm, (match, _, offset) => {
-    if (html.substring(0, offset).split('```').length % 2 == 1) {
+    let preList = html.substring(0, offset);
+    if (preList.split('```').length % 2 == 1 && preList.replace(/```/gm, '').split('`').length % 2 == 1) {
       return `\\${match}`;
     }
     return match;
   });
 
-
   // As per the markdown spec, having one newline does not result in a line break. having two
   // means that you get two seperate <p> elements. This makes adding newlines to your messages
   // really wack as you have to escape them. To fix this we escape them all pre-parsing.
-  html = html.replace(/\n+/gm, (match, offset) => {
-    if (html.substring(0, offset).split('```').length % 2 == 1) {
-      return match[0] + match.substring(1).replace(/\n/g, '\\\n');
-    };
+  html = html.replace(/[^\\]\n+/gm, (match, offset) => {
+    const preNewline = html.substring(0, offset);
+    if (preNewline.substring(preNewline.lastIndexOf('\n')).trim().startsWith('>')) return match;
+    if (preNewline.split('```').length % 2 == 1 && preNewline.replace(/```/gm, '').split('`').length % 2 == 1) {
+      return match.substring(0, 2) + match.substring(2).replace(/\n/g, '\\\n');
+    }
     return match;
   });
 
@@ -124,7 +133,7 @@ const renderer = unified()
   .use(remarkRehype)
   .use(rehypeStringify)
   .use(rehypeKatex, { trust: false, strict: false, output: 'html', throwOnError: false })
-  .use(remarkExternalAnchors)
+  .use(rehypeExternalAnchors)
   .use(rehypePrism);
 
 export default async (content: string): Promise<string> => {
