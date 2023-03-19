@@ -71,7 +71,7 @@ const unScrewHtml = (html: string): string => {
     // make blockquotes only one line long
     .replace(/^>.*$/gm, '$&\n\n')
     // solve weird bug with whitespace getting magically removed sometimes
-    .replace(/`( +\S+ +)`/gm, '` $1 `');
+    .replace(/`( +[^`\s]+? +)`/gm, '` $1 `');
 
   // we have to reassign to get the updated string
   // ensure ``` s have a new line before and after them
