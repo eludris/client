@@ -106,4 +106,48 @@
   :global(.md:has(.math)) {
     overflow-x: auto;
   }
+
+  :global(.md table) {
+    border-spacing: 0;
+  }
+
+  :global(.md td, .md th) {
+    border: 1px solid var(--gray-300);
+    padding: 10px;
+  }
+
+  :global(.md th) {
+    border-top-width: 2px;
+    background-color: var(--gray-200);
+  }
+
+  :global(.md th:first-of-type) {
+    border-top-left-radius: 5px;
+    border-left-width: 2px;
+  }
+
+  :global(.md th:last-of-type) {
+    border-top-right-radius: 5px;
+    border-right-width: 2px;
+  }
+
+  :global(.md tr:last-of-type td) {
+    border-bottom-width: 2px;
+  }
+
+  :global(.md tr td:first-of-type) {
+    border-left-width: 2px;
+  }
+
+  :global(.md tr td:last-of-type) {
+    border-right-width: 2px;
+  }
+
+  :global(.md tr:last-of-type td:first-of-type) {
+    border-bottom-left-radius: 5px;
+  }
+
+  :global(.md tr:last-of-type td:last-of-type) {
+    border-bottom-right-radius: 5px;
+  }
 </style>
