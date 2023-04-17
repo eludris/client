@@ -129,7 +129,6 @@ const unScrewHtml = (html: string): string => {
       html = preCodeFence + '\\`\\`\\`' + html.substring(lastCodeFence + 3);
     }
   }
-  console.log(html);
   return html;
 };
 
@@ -148,5 +147,5 @@ const renderer = unified()
   .use(rehypePrism);
 
 export default async (content: string): Promise<string> => {
-  return await renderer.process(unScrewHtml(content)).then((res) => res.toString());
+  return await renderer.process(unScrewHtml(content)).then((res) => res.toString()).then((res) => res.replace(/\|\|(.+?)\|\|/gm, '<span class="spoiler" onclick="this.style.color = \'var(--color-text)\';this.style.cursor = \'unset\'">$1</span>'));
 };

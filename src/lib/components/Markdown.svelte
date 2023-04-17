@@ -154,4 +154,11 @@
   :global(.md ul) {
     padding: 0 20px;
   }
+
+  :global(.md .spoiler) {
+    background-color: var(--purple-100);
+    color: transparent;
+    cursor: pointer;
+    padding: 2px;
+  }
 </style>
