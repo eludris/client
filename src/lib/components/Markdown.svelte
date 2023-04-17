@@ -150,4 +150,8 @@
   :global(.md tr:last-of-type td:last-of-type) {
     border-bottom-right-radius: 5px;
   }
+
+  :global(.md ul) {
+    padding: 0 20px;
+  }
 </style>

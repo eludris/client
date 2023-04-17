@@ -91,7 +91,7 @@ const unScrewHtml = (html: string): string => {
   });
 
   // number list supremacy
-  html = html.replace(/^(\+ |- |\* )/gm, (match, _, offset) => {
+  html = html.replace(/^(\+ |\* )/gm, (match, _, offset) => {
     let preList = html.substring(0, offset);
     if (
       preList.split('```').length % 2 == 1 &&
@@ -107,7 +107,8 @@ const unScrewHtml = (html: string): string => {
   // really wack as you have to escape them. To fix this we escape them all pre-parsing.
   html = html.replace(/[^\\]\n+/gm, (match, offset) => {
     const preNewline = html.substring(0, offset);
-    if (preNewline.substring(preNewline.lastIndexOf('\n')).trim().startsWith('>')) return match;
+    const currentLine = preNewline.substring(preNewline.lastIndexOf('\n')).trim();
+    if (/^(?:>|#|- |\d+\. )/.test(currentLine)) return match;
     if (
       preNewline.split('```').length % 2 == 1 &&
       preNewline.replace(/```/gm, '').split('`').length % 2 == 1
@@ -117,6 +118,9 @@ const unScrewHtml = (html: string): string => {
     return match;
   });
 
+  // add trailing line after lists to make them not merge
+  html = html.replace(/^((?:\d+ |- ).+)(\n[^- ]|$)/g, '$1\n$2');
+
   // trailing ```s leading to an entire code block is...annoying
   if (html.includes('```')) {
     const lastCodeFence = html.lastIndexOf('```');
@@ -125,6 +129,7 @@ const unScrewHtml = (html: string): string => {
       html = preCodeFence + '\\`\\`\\`' + html.substring(lastCodeFence + 3);
     }
   }
+  console.log(html);
   return html;
 };
 
