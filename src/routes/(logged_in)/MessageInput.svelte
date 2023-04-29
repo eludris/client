@@ -39,7 +39,8 @@
       e.key == 'Enter' &&
       !mobile &&
       !e.shiftKey &&
-      value.substring(0, input.selectionStart).split('```').length % 2 == 1
+      value.substring(0, input.selectionStart).split('```').length % 2 == 1 &&
+      value.trim().length > 0
     ) {
       dispatch('submit');
       e.preventDefault();

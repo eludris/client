@@ -26,6 +26,7 @@
   };
 
   const onUsernameInput = () => {
+    value = value.trim();
     if (value.length < 2 || value.length > 32) {
       error = 'Your username must be between 2 and 32 characters in length';
     } else {
