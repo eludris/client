@@ -47,16 +47,20 @@ const connect = async (userData: UserData, reconnect = false) => {
     return userData;
   });
 
-  ws = new WebSocket(info.pandemonium_url);
+  const innerWs = new WebSocket(info.pandemonium_url);
 
-  ws.addEventListener('open', () => {
-    pingInterval = setInterval(() => ws?.send(JSON.stringify({ op: PayloadOP.PING })), 45_000);
+  innerWs.addEventListener('open', () => {
     messages.set(oldMessages ?? []);
 
-    ws?.addEventListener('message', (msg: MessageEvent) => {
+    innerWs?.addEventListener('message', (msg: MessageEvent) => {
       const payload: IncomingPayload = JSON.parse(msg.data);
 
-      if (payload.op == PayloadOP.MESSAGE_CREATE)
+      if (payload.op == PayloadOP.HELLO) {
+        messages.set([]);
+        ws = innerWs;
+        pingInterval = setInterval(() => ws?.send(JSON.stringify({ op: PayloadOP.PING })), payload.d.heartbeat_interval);
+      }
+      else if (payload.op == PayloadOP.MESSAGE_CREATE)
         markdown(payload.d.content).then((content) => {
           const message = {
             renderedContent: content,
@@ -92,13 +96,13 @@ const connect = async (userData: UserData, reconnect = false) => {
         });
     });
 
-    ws?.addEventListener('close', () => {
+    innerWs?.addEventListener('close', () => {
       console.warn('WebSocket connection closed, reconnecting');
       retryConnect();
     });
   });
 
-  ws.addEventListener('error', () => {
+  innerWs.addEventListener('error', () => {
     console.error('Encountered an error while connecting to WebSocket');
     retryConnect();
   });
