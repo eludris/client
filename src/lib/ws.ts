@@ -58,7 +58,10 @@ const connect = async (userData: UserData, reconnect = false) => {
       if (payload.op == PayloadOP.HELLO) {
         messages.set([]);
         ws = innerWs;
-        pingInterval = setInterval(() => ws?.send(JSON.stringify({ op: PayloadOP.PING })), payload.d.heartbeat_interval);
+        setTimeout(
+          () => pingInterval = setInterval(() => ws?.send(JSON.stringify({ op: PayloadOP.PING })), payload.d.heartbeat_interval),
+          payload.d.heartbeat_interval * Math.random()
+        );
       }
       else if (payload.op == PayloadOP.MESSAGE_CREATE)
         markdown(payload.d.content).then((content) => {
