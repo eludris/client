@@ -59,7 +59,10 @@ const connect = async (userData: UserData, reconnect = false) => {
         messages.set([]);
         ws = innerWs;
         setTimeout(
-          () => pingInterval = setInterval(() => ws?.send(JSON.stringify({ op: PayloadOP.PING })), payload.d.heartbeat_interval),
+          () => {
+            ws?.send(JSON.stringify({ op: PayloadOP.PING }));
+            pingInterval = setInterval(() => ws?.send(JSON.stringify({ op: PayloadOP.PING })), payload.d.heartbeat_interval);
+          },
           payload.d.heartbeat_interval * Math.random()
         );
       }
