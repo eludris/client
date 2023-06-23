@@ -2,8 +2,12 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import userData from '$lib/user_data';
+  import type { InstanceInfo } from '$lib/types/instance';
+  import type { User } from '$lib/types/user';
+  import type { SessionCreated } from '$lib/types/session';
 
   let value = '';
+  let password = '';
   let instanceURL = '';
   let error = '';
 
@@ -11,40 +15,61 @@
     if ($userData) goto('/');
   });
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
     if (!error && value) {
-      const url: string = instanceURL.startsWith('http') ? instanceURL : 'https://' + instanceURL; // I could one line this but I like my codebases sane
-      userData.set({
-        name: value,
-        instanceURL: instanceURL ? url : 'https://eludris.tooty.xyz'
-      });
-      goto('/');
       if ('Notification' in window && Notification.permission == 'default') {
         Notification.requestPermission();
       }
+      const url: string = instanceURL.startsWith('http') ? instanceURL : 'https://' + instanceURL; // I could one line this but I like my codebases sane
+      instanceURL = instanceURL ? url : 'https://eludris.tooty.xyz';
+      error = 'Loading...';
+      let instanceInfo: InstanceInfo = await fetch(`${instanceURL}`).then((r) => r.json());
+      let session: SessionCreated = await fetch(`${instanceURL}/sessions`, {
+        method: 'POST',
+        body: JSON.stringify({ identifier: value, password, platform: 'linox', client: 'pengin' })
+      }).then((r) => r.json());
+      let headers = new Headers();
+      headers.set('Authorization', session.token);
+      let user: User = await fetch(`${instanceURL}/users/@me`, {
+        headers
+      }).then((r) => r.json());
+      userData.set({
+        user,
+        session,
+        instanceInfo
+      });
+      goto('/');
     }
   };
 
   const onUsernameInput = () => {
-    value = value.trim();
-    if (value.length < 2 || value.length > 32) {
-      error = 'Your username must be between 2 and 32 characters in length';
-    } else {
-      error = '';
-    }
+    validateInputs();
+  };
+
+  const onPasswordInput = () => {
+    validateInputs();
   };
 
   const onURLInput = () => {
-    if (!instanceURL) {
+    validateInputs();
+  };
+
+  const validateInputs = () => {
+    value = value.trim();
+    if (value.length < 2 || value.length > 32) {
+      error = 'Your username must be between 2 and 32 characters in length';
+    } else if (password.length < 8) {
+      error = 'Your password must be at least 8 characters long';
+    } else if (instanceURL) {
+      const url: string = instanceURL.startsWith('http') ? instanceURL : 'https://' + instanceURL;
+      try {
+        new URL(url);
+        error = '';
+      } catch {
+        error = 'Invalid instance url';
+      }
+    } else {
       error = '';
-      return;
-    }
-    const url: string = instanceURL.startsWith('http') ? instanceURL : 'https://' + instanceURL;
-    try {
-      new URL(url);
-      error = '';
-    } catch {
-      error = 'Invalid instance url';
     }
   };
 </script>
@@ -52,8 +77,16 @@
 <div id="login-div">
   <form id="login-form" on:submit|preventDefault={onSubmit}>
     <h1>Log in to Eludris</h1>
-    <label for="username">Username</label>
-    <input bind:value on:input={onUsernameInput} name="username" placeholder="Username" />
+    <label for="username">Username / Email</label>
+    <input bind:value on:input={onUsernameInput} name="username" placeholder="Username / Email" />
+    <label for="password">Password</label>
+    <input
+      bind:value={password}
+      on:input={onPasswordInput}
+      name="password"
+      placeholder="Password"
+      type="password"
+    />
     <label for="instanceUrl">Instance URL</label>
     <input
       bind:value={instanceURL}
