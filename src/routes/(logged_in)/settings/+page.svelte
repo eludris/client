@@ -4,22 +4,9 @@
   import config from '$lib/user_config';
   import { tick } from 'svelte';
 
-  let name = $userData?.name ?? '';
   let styles = $config.styles ?? '';
   let styleInput: HTMLTextAreaElement;
-  let error = '';
   let keys: string[] = [];
-
-  const onNameInput = () => {
-    if (name.length < 2 || name.length > 32) {
-      error = 'Your username must be between 2 and 32 characters in length';
-    } else {
-      if ($userData) {
-        $userData.name = name;
-      }
-      error = '';
-    }
-  };
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key == 'Escape') goto('/');
@@ -67,13 +54,6 @@
   <a id="back-link" href="/">Back</a>
   <div id="settings-div">
     {#if $userData}
-      <span>
-        <label for="username">Username</label>
-        <input name="username" bind:value={name} on:keyup={onNameInput} />
-      </span>
-      {#if error}
-        <span class="error">{error}</span>
-      {/if}
       <span class="has-textarea">
         <label for="styles">Custom Styles</label>
         <textarea
@@ -269,12 +249,6 @@
     cursor: pointer;
   }
 
-  .error {
-    color: var(--pink-700);
-    margin-left: calc(30% + 20px);
-    align-self: flex-start;
-  }
-
   footer {
     display: flex;
     align-items: center;
@@ -309,11 +283,6 @@
     }
 
     footer {
-      text-align: center;
-    }
-
-    .error {
-      margin: 10px;
       text-align: center;
     }
   }
