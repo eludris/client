@@ -6,6 +6,7 @@
   import Markdown from '$lib/components/Markdown.svelte';
   import MessageContext from './MessageContext.svelte';
   import { tick } from 'svelte';
+  import userData from '$lib/user_data';
   import type { PenginMessage } from '$lib/types/ui/message';
 
   export let message: PenginMessage;
@@ -47,17 +48,34 @@
   class:mentioned={message.mentioned}
   on:contextmenu|preventDefault={onContextMenu}
 >
-  {#if message.showAuthor}
-    <div class="author">{message.author}</div>
-  {/if}
-  <div class="content"><Markdown content={message.renderedContent} preRendered /></div>
-  {#if showContext}
-    <MessageContext bind:contextDiv {message} on:close={closeContextMenu} on:reply />
-  {/if}
+  <div class="avatar-container">
+    {#if message.showAuthor}
+      <img
+        src={message.author.avatar
+          ? `${$userData?.instanceInfo.effis_url}/avatars/${message.author.avatar}`
+          : 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true'}
+        alt=""
+        class="author-avatar"
+      />
+    {/if}
+  </div>
+  <div class="message-body">
+    {#if message.showAuthor}
+      <span class="author-name">
+        {message.author.display_name ?? message.author.username}
+      </span>
+    {/if}
+    <div class="content"><Markdown content={message.renderedContent} preRendered /></div>
+    {#if showContext}
+      <MessageContext bind:contextDiv {message} on:close={closeContextMenu} on:reply />
+    {/if}
+  </div>
 </div>
 
 <style>
   .message {
+    display: flex;
+    gap: 10px;
     padding: 5px;
     background-color: var(--colour-bg);
     transition: background-color ease-in-out 75ms;
@@ -67,13 +85,27 @@
     background-color: var(--purple-100);
   }
 
-  .content {
-    margin: 0;
-    margin-left: 20px;
+  .avatar-container {
+    width: 40px;
   }
 
-  .author {
-    margin: 10px 0;
+  .author-avatar {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 100%;
+  }
+
+  .message-body {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .content {
+    margin-top: auto;
+  }
+
+  .author-name {
     white-space: pre;
     font-weight: bold;
   }

@@ -48,10 +48,13 @@
 
   const onSubmit = async () => {
     if (value.trim()) {
+      let headers = new Headers();
+      headers.set('Authorization', $userData!.session.token);
       if (value.startsWith('/shrug')) value = value.substring(7) + ' ¯\\\\\\_(ツ)_/¯';
-      fetch($userData?.instanceURL + '/messages', {
+      fetch($userData!.instanceInfo.oprish_url + '/messages', {
         method: 'POST',
-        body: JSON.stringify({ author: $userData?.name, content: value }) // data?.name is fine here
+        body: JSON.stringify({ content: value }),
+        headers
       }).then(() => messagesUList.scroll(0, messagesUList.scrollHeight));
     }
     value = '';
