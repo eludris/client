@@ -2,43 +2,57 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import userData from '$lib/user_data';
+  import { request, type RequestErr } from '$lib/request';
   import type { InstanceInfo } from '$lib/types/instance';
   import type { User } from '$lib/types/user';
   import type { SessionCreated } from '$lib/types/session';
 
-  let value = '';
+  let username = '';
   let password = '';
   let instanceURL = '';
   let error = '';
+  let requesting = false;
 
   onMount(() => {
     if ($userData) goto('/');
   });
 
   const onSubmit = async () => {
-    if (!error && value) {
+    if (!error && username) {
       if ('Notification' in window && Notification.permission == 'default') {
         Notification.requestPermission();
       }
       const url: string = instanceURL.startsWith('http') ? instanceURL : 'https://' + instanceURL; // I could one line this but I like my codebases sane
       instanceURL = instanceURL ? url : 'https://eludris.tooty.xyz';
       error = 'Loading...';
-      let instanceInfo: InstanceInfo = await fetch(`${instanceURL}`).then((r) => r.json());
-      let session: SessionCreated = await fetch(`${instanceURL}/sessions`, {
-        method: 'POST',
-        body: JSON.stringify({ identifier: value, password, platform: 'linox', client: 'pengin' })
-      }).then((r) => r.json());
-      let headers = new Headers();
-      headers.set('Authorization', session.token);
-      let user: User = await fetch(`${instanceURL}/users/@me`, {
-        headers
-      }).then((r) => r.json());
-      userData.set({
-        user,
-        session,
-        instanceInfo
-      });
-      goto('/');
+      requesting = true;
+      try {
+        let instanceInfo: InstanceInfo = await request('GET', '', null, { apiUrl: url });
+        let session: SessionCreated = await request(
+          'POST',
+          'sessions',
+          { identifier: username, password, platform: 'linox', client: 'pengin' },
+          { apiUrl: url }
+        );
+        let user: User = await request('GET', 'users/@me', null, {
+          apiUrl: url,
+          token: session.token
+        });
+        userData.set({
+          user,
+          session,
+          instanceInfo
+        });
+        goto('/');
+      } catch (e) {
+        let err = e as RequestErr;
+        if (err.code == 404 || err.code == 401) {
+          error = 'Incorrect username or password';
+        } else {
+          error = err.message;
+        }
+        requesting = false;
+      }
     }
   };
 
@@ -55,10 +69,11 @@
   };
 
   const validateInputs = () => {
-    value = value.trim();
-    if (value.length < 2 || value.length > 32) {
-      error = 'Your username must be between 2 and 32 characters in length';
-    } else if (password.length < 8) {
+    if (requesting) {
+      return;
+    }
+    username = username.trim();
+    if (password.length < 8) {
       error = 'Your password must be at least 8 characters long';
     } else if (instanceURL) {
       const url: string = instanceURL.startsWith('http') ? instanceURL : 'https://' + instanceURL;
@@ -78,7 +93,12 @@
   <form id="login-form" on:submit|preventDefault={onSubmit}>
     <h1>Log in to Eludris</h1>
     <label for="username">Username / Email</label>
-    <input bind:value on:input={onUsernameInput} name="username" placeholder="Username / Email" />
+    <input
+      bind:value={username}
+      on:input={onUsernameInput}
+      name="username"
+      placeholder="Username / Email"
+    />
     <label for="password">Password</label>
     <input
       bind:value={password}
@@ -98,6 +118,7 @@
       <span class="error">{error}</span>
     {/if}
     <button type="submit" disabled={!!error}>Log in</button>
+    <a id="signup-prompt" href="/signup">Don't have an account? Sign up!</a>
   </form>
 </div>
 
@@ -122,7 +143,7 @@
   }
 
   #login-form > h1 {
-    font-size: 42px;
+    font-size: 34px;
   }
 
   #login-form > label {
@@ -133,7 +154,7 @@
   #login-form > input {
     margin: 20px;
     margin-top: 0;
-    width: 100%;
+    width: 90%;
     font-size: 18px;
     padding: 5px 10px;
     outline: none;
@@ -145,7 +166,6 @@
 
   #login-form > button {
     margin: 20px;
-    margin-bottom: 10px;
     font-size: 20px;
     padding: 13px 20px;
     outline: none;
@@ -173,6 +193,10 @@
   .error {
     color: var(--pink-700);
     text-align: center;
+  }
+
+  #signup-prompt {
+    font-weight: 300;
   }
 
   @media only screen and (max-width: 1200px) {
