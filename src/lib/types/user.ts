@@ -1,14 +1,14 @@
 export enum StatusType {
-  ONLINE = "ONLINE",
-  OFFLINE = "OFFLINE",
-  IDLE = "IDLE",
-  BUSY = "BUSY",
-};
+  ONLINE = 'ONLINE',
+  OFFLINE = 'OFFLINE',
+  IDLE = 'IDLE',
+  BUSY = 'BUSY'
+}
 
 export interface Status {
   type: StatusType;
   text?: string;
-};
+}
 
 export interface User {
   id: number;
@@ -23,4 +23,4 @@ export interface User {
   permissions: number;
   email?: string;
   verified?: boolean;
-};
+}

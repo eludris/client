@@ -4,9 +4,9 @@ export interface Session {
   platform: string;
   client: string;
   ip: string;
-};
+}
 
 export interface SessionCreated {
   token: string;
   session: Session;
-};
+}

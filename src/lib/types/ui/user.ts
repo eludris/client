@@ -6,4 +6,4 @@ export interface UserData {
   user: User;
   session: SessionCreated;
   instanceInfo: InstanceInfo;
-};
+}

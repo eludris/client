@@ -147,5 +147,13 @@ const renderer = unified()
   .use(rehypePrism);
 
 export default async (content: string): Promise<string> => {
-  return await renderer.process(unScrewHtml(content)).then((res) => res.toString()).then((res) => res.replace(/\|\|(.+?)\|\|/gm, '<span class="spoiler" onclick="this.style.color = \'var(--color-text)\';this.style.cursor = \'unset\'">$1</span>'));
+  return await renderer
+    .process(unScrewHtml(content))
+    .then((res) => res.toString())
+    .then((res) =>
+      res.replace(
+        /\|\|(.+?)\|\|/gm,
+        '<span class="spoiler" onclick="this.style.color = \'var(--color-text)\';this.style.cursor = \'unset\'">$1</span>'
+      )
+    );
 };

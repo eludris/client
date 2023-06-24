@@ -11,7 +11,7 @@ export enum PayloadOP {
   AUTHENTICATED = 'AUTHENTICATED',
   USER_UPDATE = 'USER_UPDATE',
   PRESENCE_UPDATE = 'PRESENCE_UPDATE',
-  MESSAGE_CREATE = 'MESSAGE_CREATE',
+  MESSAGE_CREATE = 'MESSAGE_CREATE'
 }
 
 export interface PingPayload {
@@ -19,7 +19,7 @@ export interface PingPayload {
 }
 
 export interface AuthenticatePayload {
-  op: PayloadOP.AUTHENTICATE,
+  op: PayloadOP.AUTHENTICATE;
 }
 
 export interface PongPayload {
@@ -30,7 +30,7 @@ export interface RateLimitPayload {
   op: PayloadOP.RATE_LIMIT;
   d: {
     wait: number;
-  }
+  };
 }
 
 export interface HelloPayload {
@@ -41,7 +41,7 @@ export interface HelloPayload {
     rate_limit: {
       reset_after: number;
       limit: number;
-    }
+    };
   };
 }
 
@@ -50,7 +50,7 @@ export interface AuthenticatedPayload {
   d: {
     user: User;
     users: User[];
-  }
+  };
 }
 
 export interface UserUpdatePayload {
@@ -71,5 +71,12 @@ export interface MessageCreatePayload {
   d: Message;
 }
 
-export type IncomingPayload = PongPayload | HelloPayload | RateLimitPayload | AuthenticatedPayload | UserUpdatePayload | PresenceUpdatePayload | MessageCreatePayload;
+export type IncomingPayload =
+  | PongPayload
+  | HelloPayload
+  | RateLimitPayload
+  | AuthenticatedPayload
+  | UserUpdatePayload
+  | PresenceUpdatePayload
+  | MessageCreatePayload;
 export type OutgoingPayload = PingPayload | AuthenticatePayload;

@@ -35,18 +35,17 @@ const connect = async (userData: UserData) => {
   const innerWs = new WebSocket(userData.instanceInfo.pandemonium_url);
 
   innerWs.addEventListener('open', () => {
-
     innerWs?.addEventListener('message', (msg: MessageEvent) => {
       const payload: IncomingPayload = JSON.parse(msg.data);
 
       if (payload.op == PayloadOP.HELLO) {
-        setTimeout(
-          () => {
-            ws?.send(JSON.stringify({ op: PayloadOP.PING }));
-            pingInterval = setInterval(() => ws?.send(JSON.stringify({ op: PayloadOP.PING })), payload.d.heartbeat_interval);
-          },
-          payload.d.heartbeat_interval * Math.random()
-        );
+        setTimeout(() => {
+          ws?.send(JSON.stringify({ op: PayloadOP.PING }));
+          pingInterval = setInterval(
+            () => ws?.send(JSON.stringify({ op: PayloadOP.PING })),
+            payload.d.heartbeat_interval
+          );
+        }, payload.d.heartbeat_interval * Math.random());
         ws = innerWs;
         ws?.send(JSON.stringify({ op: PayloadOP.AUTHENTICATE, d: userData.session.token }));
       } else if (payload.op == PayloadOP.AUTHENTICATED) {
