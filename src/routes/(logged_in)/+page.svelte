@@ -9,6 +9,7 @@
   import MessageComponent from './Message.svelte';
   import Markdown from '$lib/components/Markdown.svelte';
   import type { PenginMessage } from '$lib/types/ui/message';
+  import { request } from '$lib/request';
 
   let messagesUList: HTMLUListElement;
   let value = '';
@@ -51,11 +52,9 @@
       let headers = new Headers();
       headers.set('Authorization', $userData!.session.token);
       if (value.startsWith('/shrug')) value = value.substring(7) + ' ¯\\\\\\_(ツ)_/¯';
-      fetch($userData!.instanceInfo.oprish_url + '/messages', {
-        method: 'POST',
-        body: JSON.stringify({ content: value }),
-        headers
-      }).then(() => messagesUList.scroll(0, messagesUList.scrollHeight));
+      request('POST', 'messages', { content: value }).then((_) =>
+        messagesUList.scroll(0, messagesUList.scrollHeight)
+      );
     }
     value = '';
     await tick();
