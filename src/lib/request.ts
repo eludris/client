@@ -51,7 +51,7 @@ export const request = async (
       } else if (err.type == 'RATE_LIMITED') {
         msg = `Rate limited, try again after ${err.retry_after * 1000}s`;
       } else if (err.type == 'SERVER') {
-        msg = `${err.satatus}: ${err.info}`;
+        msg = `${err.status}: ${err.info}`;
       }
       return [msg ?? `${err.status}: ${err.message}`, err];
     })
