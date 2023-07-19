@@ -23,7 +23,7 @@
         Notification.requestPermission();
       }
       const url: string = instanceURL.startsWith('http') ? instanceURL : 'https://' + instanceURL; // I could one line this but I like my codebases sane
-      instanceURL = instanceURL ? url : 'https://eludris.tooty.xyz';
+      instanceURL = instanceURL ? url : 'https://eludris.tooty.xyz/next/';
       error = 'Loading...';
       requesting = true;
       try {
