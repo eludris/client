@@ -69,8 +69,8 @@ const connect = async (userData: UserData) => {
             if (notification_opt >= 3 || message.mentioned)
               notification = new Notification(
                 message.mentioned
-                  ? `New mention from ${message.author}`
-                  : `New message from ${message.author}`,
+                  ? `New mention from ${message.author.display_name ?? message.author.username}`
+                  : `New message from ${message.author.display_name ?? message.author.username}`,
                 {
                   body: message.content,
                   icon: '/das_ding.png',
