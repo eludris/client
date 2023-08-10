@@ -56,7 +56,7 @@ const connect = async (userData: UserData) => {
           const message = {
             renderedContent: content,
             showAuthor: payload.d.author.id != lastAuthor,
-            mentioned: content.toLowerCase().split(`<@${userData.user.id}>`).length > 1,
+            mentioned: payload.d.content.toLowerCase().split(`<@${userData.user.id}>`).length > 1,
             ...payload.d
           };
           if (
