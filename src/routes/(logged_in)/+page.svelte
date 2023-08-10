@@ -10,6 +10,7 @@
   import Markdown from '$lib/components/Markdown.svelte';
   import type { PenginMessage } from '$lib/types/ui/message';
   import { request } from '$lib/request';
+  import type { User } from '$lib/types/user';
 
   let messagesUList: HTMLUListElement;
   let value = '';
@@ -68,11 +69,24 @@
     const reply = `${value.trim() ? '\n' : ''}${e.detail.content
       .split('\n')
       .map((l) => `> ${l}`)
-      .join('\n')}\n@${e.detail.author}\n\n`;
+      .join('\n')}\n<@${e.detail.author.id}>\n\n`;
     value = value.substring(0, start) + reply + value.substring(end);
     await tick();
 
     input.selectionStart = input.selectionEnd = start + reply.length;
+
+    input.focus();
+  };
+
+  const onMention = async (e: CustomEvent<User>) => {
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+
+    const mention = `<@${e.detail.id}>`;
+    value = value.substring(0, start) + mention + value.substring(end);
+    await tick();
+
+    input.selectionStart = input.selectionEnd = start + mention.length;
 
     input.focus();
   };
@@ -97,7 +111,7 @@
   <ul bind:this={messagesUList} id="messages">
     {#if $messages}
       {#each $messages as message, i (i)}
-        <MessageComponent {message} on:reply={onReply} />
+        <MessageComponent {message} on:reply={onReply} on:mention={onMention} />
       {/each}
     {/if}
   </ul>

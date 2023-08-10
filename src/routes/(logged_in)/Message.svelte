@@ -1,45 +1,73 @@
-<script lang="ts" context="module">
-  let hideOtherContext: () => void;
-</script>
-
 <script lang="ts">
   import Markdown from '$lib/components/Markdown.svelte';
   import MessageContext from './MessageContext.svelte';
   import { tick } from 'svelte';
   import userData from '$lib/user_data';
+  import activeContext from '$lib/context';
   import type { PenginMessage } from '$lib/types/ui/message';
+  import UserContext from './UserContext.svelte';
+  import type { Unsubscriber } from 'svelte/store';
 
   export let message: PenginMessage;
+  let currentContext: number;
   let showContext = false;
+  let showAuthorContext = false;
   let contextDiv: HTMLDivElement;
+  let authorContextDiv: HTMLDivElement;
 
   const onContextMenu = async (e: MouseEvent) => {
-    if (hideOtherContext) {
-      hideOtherContext();
-    }
-    hideOtherContext = () => {
-      showContext = false;
-    };
+    $activeContext = $activeContext + 1;
+    currentContext = $activeContext;
+    let unsubscribe: Unsubscriber;
+    unsubscribe = activeContext.subscribe((id) => {
+      if (id != currentContext) {
+        showContext = false;
+        unsubscribe();
+      }
+    });
     showContext = true;
     await tick();
-    if (contextDiv.clientHeight + e.clientY < window.innerHeight) {
-      contextDiv.style.top = `${e.clientY}px`;
-      contextDiv.style.bottom = `auto`;
-    } else {
-      contextDiv.style.bottom = `${window.innerHeight - e.clientY}px`;
-      contextDiv.style.top = `auto`;
-    }
-    if (contextDiv.clientWidth + e.clientX < window.innerWidth) {
-      contextDiv.style.left = `${e.clientX}px`;
-      contextDiv.style.right = `auto`;
-    } else {
-      contextDiv.style.right = `${window.innerWidth - e.clientX}px`;
-      contextDiv.style.left = `auto`;
-    }
+    positionContextDiv(e, contextDiv);
   };
 
   const closeContextMenu = () => {
     showContext = false;
+  };
+
+  const onAuthorContextMenu = async (e: MouseEvent) => {
+    $activeContext = $activeContext + 1;
+    currentContext = $activeContext;
+    let unsubscribe: Unsubscriber;
+    unsubscribe = activeContext.subscribe((id) => {
+      if (id != currentContext) {
+        showAuthorContext = false;
+        unsubscribe();
+      }
+    });
+    showAuthorContext = true;
+    await tick();
+    positionContextDiv(e, authorContextDiv);
+  };
+
+  const closeAuthorContextMenu = () => {
+    showAuthorContext = false;
+  };
+
+  const positionContextDiv = (e: MouseEvent, div: HTMLDivElement) => {
+    if (div.clientHeight + e.clientY < window.innerHeight) {
+      div.style.top = `${e.clientY}px`;
+      div.style.bottom = `auto`;
+    } else {
+      div.style.bottom = `${window.innerHeight - e.clientY}px`;
+      div.style.top = `auto`;
+    }
+    if (div.clientWidth + e.clientX < window.innerWidth) {
+      div.style.left = `${e.clientX}px`;
+      div.style.right = `auto`;
+    } else {
+      div.style.right = `${window.innerWidth - e.clientX}px`;
+      div.style.left = `auto`;
+    }
   };
 </script>
 
@@ -51,6 +79,7 @@
   <div class="avatar-container">
     {#if message.showAuthor}
       <img
+        on:contextmenu|preventDefault|stopPropagation={onAuthorContextMenu}
         src={message.author.avatar
           ? `${$userData?.instanceInfo.effis_url}/avatars/${message.author.avatar}`
           : 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true'}
@@ -61,13 +90,21 @@
   </div>
   <div class="message-body">
     {#if message.showAuthor}
-      <span class="author-name">
+      <span on:contextmenu|preventDefault|stopPropagation={onAuthorContextMenu} class="author-name">
         {message.author.display_name ?? message.author.username}
       </span>
     {/if}
     <div class="content"><Markdown content={message.renderedContent} preRendered /></div>
     {#if showContext}
       <MessageContext bind:contextDiv {message} on:close={closeContextMenu} on:reply />
+    {/if}
+    {#if showAuthorContext}
+      <UserContext
+        bind:contextDiv={authorContextDiv}
+        user={message.author}
+        on:close={closeAuthorContextMenu}
+        on:mention
+      />
     {/if}
   </div>
 </div>
@@ -108,6 +145,10 @@
   .author-name {
     white-space: pre;
     font-weight: bold;
+  }
+
+  .author-name:hover {
+    text-decoration: underline;
   }
 
   .mentioned {
