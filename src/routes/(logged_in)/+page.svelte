@@ -122,7 +122,9 @@
     </div>
     <ul id="users">
       {#each Object.values($state.users) as user (user.id)}
-        <span>{user.username}</span>
+        <li>
+          <span>{user.username}</span>
+        </li>
       {/each}
     </ul>
   </div>
