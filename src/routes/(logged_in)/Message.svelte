@@ -90,7 +90,12 @@
   </div>
   <div class="message-body">
     {#if message.showAuthor}
-      <span on:contextmenu|preventDefault|stopPropagation={onAuthorContextMenu} class="author-name">
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <span
+        on:contextmenu|preventDefault|stopPropagation={onAuthorContextMenu}
+        on:click|preventDefault|stopPropagation={onAuthorContextMenu}
+        class="author-name"
+      >
         {message.author.display_name ?? message.author.username}
       </span>
     {/if}
