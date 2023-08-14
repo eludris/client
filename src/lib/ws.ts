@@ -6,6 +6,7 @@ import { PayloadOP, type IncomingPayload } from '$lib/types/event';
 import markdown from '$lib/markdown';
 import type { UserData } from './types/ui/user';
 import type { State } from './types/ui/state';
+import { request } from './request';
 
 const state = writable<State>({ connected: false, messages: [], users: [] });
 
@@ -66,10 +67,20 @@ const connect = async (userData: UserData) => {
           return state;
         });
       } else if (payload.op == PayloadOP.PRESENCE_UPDATE) {
-        state.update((state) => {
-          state.connected = true;
-          state.users[payload.d.user_id].status = payload.d.status;
-          return state;
+        state.update((s) => {
+          s.connected = true;
+          if (!s.users[payload.d.user_id]) {
+            request('GET', `/users/${payload.d.user_id}`).then((r) => r.json()).then((u) => {
+              state.update((state) => {
+                state.users[payload.d.user_id] = u;
+                return state;
+              })
+            });
+          }
+          else {
+            s.users[payload.d.user_id].status = payload.d.status;
+          }
+          return s;
         });
       } else if (payload.op == PayloadOP.MESSAGE_CREATE)
         markdown(payload.d.content).then((content) => {

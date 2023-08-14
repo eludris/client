@@ -151,6 +151,7 @@
   .author-name {
     white-space: pre;
     font-weight: bold;
+    width: fit-content;
   }
 
   .author-name:hover {

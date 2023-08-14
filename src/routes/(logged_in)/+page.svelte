@@ -79,7 +79,7 @@
     }
     request('POST', 'messages', {
       content: fileDatas
-        .map((d) => `![${d.name}](${$userData?.instanceInfo.effis_url}/${d.id})`)
+        .map((d) => `![${d.name}](${$userData?.instanceInfo.effis_url}${d.id})`)
         .join('\n')
     }).then((_) => messagesUList.scroll(0, messagesUList.scrollHeight));
     await tick();
