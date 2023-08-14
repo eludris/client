@@ -70,7 +70,7 @@ const connect = async (userData: UserData) => {
         state.update((s) => {
           s.connected = true;
           if (!s.users[payload.d.user_id]) {
-            request('GET', `/users/${payload.d.user_id}`).then((r) => r.json()).then((u) => {
+            request('GET', `/users/${payload.d.user_id}`).then((u) => {
               state.update((state) => {
                 state.users[payload.d.user_id] = u;
                 return state;
