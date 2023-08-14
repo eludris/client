@@ -64,6 +64,18 @@
       input.focus();
     }
   };
+
+  const onPaste = (e: ClipboardEvent) => {
+    if (e.clipboardData?.items.length) {
+      for (let i = 0; i < e.clipboardData.items.length; i++) {
+        if (e.clipboardData.items[i].kind == 'file') {
+          dispatch('submitFiles', e.clipboardData.items);
+          e.preventDefault();
+          break;
+        }
+      }
+    }
+  };
 </script>
 
 <svelte:window on:keydown={onWindowKeyDown} />
@@ -73,6 +85,7 @@
   bind:value
   on:keypress={onInputKeyPress}
   on:keydown={onInputKeyDown}
+  on:paste={onPaste}
   id="message-input"
   placeholder="Send a message to Eludris"
   autocomplete="off"

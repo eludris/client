@@ -63,6 +63,29 @@
     input.focus(); // for mobiles
   };
 
+  const submitFiles = async (e: CustomEvent<DataTransferItemList>) => {
+    let fileDatas = [];
+    for (let i = 0; i < e.detail.length; i++) {
+      if (e.detail[i].kind == 'file') {
+        const file = e.detail[i].getAsFile()!;
+        let formData = new FormData();
+        formData.append('file', file, file.name);
+        const data = await fetch($userData?.instanceInfo.effis_url!, {
+          body: formData,
+          method: 'POST'
+        }).then((r) => r.json());
+        fileDatas.push(data);
+      }
+    }
+    request('POST', 'messages', {
+      content: fileDatas
+        .map((d) => `![${d.name}](${$userData?.instanceInfo.effis_url}/${d.id})`)
+        .join('\n')
+    }).then((_) => messagesUList.scroll(0, messagesUList.scrollHeight));
+    await tick();
+    input.focus(); // for mobiles
+  };
+
   const onReply = async (e: CustomEvent<PenginMessage>) => {
     const start = input.selectionStart;
     const end = input.selectionEnd;
@@ -117,7 +140,13 @@
         {/each}
       </ul>
       <form id="message-input-form" on:submit|preventDefault={onSubmit}>
-        <MessageInput bind:input bind:value on:submit={onSubmit} scrollContainer={messagesUList} />
+        <MessageInput
+          bind:input
+          bind:value
+          on:submit={onSubmit}
+          on:submitFiles={submitFiles}
+          scrollContainer={messagesUList}
+        />
         <button id="send-button">Send</button>
       </form>
     </div>
