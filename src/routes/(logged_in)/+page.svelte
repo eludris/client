@@ -32,6 +32,7 @@
       });
     }
   }
+  $: users = Object.values($state.users);
 
   const autoScroll = async () => {
     if (!browser) return;
@@ -121,7 +122,7 @@
       </form>
     </div>
     <ul id="users">
-      {#each Object.values($state.users) as user (user.id)}
+      {#each users as user (user.id)}
         <li>
           <span>{user.username}</span>
         </li>
