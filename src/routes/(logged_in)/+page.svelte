@@ -10,7 +10,7 @@
   import Markdown from '$lib/components/Markdown.svelte';
   import type { PenginMessage } from '$lib/types/ui/message';
   import { request } from '$lib/request';
-  import type { User } from '$lib/types/user';
+  import { StatusType, type User } from '$lib/types/user';
 
   let messagesUList: HTMLUListElement;
   let value = '';
@@ -123,9 +123,11 @@
     </div>
     <ul id="users">
       {#each users as user (user.id)}
-        <li>
-          <span>{user.username}</span>
-        </li>
+        {#if user.status.type != StatusType.OFFLINE}
+          <li>
+            <span>{user.username}</span>
+          </li>
+        {/if}
       {/each}
     </ul>
   </div>
