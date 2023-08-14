@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import userData from '$lib/user_data';
   import { goto } from '$app/navigation';
-  import messages from '$lib/ws';
+  import state from '$lib/ws';
   import type { PageData } from './$types';
 
   onMount(() => {
@@ -22,7 +22,7 @@
   };
 </script>
 
-{#if $userData && $messages}
+{#if $userData && $state.connected}
   <slot />
 {:else}
   <div id="fact">

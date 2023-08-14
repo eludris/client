@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import userData from '$lib/user_data';
-  import messages from '$lib/ws';
+  import state from '$lib/ws';
   import { tick } from 'svelte';
   import { browser } from '$app/environment';
   import MessageInput from './MessageInput.svelte';
@@ -22,7 +22,7 @@
   });
 
   $: {
-    if ($messages) {
+    if ($state.connected) {
       let scroll =
         messagesUList &&
         messagesUList.scrollHeight - messagesUList.offsetHeight - messagesUList.scrollTop <
@@ -108,23 +108,41 @@
     <a id="settings-link" href="/settings"> Settings </a>
     <button id="logout-button" on:click={logOut}> Logout </button>
   </div>
-  <ul bind:this={messagesUList} id="messages">
-    {#if $messages}
-      {#each $messages as message, i (i)}
-        <MessageComponent {message} on:reply={onReply} on:mention={onMention} />
+  <div class="channel-view">
+    <div class="message-channel-body">
+      <ul bind:this={messagesUList} id="messages">
+        {#each $state.messages as message, i (i)}
+          <MessageComponent {message} on:reply={onReply} on:mention={onMention} />
+        {/each}
+      </ul>
+      <form id="message-input-form" on:submit|preventDefault={onSubmit}>
+        <MessageInput bind:input bind:value on:submit={onSubmit} scrollContainer={messagesUList} />
+        <button id="send-button">Send</button>
+      </form>
+    </div>
+    <ul id="users">
+      {#each Object.values($state.users) as user (user.id)}
+        <span>{user.username}</span>
       {/each}
-    {/if}
-  </ul>
-  <form id="message-input-form" on:submit|preventDefault={onSubmit}>
-    <MessageInput bind:input bind:value on:submit={onSubmit} scrollContainer={messagesUList} />
-    <button id="send-button">Send</button>
-  </form>
+    </ul>
+  </div>
 </div>
 
 <style>
   .message-channel {
     width: 100%;
     height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .channel-view {
+    display: flex;
+    flex-grow: 1;
+  }
+
+  .message-channel-body {
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
   }
@@ -164,6 +182,10 @@
 
   #send-button:hover {
     color: var(--gray-500);
+  }
+
+  #users {
+    width: 10%;
   }
 
   #options-div {

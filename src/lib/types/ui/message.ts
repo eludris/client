@@ -4,4 +4,4 @@ export interface PenginMessage extends Message {
   renderedContent: string;
   showAuthor: boolean;
   mentioned: boolean;
-}
+};

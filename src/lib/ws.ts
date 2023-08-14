@@ -4,27 +4,27 @@ import data from '$lib/user_data';
 import config from '$lib/user_config';
 import { PayloadOP, type IncomingPayload } from '$lib/types/event';
 import markdown from '$lib/markdown';
-import type { PenginMessage } from './types/ui/message';
 import type { UserData } from './types/ui/user';
+import type { State } from './types/ui/state';
 
-const messages = writable<Array<PenginMessage> | null>(null);
+const state = writable<State>({ connected: false, messages: [], users: [] });
 
 let ws: WebSocket | null = null;
 let pingInterval: NodeJS.Timer | null = null;
 let lastAuthor: number | null = null;
 let notification: Notification;
 let notification_opt: number;
-let oldMessages: Array<PenginMessage> | null = null;
+let connected = false;
 
-const retryConnect = (wait = 3_000) => {
-  messages.subscribe((messages) => {
-    if (messages) oldMessages = messages;
-  })();
-  messages.set(null);
+state.subscribe((state) => { connected = state.connected });
+
+const retryConnect = (wait = 5_000) => {
+  state.subscribe((state) => state.connected = false)();
   setTimeout(() => {
-    data.subscribe((userData) => {
+    data.update((userData) => {
       if (userData) connect(userData);
-    })();
+      return userData;
+    });
   }, wait);
 };
 
@@ -49,8 +49,28 @@ const connect = async (userData: UserData) => {
         ws = innerWs;
         ws?.send(JSON.stringify({ op: PayloadOP.AUTHENTICATE, d: userData.session.token }));
       } else if (payload.op == PayloadOP.AUTHENTICATED) {
-        messages.set(oldMessages ?? []);
+        state.update((state) => {
+          state.connected = true;
+          state.users = [];
+          payload.d.users.forEach((u) => state.users[u.id] = u);
+          state.users[payload.d.user.id] = payload.d.user;
+          return state;
+        });
+        data.subscribe((data) => { if (data) data.user = payload.d.user; })();
         ws = innerWs;
+      }
+      else if (payload.op == PayloadOP.USER_UPDATE) {
+        state.update((state) => {
+          state.connected = true;
+          state.users[payload.d.id] = payload.d;
+          return state;
+        });
+      } else if (payload.op == PayloadOP.PRESENCE_UPDATE) {
+        state.update((state) => {
+          state.connected = true;
+          state.users[payload.d.user_id].status = payload.d.status;
+          return state;
+        });
       } else if (payload.op == PayloadOP.MESSAGE_CREATE)
         markdown(payload.d.content).then((content) => {
           const message = {
@@ -80,9 +100,9 @@ const connect = async (userData: UserData) => {
               );
           }
           lastAuthor = payload.d.author.id;
-          messages.update((messages) => {
-            messages?.push(message);
-            return messages;
+          state.update((state) => {
+            state.messages.push(message);
+            return state;
           });
         });
     });
@@ -102,11 +122,10 @@ const connect = async (userData: UserData) => {
 if (browser) {
   data.subscribe(async (userData) => {
     // You have to log out to change the instance's url.
-    if (userData) {
+    if (!connected && userData) {
       await connect(userData);
     } else {
-      messages.set(null);
-      oldMessages = null;
+      state.update((state) => { state.connected = false; return state; });
       ws?.close();
       if (pingInterval) clearInterval(pingInterval);
       ws = null;
@@ -125,4 +144,4 @@ if (browser) {
   });
 }
 
-export default messages;
+export default state;
