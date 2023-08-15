@@ -15,6 +15,7 @@
   let messagesUList: HTMLUListElement;
   let value = '';
   let input: HTMLTextAreaElement;
+  let usernames: { [key: string]: number } = {};
 
   onMount(() => {
     messagesUList.scroll(0, messagesUList.scrollHeight);
@@ -33,6 +34,10 @@
     }
   }
   $: users = Object.values($state.users);
+  $: {
+    usernames = {};
+    users.forEach((u) => (usernames[u.username] = u.id));
+  }
 
   const autoScroll = async () => {
     if (!browser) return;
@@ -54,6 +59,14 @@
       let headers = new Headers();
       headers.set('Authorization', $userData!.session.token);
       if (value.startsWith('/shrug')) value = value.substring(7) + ' ¯\\\\\\_(ツ)_/¯';
+      value = value.replace(/@([a-z0-9_-]+)/gm, (m, username) => {
+        let id = usernames[username];
+        if (id) {
+          return `<@${id}>`;
+        } else {
+          return m;
+        }
+      });
       request('POST', 'messages', { content: value }).then((_) =>
         messagesUList.scroll(0, messagesUList.scrollHeight)
       );
