@@ -9,6 +9,8 @@ import rehypeStringify from 'rehype-stringify';
 
 import { visit } from 'unist-util-visit';
 import data from '$lib/user_data';
+import state from './ws';
+import { get } from 'svelte/store';
 
 let effisHost: string | undefined = undefined;
 
@@ -155,5 +157,13 @@ export default async (content: string): Promise<string> => {
         /\|\|(.+?)\|\|/gm,
         '<span class="spoiler" onclick="this.style.color = \'var(--color-text)\';this.style.cursor = \'unset\'">$1</span>'
       )
-    );
+    ).then((res) => {
+      return res.replace(/&#x3C;@(\d+)>/gm, (m, id) => {
+        let user = get(state).users[id];
+        if (user) {
+          return `<span class="mention">@${user.display_name ?? user.username}</span>`;
+        }
+        return m;
+      });
+    });
 };

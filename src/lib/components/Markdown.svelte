@@ -161,4 +161,10 @@
     cursor: pointer;
     padding: 2px;
   }
+
+  :global(.md .mention) {
+    background-color: var(--pink-400);
+    padding: 2px 5px;
+    border-radius: 5px;
+  }
 </style>
