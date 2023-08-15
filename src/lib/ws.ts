@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import { writable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 import data from '$lib/user_data';
 import config from '$lib/user_config';
 import { PayloadOP, type IncomingPayload } from '$lib/types/event';
@@ -20,12 +20,12 @@ let connected = false;
 state.subscribe((state) => { connected = state.connected });
 
 const retryConnect = (wait = 5_000) => {
-  state.subscribe((state) => state.connected = false)();
+  state.update((state) => { state.connected = false; return state });
   setTimeout(() => {
-    data.update((userData) => {
-      if (userData) connect(userData);
-      return userData;
-    });
+    let userData = get(data);
+    if (userData) {
+      connect(userData)
+    }
   }, wait);
 };
 
@@ -57,7 +57,7 @@ const connect = async (userData: UserData) => {
           state.users[payload.d.user.id] = payload.d.user;
           return state;
         });
-        data.subscribe((data) => { if (data) data.user = payload.d.user; })();
+        data.update((data) => { if (data) data.user = payload.d.user; return data; });
         ws = innerWs;
       }
       else if (payload.op == PayloadOP.USER_UPDATE) {
@@ -135,7 +135,7 @@ if (browser) {
     // You have to log out to change the instance's url.
     if (!connected && userData) {
       await connect(userData);
-    } else {
+    } else if (!userData) {
       state.update((state) => { state.connected = false; return state; });
       ws?.close();
       if (pingInterval) clearInterval(pingInterval);
