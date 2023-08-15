@@ -158,9 +158,9 @@ export default async (content: string): Promise<string> => {
         '<span class="spoiler" onclick="this.style.color = \'var(--color-text)\';this.style.cursor = \'unset\'">$1</span>'
       )
     ).then((res) => {
-      return res.replace(/&#x3C;@(\d+)>/gm, (m, id) => {
+      return res.replace(/&#x3C;@(\d+)>/gm, (m, id, offset) => {
         let user = get(state).users[id];
-        if (user) {
+        if (user && res.substring(0, offset).split(/<\\?code>/gm).length % 2 == 1) {
           return `<span class="mention">@${user.display_name ?? user.username}</span>`;
         }
         return m;
