@@ -129,6 +129,7 @@
 
   .avatar-container {
     width: 40px;
+    flex-shrink: 0;
   }
 
   .author-avatar {
