@@ -174,7 +174,7 @@
               alt="{user.username}'s avatar"
             />
             <div class="user-info">
-              <span>{user.username}</span>
+              <span>{user.display_name ?? user.username}</span>
               {#if user.status.text}
                 <span class="user-status">{user.status.text}</span>
               {/if}
