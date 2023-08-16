@@ -103,7 +103,7 @@
   }
 
   :global(.md img) {
-    max-width: calc(100% - 10px);
+    max-width: 30%;
     border-radius: 5px;
   }
 
