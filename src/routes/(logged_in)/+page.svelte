@@ -267,6 +267,7 @@
     flex-direction: column;
     height: 100%;
     justify-content: center;
+    overflow-x: hidden;
   }
 
   .user-status {
