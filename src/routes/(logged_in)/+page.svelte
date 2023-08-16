@@ -166,9 +166,20 @@
     <ul id="users">
       {#each users as user (user.id)}
         {#if user.status.type != StatusType.OFFLINE}
-          <li>
-            <span>{user.username}</span>
-          </li>
+          <div class="user">
+            <img
+              src={user.avatar
+                ? `${$userData?.instanceInfo.effis_url}/avatars/${user.avatar}`
+                : 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true'}
+              alt="{user.username}'s avatar"
+            />
+            <div class="user-info">
+              <span>{user.username}</span>
+              {#if user.status.text}
+                <span>{user.status.text}</span>
+              {/if}
+            </div>
+          </div>
         {/if}
       {/each}
     </ul>
@@ -234,6 +245,8 @@
 
   #users {
     width: 10%;
+    display: flex;
+    flex-direction: column;
   }
 
   #options-div {
@@ -299,5 +312,24 @@
   #logout-button:hover {
     box-shadow: 0 5px 20px var(--purple-200);
     background-color: var(--pink-600);
+  }
+
+  .user {
+    display: flex;
+    gap: 10px;
+  }
+
+  .user > img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 100%;
+  }
+
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: center;
   }
 </style>
