@@ -244,10 +244,11 @@
   }
 
   #users {
-    width: 10%;
+    width: 15%;
     display: flex;
     flex-direction: column;
     gap: 10px;
+    padding: 0;
   }
 
   .user {
