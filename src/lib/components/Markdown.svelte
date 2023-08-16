@@ -66,6 +66,10 @@
     word-wrap: break-word;
   }
 
+  :global(.md a) {
+    display: inline-block;
+  }
+
   :global(.md blockquote) {
     border-left: 5px solid var(--gray-300);
     margin: 0;
