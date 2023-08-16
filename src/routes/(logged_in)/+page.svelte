@@ -244,7 +244,7 @@
   }
 
   #users {
-    width: 15%;
+    width: 300px;
     display: flex;
     flex-direction: column;
     gap: 10px;
