@@ -273,6 +273,7 @@
     color: #888;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   #options-div {
