@@ -176,7 +176,7 @@
             <div class="user-info">
               <span>{user.username}</span>
               {#if user.status.text}
-                <span>{user.status.text}</span>
+                <span class="user-status">{user.status.text}</span>
               {/if}
             </div>
           </div>
@@ -247,6 +247,32 @@
     width: 10%;
     display: flex;
     flex-direction: column;
+    gap: 10px;
+  }
+
+  .user {
+    display: flex;
+    gap: 10px;
+  }
+
+  .user > img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 100%;
+  }
+
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: center;
+  }
+
+  .user-status {
+    color: #888;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   #options-div {
@@ -312,24 +338,5 @@
   #logout-button:hover {
     box-shadow: 0 5px 20px var(--purple-200);
     background-color: var(--pink-600);
-  }
-
-  .user {
-    display: flex;
-    gap: 10px;
-  }
-
-  .user > img {
-    width: 40px;
-    height: 40px;
-    object-fit: cover;
-    border-radius: 100%;
-  }
-
-  .user-info {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    justify-content: center;
   }
 </style>
