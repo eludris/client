@@ -17,7 +17,10 @@
         import('prismjs/components/prism-go.js');
         // @ts-expect-error: this is untyped :(
         import('prismjs/components/prism-json.js');
+        // @ts-expect-error: this is untyped :(
+        import('prismjs/components/prism-bash.js');
         Prism.languages['rs'] = Prism.languages['rust'];
+        Prism.languages['bash'] = Prism.languages['sh'];
       });
     } catch (e) {
       console.error('Could not load prism syntax highlighting');
@@ -81,11 +84,12 @@
   }
 
   :global(.md pre, pre[class*='language-'][class*='language-']) {
-    width: calc(100% - 90px);
+    width: 80%;
     background-color: var(--gray-200);
     padding: 20px;
     margin: 10px;
     border-radius: 10px;
+    overflow-y: scroll;
   }
 
   :global(.md code, code[class*='language-'][class*='language-']) {
