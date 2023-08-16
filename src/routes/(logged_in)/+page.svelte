@@ -201,9 +201,9 @@
   }
 
   .message-channel-body {
-    flex-grow: 1;
     display: flex;
     flex-direction: column;
+    width: calc(100% - 300px);
   }
 
   #messages {
