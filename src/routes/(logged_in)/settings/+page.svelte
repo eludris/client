@@ -3,9 +3,11 @@
   import userData from '$lib/user_data';
   import config from '$lib/user_config';
   import { tick } from 'svelte';
+  import { request } from '$lib/request';
 
   let styles = $config.styles ?? '';
   let styleInput: HTMLTextAreaElement;
+  let avatarInput: HTMLInputElement;
   let keys: string[] = [];
 
   const onKeyDown = (e: KeyboardEvent) => {
@@ -46,6 +48,19 @@
   const onStylesInput = () => {
     $config.styles = styles;
   };
+
+  const onAvatarInput = async () => {
+    let file = avatarInput.files![0];
+    if (file) {
+      let formData = new FormData();
+      formData.append('file', file, file.name);
+      const data = await fetch($userData?.instanceInfo.effis_url! + '/avatars', {
+        body: formData,
+        method: 'POST'
+      }).then((r) => r.json());
+      await request('PATCH', '/users/profile', { avatar: data.id });
+    }
+  };
 </script>
 
 <svelte:body on:keydown={onKeyDown} />
@@ -54,6 +69,16 @@
   <a id="back-link" href="/">Back</a>
   <div id="settings-div">
     {#if $userData}
+      <span>
+        <label for="styles">Avatar for Sir {$userData.user.username}</label>
+        <input
+          name="avatar"
+          type="file"
+          accept="image/*"
+          on:input={onAvatarInput}
+          bind:this={avatarInput}
+        />
+      </span>
       <span class="has-textarea">
         <label for="styles">Custom Styles</label>
         <textarea
