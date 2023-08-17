@@ -9,6 +9,7 @@
   let styleInput: HTMLTextAreaElement;
   let avatarInput: HTMLInputElement;
   let keys: string[] = [];
+  let status = $userData?.user.status.text;
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key == 'Escape') goto('/');
@@ -61,6 +62,10 @@
       await request('PATCH', '/users/profile', { avatar: data.id });
     }
   };
+
+  const setStatus = async () => {
+    await request('PATCH', '/users/profile', { status: status ?? null });
+  };
 </script>
 
 <svelte:body on:keydown={onKeyDown} />
@@ -78,6 +83,11 @@
           on:input={onAvatarInput}
           bind:this={avatarInput}
         />
+      </span>
+      <span>
+        <label for="styles">Status for Sir {$userData.user.username}</label>
+        <input bind:value={status} name="status" />
+        <button on:click={setStatus}>Set status</button>
       </span>
       <span class="has-textarea">
         <label for="styles">Custom Styles</label>
