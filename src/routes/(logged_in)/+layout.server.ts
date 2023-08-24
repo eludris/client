@@ -11,7 +11,8 @@ const facts = [
   'I am the storm that is approaching',
   'Coffee is kinda pog',
   'The name pengin originally started as a joke about linux users while watching <a href="https://cdn.eludris.gay/static/pengin.mp4" target="_blank">this video</a> on loop',
-  'ggVG is a sensible keybind.'
+  'ggVG is a sensible keybind.',
+  'It\'s been a long night and I can feel your anger',
 ];
 
 export function load() {
