@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import userData from '$lib/user_data';
+  import userConfig from '$lib/user_config';
   import state from '$lib/ws';
   import { tick } from 'svelte';
   import { browser } from '$app/environment';
@@ -13,6 +14,7 @@
   import { StatusType, type User } from '$lib/types/user';
 
   let messagesUList: HTMLUListElement;
+  let messageChannelBody: HTMLDivElement;
   let value = '';
   let input: HTMLTextAreaElement;
   let usernames: { [key: string]: number } = {};
@@ -20,6 +22,9 @@
   onMount(() => {
     messagesUList.scroll(0, messagesUList.scrollHeight);
     input.focus();
+    if ($userConfig.userList) {
+      messageChannelBody.style.width = '100%';
+    }
   });
 
   $: {
@@ -127,9 +132,21 @@
 
     input.focus();
   };
+
+  const windowKeyDown = async (e: KeyboardEvent) => {
+    if (e.key == 'u' && e.ctrlKey) {
+      $userConfig.userList = !$userConfig.userList;
+      if ($userConfig.userList) {
+        messageChannelBody.style.width = '100%';
+      } else {
+        messageChannelBody.style.width = 'calc(100% - 320px)';
+      }
+      e.preventDefault();
+    }
+  };
 </script>
 
-<svelte:window on:resize={autoScroll} />
+<svelte:window on:resize={autoScroll} on:keydown={windowKeyDown} />
 
 <div class="message-channel">
   <div id="options-div">
@@ -146,7 +163,7 @@
     <button id="logout-button" on:click={logOut}> Logout </button>
   </div>
   <div class="channel-view">
-    <div class="message-channel-body">
+    <div class="message-channel-body" bind:this={messageChannelBody}>
       <ul bind:this={messagesUList} id="messages">
         {#each $state.messages as message, i (i)}
           <MessageComponent {message} on:reply={onReply} on:mention={onMention} />
@@ -163,26 +180,28 @@
         <button id="send-button">Send</button>
       </form>
     </div>
-    <ul id="users">
-      {#each users as user (user.id)}
-        {#if user.status.type != StatusType.OFFLINE}
-          <div class="user">
-            <img
-              src={user.avatar
-                ? `${$userData?.instanceInfo.effis_url}/avatars/${user.avatar}`
-                : 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true'}
-              alt="{user.username}'s avatar"
-            />
-            <div class="user-info">
-              <span>{user.display_name ?? user.username}</span>
-              {#if user.status.text}
-                <span class="user-status">{user.status.text}</span>
-              {/if}
+    {#if !$userConfig.userList}
+      <ul id="users">
+        {#each users as user (user.id)}
+          {#if user.status.type != StatusType.OFFLINE}
+            <div class="user">
+              <img
+                src={user.avatar
+                  ? `${$userData?.instanceInfo.effis_url}/avatars/${user.avatar}`
+                  : 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true'}
+                alt="{user.username}'s avatar"
+              />
+              <div class="user-info">
+                <span>{user.display_name ?? user.username}</span>
+                {#if user.status.text}
+                  <span class="user-status">{user.status.text}</span>
+                {/if}
+              </div>
             </div>
-          </div>
-        {/if}
-      {/each}
-    </ul>
+          {/if}
+        {/each}
+      </ul>
+    {/if}
   </div>
 </div>
 
@@ -203,7 +222,7 @@
   .message-channel-body {
     display: flex;
     flex-direction: column;
-    width: calc(100% - 300px);
+    width: calc(100% - 320px);
   }
 
   #messages {
