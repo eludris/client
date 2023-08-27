@@ -104,7 +104,7 @@ const connect = async (userData: UserData) => {
                   : `New message from ${message.author.display_name ?? message.author.username}`,
                 {
                   body: message.content,
-                  icon: '/das_ding.png',
+                  icon: `${userData.instanceInfo.effis_url}/avatars/${message.author.avatar}` ?? '/das_ding.png',
                   renotify: true,
                   tag: 'NewMessage'
                 }
