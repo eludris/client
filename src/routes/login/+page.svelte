@@ -9,7 +9,7 @@
 
   let username = '';
   let password = '';
-  let instanceURL = '';
+  let instanceURL = 'https://eludris.tooty.xyz';
   let error = '';
   let requesting = false;
 
@@ -22,20 +22,18 @@
       if ('Notification' in window && Notification.permission == 'default') {
         Notification.requestPermission();
       }
-      const url: string = instanceURL.startsWith('http') ? instanceURL : 'https://' + instanceURL; // I could one line this but I like my codebases sane
-      instanceURL = instanceURL ? url : 'https://eludris.tooty.xyz';
       error = 'Loading...';
       requesting = true;
       try {
-        let instanceInfo: InstanceInfo = await request('GET', '', null, { apiUrl: url });
+        let instanceInfo: InstanceInfo = await request('GET', '', null, { apiUrl: instanceURL });
         let session: SessionCreated = await request(
           'POST',
           'sessions',
           { identifier: username, password, platform: 'linox', client: 'pengin' },
-          { apiUrl: url }
+          { apiUrl: instanceURL }
         );
         let user: User = await request('GET', 'users/@me', null, {
-          apiUrl: url,
+          apiUrl: instanceURL,
           token: session.token
         });
         userData.set({
@@ -64,10 +62,6 @@
     validateInputs();
   };
 
-  const onURLInput = () => {
-    validateInputs();
-  };
-
   const validateInputs = () => {
     if (requesting) {
       return;
@@ -75,14 +69,6 @@
     username = username.trim();
     if (password.length < 8) {
       error = 'Your password must be at least 8 characters long';
-    } else if (instanceURL) {
-      const url: string = instanceURL.startsWith('http') ? instanceURL : 'https://' + instanceURL;
-      try {
-        new URL(url);
-        error = '';
-      } catch {
-        error = 'Invalid instance url';
-      }
     } else {
       error = '';
     }
@@ -106,13 +92,6 @@
       name="password"
       placeholder="Password"
       type="password"
-    />
-    <label for="instanceUrl">Instance URL</label>
-    <input
-      bind:value={instanceURL}
-      on:input={onURLInput}
-      name="instanceUrl"
-      placeholder="https://eludris.tooty.xyz"
     />
     {#if error}
       <span class="error">{error}</span>
