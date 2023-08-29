@@ -12,6 +12,7 @@
   import type { PenginMessage } from '$lib/types/ui/message';
   import { request } from '$lib/request';
   import { StatusType, type User } from '$lib/types/user';
+  import { slide, type SlideParams } from 'svelte/transition';
 
   let messagesUList: HTMLUListElement;
   let messageChannelBody: HTMLDivElement;
@@ -22,8 +23,8 @@
   onMount(() => {
     messagesUList.scroll(0, messagesUList.scrollHeight);
     input.focus();
-    if ($userConfig.userList) {
-      messageChannelBody.style.width = '100%';
+    if (!$userConfig.userList) {
+      messageChannelBody.classList.add('users-hidden');
     }
   });
 
@@ -133,22 +134,59 @@
     input.focus();
   };
 
-  const windowKeyDown = async (e: KeyboardEvent) => {
+  const windowKeyDown = (e: KeyboardEvent) => {
     if (e.key == 'u' && e.ctrlKey) {
       $userConfig.userList = !$userConfig.userList;
       if ($userConfig.userList) {
-        messageChannelBody.style.width = '100%';
+        messageChannelBody.classList.add('users-hidden');
       } else {
-        messageChannelBody.style.width = 'calc(100% - 320px)';
+        messageChannelBody.classList.remove('users-hidden');
       }
       e.preventDefault();
     }
   };
+
+  let touchX = 0;
+
+  const windowTouchStart = (e: TouchEvent) => {
+    touchX = e.touches[0].clientX;
+  };
+
+  const windowTouchMove = (e: TouchEvent) => {
+    let screenWidth = window.screen.width;
+    if (screenWidth > 1000) return;
+    let touchEndX = e.touches[0].clientX;
+    let diff = touchX - touchEndX;
+    if (Math.abs(touchX - touchEndX) > screenWidth / 3) {
+      if (diff > 0) {
+        if (!messageChannelBody.classList.contains('users-hidden')) {
+          messageChannelBody.classList.add('users-hidden');
+          $userConfig.userList = false;
+        }
+      } else {
+        if (messageChannelBody.classList.contains('users-hidden')) {
+          messageChannelBody.classList.remove('users-hidden');
+          $userConfig.userList = true;
+        }
+      }
+    }
+  };
+
+  // this gets a bit screwed up on pc so we just limit it and call it conforming to discord xd
+  const phoneSlide = (node: HTMLElement, params?: SlideParams | undefined) => {
+    if (window.screen.width > 1000) return {};
+    return slide(node, params);
+  };
 </script>
 
-<svelte:window on:resize={autoScroll} on:keydown={windowKeyDown} />
+<svelte:window
+  on:resize={autoScroll}
+  on:keydown={windowKeyDown}
+  on:touchstart={windowTouchStart}
+  on:touchmove={windowTouchMove}
+/>
 
-<div class="message-channel">
+<div id="message-channel">
   <div id="options-div">
     <div id="instance-info">
       <span id="instance-name">{$userData?.instanceInfo?.instance_name ?? 'Pengin - loading'}</span>
@@ -162,8 +200,8 @@
     <a id="settings-link" href="/settings"> Settings </a>
     <button id="logout-button" on:click={logOut}> Logout </button>
   </div>
-  <div class="channel-view">
-    <div class="message-channel-body" bind:this={messageChannelBody}>
+  <div id="channel-view">
+    <div id="message-channel-body" bind:this={messageChannelBody}>
       <ul bind:this={messagesUList} id="messages">
         {#each $state.messages as message, i (i)}
           <MessageComponent {message} on:reply={onReply} on:mention={onMention} />
@@ -181,7 +219,7 @@
       </form>
     </div>
     {#if !$userConfig.userList}
-      <ul id="users">
+      <ul id="users" transition:phoneSlide={{ axis: 'x' }}>
         {#each users as user (user.id)}
           {#if user.status.type != StatusType.OFFLINE}
             <div class="user">
@@ -206,23 +244,27 @@
 </div>
 
 <style>
-  .message-channel {
+  #message-channel {
     width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
   }
 
-  .channel-view {
+  #channel-view {
     display: flex;
     flex-grow: 1;
     overflow-y: hidden;
   }
 
-  .message-channel-body {
+  #message-channel-body {
     display: flex;
     flex-direction: column;
     width: calc(100% - 320px);
+  }
+
+  :global(#message-channel-body.users-hidden) {
+    width: 100% !important;
   }
 
   #messages {
@@ -267,7 +309,10 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    padding: 10px;
+    padding: 20px 10px;
+    height: 100%;
+    margin: 0 0 0 10px;
+    background-color: var(--purple-200);
   }
 
   .user {
@@ -360,5 +405,18 @@
   #logout-button:hover {
     box-shadow: 0 5px 20px var(--purple-200);
     background-color: var(--pink-600);
+  }
+
+  @media only screen and (max-width: 1000px) {
+    #message-channel-body {
+      width: 100%;
+      position: relative;
+    }
+
+    #users {
+      position: absolute;
+      width: 80%;
+      right: 0;
+    }
   }
 </style>
