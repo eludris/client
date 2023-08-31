@@ -174,7 +174,7 @@
 
   // this gets a bit screwed up on pc so we just limit it and call it conforming to discord xd
   const phoneSlide = (node: HTMLElement, params?: SlideParams | undefined) => {
-    if (window.screen.width > 1000) return {};
+    if (window.screen.width > 1000) return { duration: 0 };
     return slide(node, params);
   };
 </script>
@@ -311,7 +311,7 @@
     gap: 10px;
     padding: 20px 10px;
     height: 100%;
-    margin: 0 0 0 10px;
+    margin: 0;
     background-color: var(--purple-200);
   }
 
