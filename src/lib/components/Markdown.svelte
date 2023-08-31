@@ -171,8 +171,9 @@
   }
 
   :global(.md .mention) {
-    background-color: var(--pink-400);
+    background-color: color-mix(in srgb, var(--pink-400) 50%, transparent);
     padding: 2px 5px;
     border-radius: 5px;
+    display: inline-block;
   }
 </style>
