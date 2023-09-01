@@ -15,7 +15,6 @@
   import { slide, type SlideParams } from 'svelte/transition';
 
   let messagesUList: HTMLUListElement;
-  let messageChannelBody: HTMLDivElement;
   let value = '';
   let input: HTMLTextAreaElement;
   let usernames: { [key: string]: number } = {};
@@ -23,9 +22,6 @@
   onMount(() => {
     messagesUList.scroll(0, messagesUList.scrollHeight);
     input.focus();
-    if (!$userConfig.userList) {
-      messageChannelBody.classList.add('users-hidden');
-    }
   });
 
   $: {
@@ -137,11 +133,6 @@
   const windowKeyDown = (e: KeyboardEvent) => {
     if (e.key == 'u' && e.ctrlKey) {
       $userConfig.userList = !$userConfig.userList;
-      if ($userConfig.userList) {
-        messageChannelBody.classList.add('users-hidden');
-      } else {
-        messageChannelBody.classList.remove('users-hidden');
-      }
       e.preventDefault();
     }
   };
@@ -159,13 +150,11 @@
     let diff = touchX - touchEndX;
     if (Math.abs(touchX - touchEndX) > screenWidth / 3) {
       if (diff > 0) {
-        if (!messageChannelBody.classList.contains('users-hidden')) {
-          messageChannelBody.classList.add('users-hidden');
+        if ($userConfig.userList) {
           $userConfig.userList = false;
         }
       } else {
-        if (messageChannelBody.classList.contains('users-hidden')) {
-          messageChannelBody.classList.remove('users-hidden');
+        if (!$userConfig.userList) {
           $userConfig.userList = true;
         }
       }
@@ -201,7 +190,7 @@
     <button id="logout-button" on:click={logOut}> Logout </button>
   </div>
   <div id="channel-view">
-    <div id="message-channel-body" bind:this={messageChannelBody}>
+    <div id="message-channel-body" class={!$userConfig.userList ? 'user-hidden' : ''}>
       <ul bind:this={messagesUList} id="messages">
         {#each $state.messages as message, i (i)}
           <MessageComponent {message} on:reply={onReply} on:mention={onMention} />
@@ -263,7 +252,7 @@
     width: calc(100% - 320px);
   }
 
-  :global(#message-channel-body.users-hidden) {
+  #message-channel-body.users-hidden {
     width: 100% !important;
   }
 
@@ -308,6 +297,7 @@
     width: 300px;
     display: flex;
     flex-direction: column;
+    flex-shrink: 0;
     gap: 10px;
     padding: 20px 10px;
     height: 100%;
