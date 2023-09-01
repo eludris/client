@@ -6,10 +6,11 @@
   import type { InstanceInfo } from '$lib/types/instance';
   import type { User } from '$lib/types/user';
   import type { SessionCreated } from '$lib/types/session';
+  import { PUBLIC_INSTANCE_URL } from '$env/static/public';
 
   let username = '';
   let password = '';
-  let instanceURL = 'https://eludris.tooty.xyz';
+  let instanceURL = PUBLIC_INSTANCE_URL ?? 'https://eludris.tooty.xyz';
   let error = '';
   let requesting = false;
 
