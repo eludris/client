@@ -13,7 +13,7 @@ const facts = [
   'The name pengin originally started as a joke about linux users while watching <a href="https://cdn.eludris.gay/static/pengin.mp4" target="_blank">this video</a> on loop',
   'ggVG is a sensible keybind.',
   'It\'s been a long night and I can feel your anger',
-  'Fun fact: I have been playing arknights for 13 hours and it has been eating away my life.',
+  'Fun fact: I have been playing arknights for more than 13 hours and it has been eating away my life.',
 ];
 
 export function load() {
