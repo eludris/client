@@ -4,11 +4,11 @@
   import { tick } from 'svelte';
   import userData from '$lib/user_data';
   import activeContext from '$lib/context';
-  import type { PenginMessage } from '$lib/types/ui/message';
+  import type { ClientMessage } from '$lib/types/ui/message';
   import UserContext from './UserContext.svelte';
   import type { Unsubscriber } from 'svelte/store';
 
-  export let message: PenginMessage;
+  export let message: ClientMessage;
   let currentContext: number;
   let showContext = false;
   let showAuthorContext = false;

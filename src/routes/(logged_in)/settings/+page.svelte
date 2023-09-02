@@ -124,8 +124,8 @@
   </div>
   <footer>
     <span>
-      Pengin is fully FOSS! Check out our <a
-        href="https://github.com/eludris/pengin"
+      The client is fully FOSS! Check out our <a
+        href="https://github.com/eludris/client"
         target="_blank"
         rel="noreferrer">GitHub</a
       > repository!

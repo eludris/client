@@ -9,7 +9,7 @@
   import MessageInput from './MessageInput.svelte';
   import MessageComponent from './Message.svelte';
   import Markdown from '$lib/components/Markdown.svelte';
-  import type { PenginMessage } from '$lib/types/ui/message';
+  import type { ClientMessage } from '$lib/types/ui/message';
   import { request } from '$lib/request';
   import { StatusType, type User } from '$lib/types/user';
   import { slide, type SlideParams } from 'svelte/transition';
@@ -101,7 +101,7 @@
     input.focus(); // for mobiles
   };
 
-  const onReply = async (e: CustomEvent<PenginMessage>) => {
+  const onReply = async (e: CustomEvent<ClientMessage>) => {
     const start = input.selectionStart;
     const end = input.selectionEnd;
 
@@ -178,7 +178,7 @@
 <div id="message-channel">
   <div id="options-div">
     <div id="instance-info">
-      <span id="instance-name">{$userData?.instanceInfo?.instance_name ?? 'Pengin - loading'}</span>
+      <span id="instance-name">{$userData?.instanceInfo?.instance_name}</span>
       {#if $userData?.instanceInfo?.description}
         <span id="instance-description">{$userData.instanceInfo.description}</span>
         <span id="instance-markdown">
@@ -252,7 +252,7 @@
     width: calc(100% - 320px);
   }
 
-  #message-channel-body.users-hidden {
+  :global(#message-channel-body.users-hidden) {
     width: 100% !important;
   }
 

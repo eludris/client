@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { PenginMessage } from '$lib/types/ui/message';
+  import type { ClientMessage } from '$lib/types/ui/message';
   import { createEventDispatcher } from 'svelte';
 
-  export let message: PenginMessage;
+  export let message: ClientMessage;
 
   const dispatch = createEventDispatcher();
   export let contextDiv: HTMLDivElement;
