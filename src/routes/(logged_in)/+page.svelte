@@ -186,7 +186,6 @@
         </span>
       {/if}
     </div>
-    <button id="logout-button" on:click={logOut}> Logout </button>
     <a id="settings-link" href="/settings">
       <!--- https://icon-sets.iconify.design/mdi/cog/ --->
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
