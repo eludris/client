@@ -148,7 +148,7 @@
     if (screenWidth > 1000) return;
     let touchEndX = e.touches[0].clientX;
     let diff = touchX - touchEndX;
-    if (Math.abs(touchX - touchEndX) > screenWidth / 3) {
+    if (Math.abs(touchX - touchEndX) > screenWidth / 4) {
       if (diff > 0) {
         if ($userConfig.userList) {
           $userConfig.userList = false;
