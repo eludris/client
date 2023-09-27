@@ -186,7 +186,7 @@
         </span>
       {/if}
     </div>
-    <span id="user-info" class="user">
+    <span id="user-info" class="user current-user">
       <span class="user-avatar-container">
         <img
           class="user-avatar"
@@ -348,6 +348,14 @@
   .user {
     display: flex;
     gap: 10px;
+  }
+
+  .current-user {
+    width: 300px;
+  }
+
+  .current-user .user-info {
+    flex-grow: 1;
   }
 
   .user-avatar-container {
