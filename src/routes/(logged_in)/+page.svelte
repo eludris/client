@@ -1,6 +1,5 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { goto } from '$app/navigation';
   import userData from '$lib/user_data';
   import userConfig from '$lib/user_config';
   import state from '$lib/ws';
@@ -49,11 +48,6 @@
       window.outerHeight / 4
     )
       messagesUList.scroll(0, messagesUList.scrollHeight);
-  };
-
-  const logOut = () => {
-    userData.set(null);
-    goto('/login');
   };
 
   const onSubmit = async () => {
@@ -306,74 +300,8 @@
     background-color: var(--purple-200);
   }
 
-  :global(.user) {
-    display: flex;
-    gap: 10px;
-  }
-
-  :global(.user-avatar-container) {
-    position: relative;
-    height: 40px;
-  }
-
-  :global(.user-avatar) {
-    width: 40px;
-    height: 40px;
-    object-fit: cover;
-    border-radius: 100%;
-  }
-
-  :global(.user-status-indicator) {
-    border-radius: 100%;
-    width: 16px;
-    height: 16px;
-    position: absolute;
-    right: 0;
-    bottom: 0;
-  }
-
-  :global(.user-status-indicator span) {
-    width: 10px;
-    height: 10px;
-    position: absolute;
-    border-radius: 100%;
-    right: 3px;
-    bottom: 3px;
-  }
-
-  :global(.user-status-indicator.online span) {
-    background-color: #239e58;
-  }
-
-  :global(.user-status-indicator.idle span) {
-    background-color: #e6ab32;
-  }
-
-  :global(.user-status-indicator.busy span) {
-    background-color: #e83d42;
-  }
-
-  :global(.user-status-indicator.offline span) {
-    background-color: #71757e;
-  }
-
   #users .user-status-indicator {
     background-color: var(--purple-200);
-  }
-
-  :global(.user-info) {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    justify-content: center;
-    overflow-x: hidden;
-  }
-
-  :global(.user-status) {
-    color: #888;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 
   @media only screen and (max-width: 1000px) {
