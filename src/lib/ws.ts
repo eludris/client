@@ -66,6 +66,12 @@ const connect = async (userData: UserData) => {
           state.users[payload.d.id] = payload.d;
           return state;
         });
+        if (payload.d.id == userData.user.id) {
+          data.update((d) => {
+            if (d) { d.user = payload.d; }
+            return d;
+          });
+        }
       } else if (payload.op == PayloadOP.PRESENCE_UPDATE) {
         state.update((s) => {
           s.connected = true;
@@ -82,6 +88,12 @@ const connect = async (userData: UserData) => {
           }
           return s;
         });
+        if (payload.d.user_id == userData.user.id) {
+          data.update((d) => {
+            if (d) { d.user.status = payload.d.status; }
+            return d;
+          });
+        }
       } else if (payload.op == PayloadOP.MESSAGE_CREATE)
         markdown(payload.d.content).then((content) => {
           const message = {
