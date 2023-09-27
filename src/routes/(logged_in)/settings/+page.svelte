@@ -4,6 +4,7 @@
   import config from '$lib/user_config';
   import { tick } from 'svelte';
   import { request } from '$lib/request';
+  import Navbar from '$lib/components/Navbar.svelte';
 
   let styles = $config.styles ?? '';
   let styleInput: HTMLTextAreaElement;
@@ -70,6 +71,7 @@
 
 <svelte:body on:keydown={onKeyDown} />
 
+<Navbar />
 <div id="settings-wrapper-div">
   <a id="back-link" href="/">Back</a>
   <div id="settings-div">
