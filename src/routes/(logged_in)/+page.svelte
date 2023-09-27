@@ -186,15 +186,35 @@
         </span>
       {/if}
     </div>
-    <a id="settings-link" href="/settings">
-      <!--- https://icon-sets.iconify.design/mdi/cog/ --->
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-        ><path
-          fill="currentColor"
-          d="M12 15.5A3.5 3.5 0 0 1 8.5 12A3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5a3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97c0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1c0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66Z"
-        /></svg
-      >
-    </a>
+    <span id="user-info" class="user">
+      <span class="user-avatar-container">
+        <img
+          class="user-avatar"
+          src={$userData?.user.avatar
+            ? `${$userData?.instanceInfo.effis_url}/avatars/${$userData?.user.avatar}`
+            : 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true'}
+          alt="{$userData?.user.username}'s avatar"
+        />
+        <span class="user-status-indicator {$userData?.user.status.type.toLowerCase()}">
+          <span />
+        </span>
+      </span>
+      <div class="user-info">
+        <span>{$userData?.user.display_name ?? $userData?.user.username}</span>
+        {#if $userData?.user.status.text}
+          <span class="user-status">{$userData?.user.status.text}</span>
+        {/if}
+      </div>
+      <a id="settings-link" href="/settings">
+        <!--- https://icon-sets.iconify.design/mdi/cog/ --->
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+          ><path
+            fill="currentColor"
+            d="M12 15.5A3.5 3.5 0 0 1 8.5 12A3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5a3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97c0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1c0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66Z"
+          /></svg
+        >
+      </a>
+    </span>
   </div>
   <div id="channel-view">
     <div id="message-channel-body" class={!$userConfig.userList ? 'user-hidden' : ''}>
@@ -224,12 +244,18 @@
         {#each users as user (user.id)}
           {#if user.status.type != StatusType.OFFLINE}
             <div class="user">
-              <img
-                src={user.avatar
-                  ? `${$userData?.instanceInfo.effis_url}/avatars/${user.avatar}`
-                  : 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true'}
-                alt="{user.username}'s avatar"
-              />
+              <span class="user-avatar-container">
+                <img
+                  class="user-avatar"
+                  src={user.avatar
+                    ? `${$userData?.instanceInfo.effis_url}/avatars/${user.avatar}`
+                    : 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true'}
+                  alt="{user.username}'s avatar"
+                />
+                <span class="user-status-indicator {user.status.type.toLowerCase()}">
+                  <span />
+                </span>
+              </span>
               <div class="user-info">
                 <span>{user.display_name ?? user.username}</span>
                 {#if user.status.text}
@@ -324,11 +350,58 @@
     gap: 10px;
   }
 
-  .user > img {
+  .user-avatar-container {
+    position: relative;
+    height: 40px;
+  }
+
+  .user-avatar {
     width: 40px;
     height: 40px;
     object-fit: cover;
     border-radius: 100%;
+  }
+
+  .user-status-indicator {
+    border-radius: 100%;
+    width: 16px;
+    height: 16px;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+  }
+
+  .user-status-indicator span {
+    width: 10px;
+    height: 10px;
+    position: absolute;
+    border-radius: 100%;
+    right: 3px;
+    bottom: 3px;
+  }
+
+  .user-status-indicator.online span {
+    background-color: #239e58;
+  }
+
+  .user-status-indicator.idle span {
+    background-color: #e6ab32;
+  }
+
+  .user-status-indicator.busy span {
+    background-color: #e83d42;
+  }
+
+  .user-status-indicator.offline span {
+    background-color: #71757e;
+  }
+
+  #options-div .user-status-indicator {
+    background-color: var(--gray-200);
+  }
+
+  #users .user-status-indicator {
+    background-color: var(--purple-200);
   }
 
   .user-info {
@@ -351,7 +424,7 @@
     background-color: var(--gray-200);
     padding: 10px;
     gap: 20px;
-    align-items: baseline;
+    align-items: center;
   }
 
   #instance-info {
