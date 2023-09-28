@@ -48,6 +48,7 @@
     display: flex;
     gap: 10px;
     border-bottom: 2px solid var(--gray-500);
+    overflow-x: auto;
   }
 
   #settings-nav a {
@@ -74,6 +75,10 @@
   }
 
   @media only screen and (max-width: 1200px) {
+    #settings-div {
+      width: 95%;
+    }
+
     footer {
       text-align: center;
     }
