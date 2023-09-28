@@ -15,6 +15,14 @@ const facts = [
   'It\'s been a long night and I can feel your anger',
   'wei wei wei wei',
   'The only thing that you gotta know is that I do what it takes do what it takes!',
+  'Kei nario nazasu',
+  'This is getting a bit Derailed',
+  'It\'s quite sad- it\'s quite sad...',
+  'Life is a row of blocks in a menagerie of knights on a funny ark',
+  'Guys I\'m a lobster',
+  'Bob Bobster',
+  '<span style="background-color: aquamarine;">@Duffelbag</span> eval',
+  'One two three four five once I caught a fish alive',
 ];
 
 export function load() {
