@@ -172,7 +172,7 @@
 <div id="message-channel">
   <Navbar />
   <div id="channel-view">
-    <div id="message-channel-body" class={!$userConfig.userList ? 'user-hidden' : ''}>
+    <div id="message-channel-body" class={$userConfig.userList ? 'users-hidden' : ''}>
       <ul bind:this={messagesUList} id="messages">
         {#each $state.messages as message, i (i)}
           <MessageComponent {message} on:reply={onReply} on:mention={onMention} />
@@ -207,8 +207,8 @@
                     : 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true'}
                   alt="{user.username}'s avatar"
                 />
-                <span class="user-status-indicator {user.status.type.toLowerCase()}">
-                  <span />
+                <span class="user-status-indicator">
+                  <span class="status-indicator {$userData?.user.status.type.toLowerCase()}" />
                 </span>
               </span>
               <div class="user-info">
@@ -243,6 +243,10 @@
     display: flex;
     flex-direction: column;
     width: calc(100% - 320px);
+  }
+
+  #message-channel-body.users-hidden {
+    width: 100%;
   }
 
   :global(#message-channel-body.users-hidden) {

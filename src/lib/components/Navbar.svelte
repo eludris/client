@@ -22,8 +22,8 @@
           : 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true'}
         alt="{$userData?.user.username}'s avatar"
       />
-      <span class="user-status-indicator {$userData?.user.status.type.toLowerCase()}">
-        <span />
+      <span class="user-status-indicator">
+        <span class="status-indicator {$userData?.user.status.type.toLowerCase()}" />
       </span>
     </span>
     <div class="user-info">
@@ -142,19 +142,19 @@
     bottom: 3px;
   }
 
-  :global(.user-status-indicator.online span) {
+  :global(.status-indicator.online) {
     background-color: #239e58;
   }
 
-  :global(.user-status-indicator.idle span) {
+  :global(.status-indicator.idle) {
     background-color: #e6ab32;
   }
 
-  :global(.user-status-indicator.busy span) {
+  :global(.status-indicator.busy) {
     background-color: #e83d42;
   }
 
-  :global(.user-status-indicator.offline span) {
+  :global(.status-indicator.offline) {
     background-color: #71757e;
   }
 

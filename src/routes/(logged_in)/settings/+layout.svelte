@@ -1,7 +1,31 @@
 <script lang="ts">
   import Navbar from '$lib/components/Navbar.svelte';
+  import { goto } from '$app/navigation';
   import { page } from '$app/stores';
+
+  let keys: string[] = [];
+
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.key == 'Escape') goto('/');
+
+    if (e.key == 'Shift') {
+      return;
+    }
+
+    if (keys.length < 2 && e.key == 'g') {
+      keys.push('g');
+    } else if (keys[0] == 'g' && keys[1] == 'g' && e.key == 'V') {
+      keys.push('V');
+    } else if (keys[0] == 'g' && keys[1] == 'g' && keys[2] == 'V' && e.key == 'G') {
+      alert('ggVG is a sensible keybind');
+      keys = [];
+    } else {
+      keys = [];
+    }
+  };
 </script>
+
+<svelte:body on:keydown={onKeyDown} />
 
 <Navbar />
 
