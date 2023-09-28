@@ -208,7 +208,7 @@
                   alt="{user.username}'s avatar"
                 />
                 <span class="user-status-indicator">
-                  <span class="status-indicator {$userData?.user.status.type.toLowerCase()}" />
+                  <span class="status-indicator {user.status.type.toLowerCase()}" />
                 </span>
               </span>
               <div class="user-info">
