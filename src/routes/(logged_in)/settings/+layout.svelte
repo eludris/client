@@ -14,7 +14,7 @@
       >
       <a
         href="/settings/notifications "
-        class:current={$page.url.pathname == '/settings.notifications'}>Notifications</a
+        class:current={$page.url.pathname == '/settings/notifications'}>Notifications</a
       >
       <a href="/settings/appearance" class:current={$page.url.pathname == '/settings/appearance'}
         >Appearance</a

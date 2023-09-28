@@ -1,7 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import userData from '$lib/user_data';
-  import config from '$lib/user_config';
   import { request } from '$lib/request';
 
   let avatarInput: HTMLInputElement;
@@ -61,24 +60,4 @@
   <label for="styles">Status</label>
   <input bind:value={status} name="status" />
   <button on:click={setStatus}>Set status</button>
-</div>
-<div class="setting">
-  <label for="notifications">Notifications Level</label>
-  <div id="notifications-div">
-    <datalist id="notification-opts">
-      <option value="1" label="Off"><span class="mark" /></option>
-      <option value="2" label="Mentions only"><span class="mark" /></option>
-      <option value="3" label="Everything"><span class="mark" /></option>
-    </datalist>
-    <input
-      name="notifications"
-      bind:value={$config.notifications}
-      type="range"
-      list="notification-opts"
-      min="1"
-      max="3"
-    />
-    <span id="notifications-input-track" />
-    <div />
-  </div>
 </div>
