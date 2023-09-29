@@ -21,17 +21,20 @@
 <style>
   .setting {
     gap: 10px;
+    width: fit-content;
+    align-self: flex-start;
   }
 
   .container {
     display: flex;
-    width: 40%;
     background-color: var(--gray-200);
     padding: 10px;
     align-items: center;
     gap: 10px;
     border-radius: 5px;
     transition: background-color ease-in-out 125ms;
+    font-size: 18px;
+    box-sizing: border-box;
   }
 
   .container:hover {
@@ -58,4 +61,11 @@
   .container.checked .radio {
     background-color: var(--gray-400);
   }
+
+  @media only screen and (max-width: 1200px) {
+    .container {
+      width: 100%;
+    }
+  }
+
 </style>
