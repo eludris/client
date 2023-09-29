@@ -93,7 +93,7 @@
     padding: 20px;
     margin: 10px;
     border-radius: 10px;
-    overflow-y: scroll;
+    overflow-y: auto;
   }
 
   :global(.md code, code[class*='language-'][class*='language-']) {
@@ -113,6 +113,12 @@
 
   :global(.md:has(.math)) {
     overflow-x: auto;
+  }
+
+  :global(.md .math *) {
+    white-space: nowrap;
+    line-break: unset;
+    word-wrap: unset;
   }
 
   :global(.md table) {
