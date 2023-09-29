@@ -158,6 +158,12 @@ export default async (content: string): Promise<string> => {
         /\|\|(.+?)\|\|/gm,
         '<span class="spoiler" onclick="this.style.color = \'var(--color-text)\';this.style.cursor = \'unset\'">$1</span>'
       )
+    ).then((res) =>
+      // Prevents backslashes from rendering in newline markdown before tables/katex blocks etc.
+      res.replace(
+        /\n\\<\/p>\n<(table|div)/gm,
+        '\n<br>\n</p>\n<$1'
+      )
     ).then((res) => {
       return res.replace(/&#x3C;@(\d+)>/gm, (m, id, offset) => {
         let user = get(state).users[id];
