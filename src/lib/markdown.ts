@@ -11,6 +11,7 @@ import { visit } from 'unist-util-visit';
 import data from '$lib/user_data';
 import state from './ws';
 import { get } from 'svelte/store';
+import { emojiDictionary } from './emoji' 
 
 let effisHost: string | undefined = undefined;
 
@@ -165,5 +166,23 @@ export default async (content: string): Promise<string> => {
         }
         return m;
       });
+    })
+    .then((res) => {
+      let big = !content.replace(/:[a-zA-Z0-9_-]+:/gm, '').trim() ? ' big' : '';
+      if (big && content.split(':').length > 21) {
+        big = '';
+      }
+      return res.replace(/:([a-zA-Z0-9_-]+):/gm, (m, emojiName, offset) => {
+        let emoji = emojiDictionary[emojiName];
+        if (emoji && res.substring(0, offset).split(/<\\?code>/gm).length % 2 == 1) {
+          if (emoji.startsWith("http")) {
+            return `<img src="${emoji}" class="emoji${big}" />`;
+          } else {
+            let hexValue = Array.from(emoji).map((char) => char.codePointAt(0)?.toString(16)).join('-');
+            return `<img class="emoji${big}" draggable="false" alt="${emoji}" src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/${hexValue}.svg" title="${emoji}"/>`;
+          }
+        }
+        return m;
+      })
     });
 };
