@@ -64,7 +64,6 @@
       !statusSelector.contains(e.target as Node)
     ) {
       statusIndicatorFocused = false;
-      e.preventDefault();
     }
   };
 
