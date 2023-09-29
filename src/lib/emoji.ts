@@ -1,3 +1,24 @@
+// adapted from https://github.com/twitter/twemoji/blob/d94f4cf793e6d5ca592aa00f58a88f6a4229ad43/scripts/build.js#L571-L589
+export const toCodePoints = (emoji: string) => {
+  let codePoint = [];
+  let currentChar = 0;
+  let previousChar = 0;
+
+  for (let i = 0; i < emoji.length; i++) {
+    currentChar = emoji.charCodeAt(i);
+    if (previousChar) {
+      codePoint.push((0x10000 + ((previousChar - 0xD800) << 10) + (currentChar - 0xDC00)).toString(16));
+      previousChar = 0;
+    } else if (0xD800 <= currentChar && currentChar <= 0xDBFF) {
+      previousChar = currentChar;
+    } else {
+      codePoint.push(currentChar.toString(16));
+    }
+  }
+  return codePoint.join('-');
+};
+
+
 export const emojiDictionary: { [emoji: string]: string } = {
   100: "💯",
   1234: "🔢",

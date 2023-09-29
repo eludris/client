@@ -11,7 +11,7 @@ import { visit } from 'unist-util-visit';
 import data from '$lib/user_data';
 import state from './ws';
 import { get } from 'svelte/store';
-import { emojiDictionary } from './emoji'
+import { emojiDictionary, toCodePoints } from './emoji'
 
 let effisHost: string | undefined = undefined;
 
@@ -178,9 +178,7 @@ export default async (content: string): Promise<string> => {
           if (emoji.startsWith("http")) {
             return `<img src="${emoji}" class="emoji${big}" />`;
           } else {
-            emoji = emoji.replace('\ufe0f', '');
-            let hexValue = Array.from(emoji).map((char) => char.codePointAt(0)?.toString(16)).join('-');
-            return `<img class="emoji${big}" draggable="false" alt="${emoji}" src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/${hexValue}.svg" title="${emoji}"/>`;
+            return `<img class="emoji${big}" draggable="false" alt="${emoji}" src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/${toCodePoints(emoji)}.svg" title="${emoji}"/>`;
           }
         }
         return m;
