@@ -4,6 +4,14 @@
   import { request } from '$lib/request';
   import Markdown from '$lib/components/Markdown.svelte';
   import { tick } from 'svelte';
+  import type { StatusType } from '$lib/types/user';
+
+  let statuses = [
+    ['Online', ''],
+    ['Idle', ''],
+    ['Busy', 'You will not get any notifications'],
+    ['Offline', 'You will appear offline to other users']
+  ];
 
   let banner = $userData!.user.banner
     ? `${$userData!.instanceInfo.effis_url}/banners/${$userData?.user.banner}`
@@ -12,7 +20,7 @@
     ? `${$userData!.instanceInfo.effis_url}/avatars/${$userData?.user.avatar}`
     : 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true';
   let display_name = $userData!.user.display_name;
-  let status_type = $userData!.user.status.type;
+  let status_type = $userData!.user.status.type.toLowerCase();
   let status = $userData!.user.status.text;
   let bio = $userData!.user.bio;
 
@@ -36,23 +44,33 @@
   }
 
   let bioFocused = false;
+  let statusIndicatorFocused = false;
 
   let saving = false;
 
   let error: string;
 
-  let avatarInput: HTMLInputElement;
   let bioInput: HTMLTextAreaElement;
 
-  const bioFocusIn = async () => {
+  const statusIndicatorClick = () => {
+    statusIndicatorFocused = true;
+  };
+
+  const bodyClick = (e: MouseEvent) => {
+    if (statusIndicatorFocused) {
+      statusIndicatorFocused = false;
+      e.preventDefault();
+    }
+  };
+
+  const bioClick = async () => {
     bioFocused = true;
     await tick();
     bioInput.focus();
   };
 
-  const bioFocusOut = async () => {
+  const bioFocusOut = () => {
     bioFocused = false;
-    await tick();
   };
 
   const uploadFile = async (bucket: string, file: File) => {
@@ -78,6 +96,9 @@
     if (display_name != $userData?.user.display_name) {
       newProfile.display_name = display_name ?? null;
     }
+    if (status_type.toUpperCase() != $userData?.user.status.type) {
+      newProfile.status_type = status_type.toUpperCase() as StatusType;
+    }
     if (status != $userData?.user.status.text) {
       newProfile.status = status ?? null;
     }
@@ -88,6 +109,8 @@
     saving = false;
   };
 </script>
+
+<svelte:body on:click={bodyClick} />
 
 {#if $userData}
   <div class="setting">
@@ -163,10 +186,38 @@
           </span>
         </span>
         <span id="status-container">
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
           <span
             id="status-type"
-            class="status-indicator {$userData.user.status.type.toLowerCase()}"
+            class="status-icon status-indicator {status_type.toLowerCase()}"
+            on:click|stopPropagation={statusIndicatorClick}
           />
+          {#if statusIndicatorFocused}
+            <ul id="status-type-selector">
+              {#each statuses as [value, info]}
+                <li>
+                  <label
+                    class="status-container {status_type.toLowerCase() == value.toLowerCase()
+                      ? 'checked'
+                      : ''}"
+                  >
+                    <span class="status-icon status-indicator {value.toLowerCase()}" />
+                    <input
+                      name="notifications"
+                      class="status-radio"
+                      type="radio"
+                      {value}
+                      bind:group={status_type}
+                    />
+                    <span class="status-text">
+                      {value}
+                      <span class="status-info">{info}</span>
+                    </span>
+                  </label>
+                </li>
+              {/each}
+            </ul>
+          {/if}
           <input id="status" name="status" bind:value={status} placeholder="Nothing going on yet" />
         </span>
         <div id="bio-container" on:focusout={bioFocusOut}>
@@ -180,7 +231,7 @@
             />
           {:else}
             <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <div id="bio-md-container" on:click={bioFocusIn}>
+            <div id="bio-md-container" on:click={bioClick}>
               <Markdown content={bio ?? 'Nothing here yet'} />
             </div>
           {/if}
@@ -230,11 +281,11 @@
   #user {
     display: flex;
     flex-direction: column;
-    width: 900px;
+    width: min(900px, 100%);
     margin: 10px auto;
     background-color: var(--gray-100);
     border-radius: 10px;
-    overflow: hidden;
+    overflow: visible;
   }
 
   #banner-container {
@@ -330,17 +381,81 @@
   }
 
   #status-container {
+    position: relative;
     display: flex;
     padding: 0 30px 10px 30px;
     gap: 5px;
     align-items: baseline;
   }
 
-  #status-type {
+  .status-icon {
     display: inline-block;
     width: 12px;
     height: 12px;
     border-radius: 100%;
+  }
+
+  #status-type-selector {
+    position: absolute;
+    display: flex;
+    top: -13px;
+    left: 45px;
+    flex-direction: column;
+    margin: 0;
+    padding: 10px;
+    background-color: var(--gray-200);
+    border-radius: 5px;
+  }
+
+  #status-type-selector li {
+    list-style: none;
+    overflow: hidden;
+  }
+
+  #status-type-selector li:first-child {
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+  }
+
+  #status-type-selector li:last-child {
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+  }
+
+  .status-container {
+    display: flex;
+    width: 100%;
+    padding: 5px;
+    box-sizing: border-box;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .status-container .status-icon {
+    margin-top: 3px;
+    align-self: baseline;
+  }
+
+  .status-container:hover {
+    background-color: var(--gray-300);
+  }
+
+  .status-container.checked {
+    background-color: var(--gray-400);
+  }
+
+  .status-radio {
+    display: none;
+  }
+
+  .status-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .status-info {
+    font-size: 14px;
+    font-weight: 400;
   }
 
   #status {
