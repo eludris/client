@@ -50,6 +50,7 @@
 
   let error: string;
 
+  let statusSelector: HTMLUListElement;
   let bioInput: HTMLTextAreaElement;
 
   const statusIndicatorClick = () => {
@@ -57,7 +58,11 @@
   };
 
   const bodyClick = (e: MouseEvent) => {
-    if (statusIndicatorFocused) {
+    if (
+      statusIndicatorFocused &&
+      e.target != statusSelector &&
+      !statusSelector.contains(e.target as Node)
+    ) {
       statusIndicatorFocused = false;
       e.preventDefault();
     }
@@ -193,7 +198,7 @@
             on:click|stopPropagation={statusIndicatorClick}
           />
           {#if statusIndicatorFocused}
-            <ul id="status-type-selector">
+            <ul id="status-type-selector" bind:this={statusSelector}>
               {#each statuses as [value, info]}
                 <li>
                   <label
