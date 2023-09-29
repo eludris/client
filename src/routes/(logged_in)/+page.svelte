@@ -57,7 +57,7 @@
       if (value.startsWith('/shrug')) value = value.substring(7) + ' ¯\\\\\\_(ツ)_/¯';
       value = value.replace(/@([a-z0-9_-]+)/gm, (m, username) => {
         let id = usernames[username];
-        if (id) {
+        if (id != undefined) {
           return `<@${id}>`;
         } else {
           return m;
