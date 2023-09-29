@@ -299,7 +299,6 @@
     flex-shrink: 0;
     gap: 10px;
     padding: 20px 10px;
-    height: 100%;
     margin: 0;
     background-color: var(--purple-200);
   }
@@ -318,6 +317,8 @@
       position: absolute;
       width: 80%;
       right: 0;
+      height: calc(100% - 60px);
+      box-sizing: border-box;
     }
   }
 </style>
