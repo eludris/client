@@ -156,6 +156,7 @@
     width: 100px;
     height: 70px;
     padding: 0 10px;
+    flex-shrink: 0;
   }
 
   #avatar {
