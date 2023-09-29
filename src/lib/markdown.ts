@@ -178,6 +178,9 @@ export default async (content: string): Promise<string> => {
           if (emoji.startsWith("http")) {
             return `<img src="${emoji}" class="emoji${big}" />`;
           } else {
+            if (emoji.indexOf('\u200d') < 0) {
+              emoji = emoji.replace(/\uFE0F/g, '');
+            }
             return `<img class="emoji${big}" draggable="false" alt="${emoji}" src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/${toCodePoints(emoji)}.svg" title="${emoji}"/>`;
           }
         }
