@@ -176,4 +176,13 @@
     border-radius: 5px;
     display: inline-block;
   }
+
+  :global(.md .emoji) {
+    height: 22px;
+    vertical-align: bottom;
+  }
+
+  :global(.md .emoji.big) {
+    height: 100px;
+  }
 </style>
