@@ -16,7 +16,7 @@
   let banner = $userData!.user.banner
     ? `${$userData!.instanceInfo.effis_url}/banners/${$userData?.user.banner}`
     : null;
-  let avatar: string = $userData!.user.avatar
+  let avatar = $userData!.user.avatar
     ? `${$userData!.instanceInfo.effis_url}/avatars/${$userData?.user.avatar}`
     : 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true';
   let display_name = $userData!.user.display_name;
@@ -67,10 +67,10 @@
   $: changed =
     bannerFile ||
     avatarFile ||
-    display_name != $userData!.user.display_name ||
+    (display_name || null) != $userData!.user.display_name ||
     status_type != $userData!.user.status.type.toLowerCase() ||
-    status! != $userData!.user.status.text ||
-    bio! != $userData!.user.bio;
+    (status || null) != $userData!.user.status.text ||
+    (bio || null) != $userData!.user.bio;
 
   $: console.log(changed);
   $: disableSave = saving || !!Object.keys(errors).length || !changed;
@@ -150,22 +150,24 @@
     if (avatarFile) {
       let data = await uploadFile('avatars', avatarFile[0]);
       newProfile.avatar = data.id;
+      avatar = `${$userData!.instanceInfo.effis_url}/avatars/${data.id}`;
     }
     if (bannerFile) {
       let data = await uploadFile('banners', bannerFile[0]);
       newProfile.banner = data.id;
+      banner = `${$userData!.instanceInfo.effis_url}/banners/${data.id}`;
     }
     if (display_name != $userData?.user.display_name) {
-      newProfile.display_name = display_name ?? null;
+      newProfile.display_name = display_name || null;
     }
     if (status_type.toUpperCase() != $userData?.user.status.type) {
       newProfile.status_type = status_type.toUpperCase() as StatusType;
     }
     if (status != $userData?.user.status.text) {
-      newProfile.status = status ?? null;
+      newProfile.status = status || null;
     }
     if (bio != $userData?.user.bio) {
-      newProfile.bio = bio ?? null;
+      newProfile.bio = bio || null;
     }
     await request('PATCH', '/users/profile', newProfile);
     saving = false;

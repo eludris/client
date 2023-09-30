@@ -67,8 +67,7 @@ const connect = async (userData: UserData) => {
           }
           return data;
         });
-      }
-      else if (payload.op == PayloadOP.USER_UPDATE) {
+      } else if (payload.op == PayloadOP.USER_UPDATE) {
         state.update((state) => {
           state.connected = true;
           state.users[payload.d.id] = payload.d;
@@ -140,7 +139,7 @@ const connect = async (userData: UserData) => {
 
     innerWs?.addEventListener('close', () => {
       console.warn('WebSocket connection closed, reconnecting');
-      retryConnect();
+      retryConnect(7_000);
     });
   });
 
