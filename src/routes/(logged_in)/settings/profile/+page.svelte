@@ -351,6 +351,15 @@
 {/if}
 
 <style>
+  .setting {
+    background-color: var(--purple-100);
+    padding: 20px;
+    margin: 5px;
+    border-radius: 10px;
+    gap: 5px;
+    align-items: center;
+  }
+
   .setting input,
   .setting textarea {
     border: unset;
@@ -359,14 +368,6 @@
     height: initial;
     width: initial;
     font-size: initial;
-  }
-
-  .setting {
-    background-color: var(--purple-100);
-    padding: 20px;
-    margin: 5px;
-    border-radius: 10px;
-    gap: 5px;
   }
 
   #info,
@@ -382,15 +383,21 @@
   #change-warning {
     color: var(--pink-500);
   }
+  
+  form {
+    display: flex;
+    flex-direction: column;
+    width: min(900px, 100%);
+  }
 
   #user {
     display: flex;
     flex-direction: column;
-    width: min(900px, 100%);
     margin: 10px auto;
     background-color: var(--gray-100);
     border-radius: 10px;
     overflow: visible;
+    width: 100%;
   }
 
   #banner-container {
@@ -641,12 +648,33 @@
     background-color: var(--pink-600);
   }
 
+  #save {
+    width: fit-content;
+    align-self: flex-end;
+    border: unset;
+    border-radius: 5px;
+    padding: 10px 40px;
+    margin-top: 10px;
+    font-size: 18px;
+    background-color: var(--gray-300);
+    transition: background-color ease-in-out 125ms;
+    color: var(--color-text);
+  }
+
+  #save:hover {
+    background-color: var(--gray-400);
+  }
+
+  #save:disabled {
+    background-color: var(--gray-200);
+  }
+
   @media only screen and (max-width: 1200px) {
     .setting {
-      padding: 5px;
+      padding: 20px 5px;
     }
 
-    #user {
+    form {
       width: 95%;
     }
   }
