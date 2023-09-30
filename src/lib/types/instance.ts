@@ -3,6 +3,7 @@ export interface InstanceInfo {
   description: string;
   version: string;
   message_limit: number;
+  bio_limit: number;
   oprish_url: string;
   pandemonium_url: string;
   effis_url: string;

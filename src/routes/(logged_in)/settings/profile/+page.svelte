@@ -27,20 +27,34 @@
   let bannerFile: FileList;
   let avatarFile: FileList;
 
+  let popupError = '';
+
   $: if (avatarFile) {
-    let reader = new FileReader();
-    reader.addEventListener('load', () => {
-      avatar = reader.result! as string;
-    });
-    reader.readAsDataURL(avatarFile[0]);
+    if (avatarFile[0].size > $userData!.instanceInfo.file_size) {
+      popupError = `Your avatar image cannot be bigger than ${
+        $userData!.instanceInfo.file_size / 1000000
+      }MB`;
+    } else {
+      let reader = new FileReader();
+      reader.addEventListener('load', () => {
+        avatar = reader.result! as string;
+      });
+      reader.readAsDataURL(avatarFile[0]);
+    }
   }
 
   $: if (bannerFile) {
-    let reader = new FileReader();
-    reader.addEventListener('load', () => {
-      banner = reader.result! as string;
-    });
-    reader.readAsDataURL(bannerFile[0]);
+    if (bannerFile[0].size > $userData!.instanceInfo.file_size) {
+      popupError = `Your banner image cannot be bigger than ${
+        $userData!.instanceInfo.file_size / 1000000
+      }MB`;
+    } else {
+      let reader = new FileReader();
+      reader.addEventListener('load', () => {
+        banner = reader.result! as string;
+      });
+      reader.readAsDataURL(bannerFile[0]);
+    }
   }
 
   let bioFocused = false;
@@ -48,10 +62,13 @@
 
   let saving = false;
 
-  let error: string;
+  let errors: { [field: string]: string | undefined } = {};
+
+  $: disableSave = saving || !!Object.keys(errors).length;
 
   let statusSelector: HTMLUListElement;
   let bioInput: HTMLTextAreaElement;
+  let popup: HTMLDivElement;
 
   const statusIndicatorClick = () => {
     statusIndicatorFocused = true;
@@ -65,6 +82,10 @@
     ) {
       statusIndicatorFocused = false;
     }
+    console.log('e');
+    if (popupError && e.target != popup && !popup.contains(e.target as Node)) {
+      popupDismiss();
+    }
   };
 
   const bioClick = async () => {
@@ -75,6 +96,35 @@
 
   const bioFocusOut = () => {
     bioFocused = false;
+  };
+
+  // verification
+
+  const verifyDisplayName = () => {
+    if (display_name && (display_name.length < 2 || display_name.length > 32)) {
+      errors.display_name = 'Display name must be between 2 and 32 characters long';
+    } else {
+      delete errors.display_name;
+      errors = errors; // wake up svelte
+    }
+  };
+
+  const verifyStatus = () => {
+    if (status && status.length > 150) {
+      errors.status = 'Status must be less than 150 characters long';
+    } else {
+      delete errors.status;
+      errors = errors; // wake up svelte
+    }
+  };
+
+  const verifyBio = () => {
+    if (bio && bio.length > $userData!.instanceInfo.bio_limit) {
+      errors.bio = `Bio must be less than ${$userData?.instanceInfo.bio_limit} characters long`;
+    } else {
+      delete errors.bio;
+      errors = errors; // wake up svelte
+    }
   };
 
   const uploadFile = async (bucket: string, file: File) => {
@@ -111,6 +161,10 @@
     }
     await request('PATCH', '/users/profile', newProfile);
     saving = false;
+  };
+
+  const popupDismiss = () => {
+    popupError = '';
   };
 </script>
 
@@ -184,6 +238,7 @@
               id="display-name"
               name="display-name"
               bind:value={display_name}
+              on:input={verifyDisplayName}
               placeholder={$userData.user.username}
             />
             <span id="username">{$userData.user.username}</span>
@@ -222,7 +277,13 @@
               {/each}
             </ul>
           {/if}
-          <input id="status" name="status" bind:value={status} placeholder="Nothing going on yet" />
+          <input
+            id="status"
+            name="status"
+            bind:value={status}
+            on:input={verifyStatus}
+            placeholder="Nothing going on yet"
+          />
         </span>
         <div id="bio-container" on:focusout={bioFocusOut}>
           {#if bioFocused}
@@ -230,6 +291,7 @@
               id="bio"
               name="bio"
               bind:value={bio}
+              on:input={verifyBio}
               placeholder="Nothing here yet"
               bind:this={bioInput}
             />
@@ -241,10 +303,14 @@
           {/if}
         </div>
       </div>
-      {#if error}
-        <span id="error">{error}</span>
-      {/if}
-      <button id="save" disabled={saving}>
+      <ul id="errors">
+        {#each Object.entries(errors) as [k, v] (k)}
+          {#if v}
+            <li class="error">{v}</li>
+          {/if}
+        {/each}
+      </ul>
+      <button id="save" disabled={disableSave}>
         {#if saving}
           Saving...
         {:else}
@@ -253,6 +319,16 @@
       </button>
     </form>
   </div>
+
+  {#if popupError}
+    <div id="popup-container">
+      <div id="popup" bind:this={popup}>
+        <h2 id="popup-title">Error</h2>
+        <span id="popup-message">{popupError}</span>
+        <button id="popup-dismiss" on:click={popupDismiss}>Got it</button>
+      </div>
+    </div>
+  {/if}
 {/if}
 
 <style>
@@ -375,9 +451,10 @@
   }
 
   #name-container {
-    padding-top: 10px;
     display: flex;
+    padding: 10px 5px 0 0;
     flex-direction: column;
+    flex-grow: 1;
   }
 
   #display-name {
@@ -478,12 +555,66 @@
     height: 100px;
     resize: none;
     margin: 0;
+    line-height: 20px;
   }
 
   #bio-md-container {
     width: 100%;
     min-height: 100px;
     margin: 0;
+    border-radius: 10px;
+  }
+
+  #errors {
+    display: flex;
+    margin: 0 auto;
+    width: 60%;
+    flex-direction: column;
+    color: var(--pink-700);
+  }
+
+  #popup-container {
+    position: absolute;
+    display: flex;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    background-color: #0008;
+  }
+
+  #popup {
+    display: flex;
+    border-radius: 10px;
+    flex-direction: column;
+    padding: 20px;
+    background-color: var(--gray-100);
+  }
+
+  #popup-title {
+    margin: 10px 5px;
+  }
+
+  #popup-message {
+    margin: 10px;
+  }
+
+  #popup-dismiss {
+    width: fit-content;
+    align-self: flex-end;
+    border: unset;
+    border-radius: 5px;
+    padding: 5px 7px;
+    margin-top: 10px;
+    font-size: 14px;
+    background-color: var(--pink-500);
+    transition: background-color ease-in-out 125ms;
+  }
+
+  #popup-dismiss:hover {
+    background-color: var(--pink-600);
   }
 
   @media only screen and (max-width: 1200px) {

@@ -7,6 +7,7 @@ import markdown from '$lib/markdown';
 import type { UserData } from './types/ui/user';
 import type { State } from './types/ui/state';
 import { request } from './request';
+import type { InstanceInfo } from './types/instance';
 
 const state = writable<State>({ connected: false, messages: [], users: [] });
 
@@ -39,6 +40,7 @@ const connect = async (userData: UserData) => {
     innerWs?.addEventListener('message', (msg: MessageEvent) => {
       const payload: IncomingPayload = JSON.parse(msg.data);
 
+      let instanceInfo: InstanceInfo;
       if (payload.op == PayloadOP.HELLO) {
         setTimeout(() => {
           ws?.send(JSON.stringify({ op: PayloadOP.PING }));
@@ -48,6 +50,7 @@ const connect = async (userData: UserData) => {
           );
         }, payload.d.heartbeat_interval * Math.random());
         ws = innerWs;
+        instanceInfo = payload.d.instance_info;
         ws?.send(JSON.stringify({ op: PayloadOP.AUTHENTICATE, d: userData.session.token }));
       } else if (payload.op == PayloadOP.AUTHENTICATED) {
         state.update((state) => {
@@ -57,8 +60,13 @@ const connect = async (userData: UserData) => {
           state.users[payload.d.user.id] = payload.d.user;
           return state;
         });
-        data.update((data) => { if (data) data.user = payload.d.user; return data; });
-        ws = innerWs;
+        data.update((data) => {
+          if (data) {
+            data.user = payload.d.user;
+            if (instanceInfo) data.instanceInfo = instanceInfo;
+          }
+          return data;
+        });
       }
       else if (payload.op == PayloadOP.USER_UPDATE) {
         state.update((state) => {
