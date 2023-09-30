@@ -271,6 +271,7 @@
     padding: 20px;
     margin: 5px;
     border-radius: 10px;
+    gap: 5px;
   }
 
   #info {

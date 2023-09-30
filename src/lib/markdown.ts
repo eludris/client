@@ -114,7 +114,9 @@ const unScrewHtml = (html: string): string => {
     if (/^(?:>|#|- |\d+\. )/.test(currentLine)) return match;
     if (
       preNewline.split('```').length % 2 == 1 &&
-      preNewline.replace(/```/gm, '').split('`').length % 2 == 1
+      preNewline.replace(/```/gm, '').split('`').length % 2 == 1 &&
+      preNewline.split('$$').length % 2 == 1 &&
+      preNewline.replace(/$$/gm, '').split('`').length % 2 == 1
     ) {
       return match.substring(0, 2) + match.substring(2).replace(/\n/g, '\\\n');
     }
