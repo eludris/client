@@ -1,7 +1,7 @@
 <script lang="ts">
   import userData from '$lib/user_data';
   import type { UpdateUserProfile } from '$lib/types/profile';
-  import { request } from '$lib/request';
+  import { request, type RequestErr } from '$lib/request';
   import Markdown from '$lib/components/Markdown.svelte';
   import { tick } from 'svelte';
   import type { StatusType } from '$lib/types/user';
@@ -24,8 +24,8 @@
   let status = $userData!.user.status.text;
   let bio = $userData!.user.bio;
 
-  let bannerFile: FileList;
-  let avatarFile: FileList;
+  let bannerFile: FileList | undefined = undefined;
+  let avatarFile: FileList | undefined = undefined;
 
   let popupError = '';
 
@@ -150,12 +150,12 @@
     if (avatarFile) {
       let data = await uploadFile('avatars', avatarFile[0]);
       newProfile.avatar = data.id;
-      avatar = `${$userData!.instanceInfo.effis_url}/avatars/${data.id}`;
+      avatarFile = undefined;
     }
     if (bannerFile) {
       let data = await uploadFile('banners', bannerFile[0]);
       newProfile.banner = data.id;
-      banner = `${$userData!.instanceInfo.effis_url}/banners/${data.id}`;
+      bannerFile = undefined;
     }
     if (display_name != $userData?.user.display_name) {
       newProfile.display_name = display_name || null;
@@ -169,7 +169,12 @@
     if (bio != $userData?.user.bio) {
       newProfile.bio = bio || null;
     }
-    await request('PATCH', '/users/profile', newProfile);
+    try {
+      await request('PATCH', '/users/profile', newProfile);
+    } catch (e) {
+      let err = e as RequestErr;
+      popupError = err.message;
+    }
     saving = false;
   };
 
@@ -383,7 +388,7 @@
   #change-warning {
     color: var(--pink-500);
   }
-  
+
   form {
     display: flex;
     flex-direction: column;
