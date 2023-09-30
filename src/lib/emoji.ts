@@ -1907,6 +1907,7 @@ export const emojiDictionary: { [emoji: string]: string } = {
     halal: "https://cdn.discordapp.com/emojis/1098216622621200464.webp?quality=lossless",
     haram: "https://cdn.discordapp.com/emojis/1098216666745282670.webp?quality=lossless",
     woof: "https://media.tenor.com/ljcdej9JsBsAAAAd/vanitas-vanitas-no-carte.gif",
-    uwoogh: "https://cdn.discordapp.com/attachments/980412957794136087/1157332050056060928/suzUOOOOHHHHHHHH.png"
+    uwoogh: "https://cdn.discordapp.com/attachments/980412957794136087/1157332050056060928/suzUOOOOHHHHHHHH.png",
+    kaldance: "https://media.discordapp.net/stickers/1143840253476614144.png?size=160",
   }
 }
