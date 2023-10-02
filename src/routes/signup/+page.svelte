@@ -15,6 +15,7 @@
   let username = '';
   let email = '';
   let password = '';
+  let passwordConfirm = '';
   let instanceURL = env.PUBLIC_INSTANCE_URL ?? 'https://eludris.tooty.xyz';
   let error = '';
   let requesting = false;
@@ -73,6 +74,10 @@
     validateInputs();
   };
 
+  const onPasswordConfirmInput = () => {
+    validateInputs();
+  };
+
   const validateInputs = () => {
     if (requesting) {
       return;
@@ -84,6 +89,8 @@
       error = 'You must pass a valid email';
     } else if (password.length < 8) {
       error = 'Your password must be at least 8 characters long';
+    } else if (password != passwordConfirm) {
+      error = 'Your passwords must match';
     } else {
       error = '';
     }
@@ -108,6 +115,14 @@
       on:input={onPasswordInput}
       name="password"
       placeholder="Password"
+      type="password"
+    />
+    <label for="password-confirm">Confirm your password</label>
+    <input
+      bind:value={passwordConfirm}
+      on:input={onPasswordConfirmInput}
+      name="password-confirm"
+      placeholder="Confirm your password"
       type="password"
     />
     {#if error}
