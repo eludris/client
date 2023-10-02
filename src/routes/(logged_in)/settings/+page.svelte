@@ -226,7 +226,7 @@
           {$userData.user.email?.replace(/[^@.]/gm, '*')}
         </span>
       {/if}
-      <button on:click={toggleEmail}>{showEmail ? 'Show' : 'Hide'}</button>
+      <button on:click={toggleEmail}>{showEmail ? 'Hide' : 'Show'}</button>
     </span>
     <button class="edit-button" on:click={editEmail}>
       <!-- https://icon-sets.iconify.design/material-symbols/edit/ -->
