@@ -49,7 +49,7 @@ export const request = async (
       } else if (err.type == 'VALIDATION') {
         msg = `Invalid ${err.value_name}: ${err.info}`;
       } else if (err.type == 'RATE_LIMITED') {
-        msg = `Rate limited, try again after ${err.retry_after * 1000}s`;
+        msg = `Rate limited, try again after ${err.retry_after / 1000}s`;
       } else if (err.type == 'SERVER') {
         msg = `${err.status}: ${err.info}`;
       }

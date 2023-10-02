@@ -345,6 +345,7 @@
 
   {#if popupError}
     <Popup on:dismiss={popupDismiss}>
+      <span slot="title">Error</span>
       {popupError}
     </Popup>
   {/if}

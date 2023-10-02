@@ -5,15 +5,21 @@
 
   let popup: HTMLDivElement;
 
+  const containerClick = (e: MouseEvent) => {
+    if (e.target != popup && !popup.contains(e.target as Node)) {
+      popupDismiss();
+    }
+  };
+
   const popupDismiss = () => {
     dispatch('dismiss');
   };
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div id="popup-container" on:click={popupDismiss}>
+<div id="popup-container" on:click={containerClick}>
   <div id="popup" bind:this={popup}>
-    <h2 id="popup-title">Error</h2>
+    <h2 id="popup-title"><slot name="title">Notice</slot></h2>
     <span id="popup-message"><slot /></span>
     <slot name="control">
       <button id="popup-dismiss" on:click={popupDismiss}>Got it</button>
@@ -50,7 +56,7 @@
     margin: 10px;
   }
 
-  #popup-dismiss {
+  :global(#popup-dismiss) {
     width: fit-content;
     align-self: flex-end;
     border: unset;
