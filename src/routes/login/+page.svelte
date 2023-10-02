@@ -7,6 +7,7 @@
   import type { User } from '$lib/types/user';
   import type { SessionCreated } from '$lib/types/session';
   import { env } from '$env/dynamic/public';
+  import getPlatform from '$lib/platform';
 
   let username = '';
   let password = '';
@@ -30,7 +31,7 @@
         let session: SessionCreated = await request(
           'POST',
           'sessions',
-          { identifier: username, password, platform: 'linox', client: 'pengin' },
+          { identifier: username, password, platform: getPlatform(), client: 'pengin' },
           { apiUrl: instanceURL }
         );
         let user: User = await request('GET', 'users/@me', null, {
