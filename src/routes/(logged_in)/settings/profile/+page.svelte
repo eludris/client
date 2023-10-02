@@ -5,6 +5,7 @@
   import Markdown from '$lib/components/Markdown.svelte';
   import { tick } from 'svelte';
   import type { StatusType } from '$lib/types/user';
+  import Popup from '$lib/components/Popup.svelte';
 
   let statuses = [
     ['Online', ''],
@@ -29,31 +30,33 @@
 
   let popupError = '';
 
-  $: if (avatarFile) {
-    if (avatarFile[0].size > $userData!.instanceInfo.file_size) {
-      popupError = `Your avatar image cannot be bigger than ${
-        $userData!.instanceInfo.file_size / 1000000
-      }MB`;
-    } else {
-      let reader = new FileReader();
-      reader.addEventListener('load', () => {
-        avatar = reader.result! as string;
-      });
-      reader.readAsDataURL(avatarFile[0]);
-    }
-  }
-
   $: if (bannerFile) {
     if (bannerFile[0].size > $userData!.instanceInfo.file_size) {
       popupError = `Your banner image cannot be bigger than ${
         $userData!.instanceInfo.file_size / 1000000
       }MB`;
+      bannerFile = undefined;
     } else {
       let reader = new FileReader();
       reader.addEventListener('load', () => {
         banner = reader.result! as string;
       });
       reader.readAsDataURL(bannerFile[0]);
+    }
+  }
+
+  $: if (avatarFile) {
+    if (avatarFile[0].size > $userData!.instanceInfo.file_size) {
+      popupError = `Your avatar image cannot be bigger than ${
+        $userData!.instanceInfo.file_size / 1000000
+      }MB`;
+      avatarFile = undefined;
+    } else {
+      let reader = new FileReader();
+      reader.addEventListener('load', () => {
+        avatar = reader.result! as string;
+      });
+      reader.readAsDataURL(avatarFile[0]);
     }
   }
 
@@ -77,7 +80,6 @@
 
   let statusSelector: HTMLUListElement;
   let bioInput: HTMLTextAreaElement;
-  let popup: HTMLDivElement;
 
   const statusIndicatorClick = () => {
     statusIndicatorFocused = true;
@@ -90,9 +92,6 @@
       !statusSelector.contains(e.target as Node)
     ) {
       statusIndicatorFocused = false;
-    }
-    if (popupError && e.target != popup && !popup.contains(e.target as Node)) {
-      popupDismiss();
     }
   };
 
@@ -147,15 +146,15 @@
   const updateProfile = async () => {
     saving = true;
     let newProfile: UpdateUserProfile = {};
-    if (avatarFile) {
-      let data = await uploadFile('avatars', avatarFile[0]);
-      newProfile.avatar = data.id;
-      avatarFile = undefined;
-    }
     if (bannerFile) {
       let data = await uploadFile('banners', bannerFile[0]);
       newProfile.banner = data.id;
       bannerFile = undefined;
+    }
+    if (avatarFile) {
+      let data = await uploadFile('avatars', avatarFile[0]);
+      newProfile.avatar = data.id;
+      avatarFile = undefined;
     }
     if (display_name != $userData?.user.display_name) {
       newProfile.display_name = display_name || null;
@@ -345,13 +344,9 @@
   </div>
 
   {#if popupError}
-    <div id="popup-container">
-      <div id="popup" bind:this={popup}>
-        <h2 id="popup-title">Error</h2>
-        <span id="popup-message">{popupError}</span>
-        <button id="popup-dismiss" on:click={popupDismiss}>Got it</button>
-      </div>
-    </div>
+    <Popup on:dismiss={popupDismiss}>
+      {popupError}
+    </Popup>
   {/if}
 {/if}
 
@@ -607,50 +602,6 @@
     width: 60%;
     flex-direction: column;
     color: var(--pink-700);
-  }
-
-  #popup-container {
-    position: absolute;
-    display: flex;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    align-items: center;
-    justify-content: center;
-    background-color: #0008;
-  }
-
-  #popup {
-    display: flex;
-    border-radius: 10px;
-    flex-direction: column;
-    padding: 20px;
-    background-color: var(--gray-100);
-  }
-
-  #popup-title {
-    margin: 10px 5px;
-  }
-
-  #popup-message {
-    margin: 10px;
-  }
-
-  #popup-dismiss {
-    width: fit-content;
-    align-self: flex-end;
-    border: unset;
-    border-radius: 5px;
-    padding: 5px 7px;
-    margin-top: 10px;
-    font-size: 14px;
-    background-color: var(--pink-500);
-    transition: background-color ease-in-out 125ms;
-  }
-
-  #popup-dismiss:hover {
-    background-color: var(--pink-600);
   }
 
   #save {
