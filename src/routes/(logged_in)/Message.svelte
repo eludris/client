@@ -78,8 +78,10 @@
 >
   <div class="avatar-container">
     {#if message.showAuthor}
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
       <img
         on:contextmenu|preventDefault|stopPropagation={onAuthorContextMenu}
+        on:click|preventDefault|stopPropagation={onAuthorContextMenu}
         src={message.author.avatar
           ? `${$userData?.instanceInfo.effis_url}/avatars/${message.author.avatar}`
           : 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true'}
