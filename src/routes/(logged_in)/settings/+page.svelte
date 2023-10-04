@@ -171,7 +171,7 @@
   const verifyAccount = async () => {
     saving = true;
     try {
-      await request('POST', `/users/verify?code=${code}`, { empty: true });
+      await request('POST', `/users/verify?code=${code}`, {}, { empty: true });
     } catch (e) {
       let err = e as RequestErr;
       error = err.message;
@@ -365,7 +365,7 @@
               ><em>Check your email for a verification code</em></span
             >
             <label for="code">Verification code</label>
-            <input name="code" placeholder="Code" bind:value={code} />
+            <input name="code" placeholder="Code" bind:value={code} on:input={codeInput} />
             {#if error}
               <span class="error">{error}</span>
             {/if}
@@ -375,8 +375,7 @@
             <button
               class="popup-confirm"
               on:click={verifyAccount}
-              disabled={code.length != 6 || !!error || saving}
-              on:input={codeInput}>Verify</button
+              disabled={code.length != 6 || !!error || saving}>Verify</button
             >
           </span>
         </Popup>
