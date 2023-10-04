@@ -114,7 +114,7 @@ const connect = async (userData: UserData) => {
           const message = {
             renderedContent: content,
             showAuthor: payload.d.author.id != lastAuthor,
-            mentioned: payload.d.content.toLowerCase().split(`<@${userData.user.id}>`).length > 1,
+            mentioned: new RegExp(`(?<!\)<@${userData.user.id}>`, 'gm').test(payload.d.content),
             ...payload.d
           };
           if (

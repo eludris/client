@@ -74,7 +74,9 @@ const unScrewHtml = (html: string): string => {
     // make blockquotes only one line long
     .replace(/^>.*$/gm, '$&\n\n')
     // solve weird bug with whitespace getting magically removed sometimes
-    .replace(/`( +[^`\s]+? +)`/gm, '` $1 `');
+    .replace(/`( +[^`\s]+? +)`/gm, '` $1 `')
+    // ensure backslashes escaping mentions etc are retained
+    .replace(/\\([:@<>#])/gm, '\\\\$1');
 
   // we have to reassign to get the updated string
   // ensure ``` s have a new line before and after them
@@ -158,7 +160,7 @@ export default async (content: string): Promise<string> => {
     .then((res) =>
       res.replace(
         /\|\|(.+?)\|\|/gm,
-        '<span class="spoiler" onclick="this.classList.add(\'unspoilered\')">$1</span>',
+        '<span class="spoiler" onclick="this.classList.add(\'unspoilered\')">$1</span>'
       )
     )
     .then((res) =>
@@ -166,7 +168,7 @@ export default async (content: string): Promise<string> => {
       res.replace(/\n\\<\/p>\n<(table|div|h[1-6])/gm, '\n<br>\n</p>\n<$1')
     )
     .then((res) => {
-      return res.replace(/&#x3C;@(\d+)>/gm, (m, id, offset) => {
+      return res.replace(/(?<!\\)&#x3C;@(\d+)>/gm, (m, id, offset) => {
         let user = get(state).users[id];
         if (user && res.substring(0, offset).split(/<\\?code>/gm).length % 2 == 1) {
           return `<span class="mention">@${user.display_name ?? user.username}</span>`;
@@ -175,11 +177,11 @@ export default async (content: string): Promise<string> => {
       });
     })
     .then((res) => {
-      let big = !content.replace(/:[a-zA-Z0-9_-]+:/gm, '').trim() ? ' big' : '';
+      let big = !content.replace(/(?<!\\):[a-zA-Z0-9_-]+:/gm, '').trim() ? ' big' : '';
       if (big && content.split(':').length > 21) {
         big = '';
       }
-      return res.replace(/:([a-zA-Z0-9_-]+):/gm, (m, emojiName, offset) => {
+      return res.replace(/(?<!\\):([a-zA-Z0-9_-]+):/gm, (m, emojiName, offset) => {
         let emoji = emojiDictionary[emojiName];
         if (emoji && res.substring(0, offset).split(/<\\?code>/gm).length % 2 == 1) {
           if (emoji.startsWith('http')) {
@@ -195,5 +197,6 @@ export default async (content: string): Promise<string> => {
         }
         return m;
       });
-    });
+    })
+    .then((res) => res.replace(/\\([:@&#x3C;>#])/gm, '$1'));
 };
