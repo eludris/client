@@ -25,8 +25,8 @@
   let status = $userData!.user.status.text;
   let bio = $userData!.user.bio;
 
-  let bannerFile: FileList | undefined = undefined;
-  let avatarFile: FileList | undefined = undefined;
+  let bannerFile: FileList | undefined | null = undefined;
+  let avatarFile: FileList | undefined | null = undefined;
 
   let popupError = '';
 
@@ -45,6 +45,11 @@
     }
   }
 
+  const resetBanner = () => {
+    banner = null;
+    bannerFile = null;
+  };
+
   $: if (avatarFile) {
     if (avatarFile[0].size > $userData!.instanceInfo.file_size) {
       popupError = `Your avatar image cannot be bigger than ${
@@ -60,6 +65,11 @@
     }
   }
 
+  const resetAvatar = () => {
+    avatar = 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true';
+    avatarFile = null;
+  };
+
   let bioFocused = false;
   let statusIndicatorFocused = false;
 
@@ -68,8 +78,8 @@
   let errors: { [field: string]: string | undefined } = {};
 
   $: changed =
-    bannerFile ||
-    avatarFile ||
+    bannerFile !== undefined ||
+    avatarFile !== undefined ||
     (display_name || null) != $userData!.user.display_name ||
     status_type != $userData!.user.status.type.toLowerCase() ||
     (status || null) != $userData!.user.status.text ||
@@ -146,14 +156,22 @@
   const updateProfile = async () => {
     saving = true;
     let newProfile: UpdateUserProfile = {};
-    if (bannerFile) {
-      let data = await uploadFile('banners', bannerFile[0]);
-      newProfile.banner = data.id;
+    if (bannerFile !== undefined) {
+      if (bannerFile) {
+        let data = await uploadFile('banners', bannerFile[0]);
+        newProfile.banner = data.id;
+      } else {
+        newProfile.banner = null;
+      }
       bannerFile = undefined;
     }
-    if (avatarFile) {
-      let data = await uploadFile('avatars', avatarFile[0]);
-      newProfile.avatar = data.id;
+    if (avatarFile !== undefined) {
+      if (avatarFile) {
+        let data = await uploadFile('avatars', avatarFile[0]);
+        newProfile.avatar = data.id;
+      } else {
+        newProfile.avatar = null;
+      }
       avatarFile = undefined;
     }
     if (display_name != $userData?.user.display_name) {
@@ -221,6 +239,9 @@
                 /></svg
               >
               <em>Max {$userData.instanceInfo.file_size / 1000000}MB</em>
+              {#if banner}
+                <button on:click={resetBanner}>Reset</button>
+              {/if}
             </span>
             <input
               id="image-input"
@@ -245,14 +266,17 @@
                     /></svg
                   >
                   <em>Max {$userData.instanceInfo.file_size / 1000000}MB</em>
+                  <input
+                    id="image-input"
+                    name="avatar"
+                    type="file"
+                    accept="image/*"
+                    bind:files={avatarFile}
+                  />
+                  {#if avatar != 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true'}
+                    <button on:click={resetAvatar}>Reset</button>
+                  {/if}
                 </span>
-                <input
-                  id="image-input"
-                  name="avatar"
-                  type="file"
-                  accept="image/*"
-                  bind:files={avatarFile}
-                />
               </span>
             </span>
           </span>
@@ -460,6 +484,7 @@
     width: 100%;
     height: 100%;
     opacity: 0;
+    cursor: pointer;
   }
 
   #image-input-hover {
@@ -480,6 +505,18 @@
 
   #image-input-wrapper:hover #image-input-hover {
     opacity: 1;
+  }
+
+  #image-input-hover button {
+    background-color: unset;
+    border: unset;
+    color: var(--pink-700);
+    z-index: 2;
+    cursor: pointer;
+  }
+
+  #image-input-hover button:hover {
+    text-decoration: underline;
   }
 
   #name-container {
@@ -614,7 +651,7 @@
     margin-top: 10px;
     font-size: 18px;
     background-color: var(--gray-300);
-    transition: background-color ease-in-out 125ms;
+    transition: background-color ease-in-out 125ms, color ease-in-out 125ms;
     color: var(--color-text);
   }
 
@@ -624,6 +661,7 @@
 
   #save:disabled {
     background-color: var(--gray-200);
+    color: #aaa;
   }
 
   @media only screen and (max-width: 1200px) {
