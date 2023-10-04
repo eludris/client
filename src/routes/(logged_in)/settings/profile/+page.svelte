@@ -437,6 +437,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    height: 100%;
   }
 
   #main-info-container {
