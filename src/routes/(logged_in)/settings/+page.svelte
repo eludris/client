@@ -23,6 +23,7 @@
   let email = '';
   let newPassword = '';
   let confirmPassword = '';
+  let code = '';
 
   const usernameInput = () => {
     username = username.toLowerCase().trim();
@@ -70,6 +71,11 @@
     }
   };
 
+  const codeInput = () => {
+    code = code.trim();
+    error = '';
+  };
+
   let password = '';
 
   const toggleEmail = () => {
@@ -86,6 +92,10 @@
 
   const editPassword = () => {
     edit = 'password';
+  };
+
+  const verifyCode = () => {
+    edit = 'verify';
   };
 
   const popupDismiss = () => {
@@ -158,6 +168,22 @@
     popupDismiss();
   };
 
+  const verifyAccount = async () => {
+    saving = true;
+    try {
+      await request('POST', `/users/verify?code=${code}`, { empty: true });
+    } catch (e) {
+      let err = e as RequestErr;
+      error = err.message;
+      saving = false;
+      return;
+    }
+    saving = false;
+    code = '';
+    $userData!.user.verified = true;
+    popupDismiss();
+  };
+
   const logOut = () => {
     userData.set(null);
     goto('/login');
@@ -169,7 +195,7 @@
     <img src={avatar} alt="Your avatar" id="avatar" />
     <span id="username"> {$userData.user.display_name || $userData.user.username}</span>
   </div>
-  <div class="setting">
+  <div class="setting account-info">
     <span class="current">
       <h3>Username</h3>
       <span>
@@ -214,7 +240,7 @@
       </Popup>
     {/if}
   </div>
-  <div class="setting">
+  <div class="setting account-info">
     <span class="current">
       <h3>Email</h3>
       {#if showEmail}
@@ -266,7 +292,7 @@
       </Popup>
     {/if}
   </div>
-  <div class="setting">
+  <div class="setting account-info">
     <span class="current">
       <h3>Password</h3>
       <span> •••••••••••• </span>
@@ -317,6 +343,46 @@
       </Popup>
     {/if}
   </div>
+  {#if $userData.instanceInfo.email_address && !$userData.user.verified}
+    <div id="verify" class="setting account-info">
+      <!-- https://icon-sets.iconify.design/mdi/alert/ -->
+      <h2 class="verification-warning">
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24"
+          ><path fill="currentColor" d="M13 14h-2V9h2m0 9h-2v-2h2M1 21h22L12 2L1 21Z" /></svg
+        >
+        Your account has not been verified.
+      </h2>
+      <span>
+        Unverified accounts get deleted after 7 days, please verify your account to maintain access
+        to it
+      </span>
+      <button id="verify-button" on:click={verifyCode}>Verify Account</button>
+      {#if edit == 'verify'}
+        <Popup on:dismiss={popupDismiss}>
+          <span slot="title">Verify your account</span>
+          <div class="popup-body">
+            <span style="text-align: center;"
+              ><em>Check your email for a verification code</em></span
+            >
+            <label for="code">Verification code</label>
+            <input name="code" placeholder="Code" bind:value={code} />
+            {#if error}
+              <span class="error">{error}</span>
+            {/if}
+          </div>
+          <span class="popup-control" slot="control">
+            <button class="popup-dismiss" on:click={popupDismiss}>Nevermind</button>
+            <button
+              class="popup-confirm"
+              on:click={verifyAccount}
+              disabled={code.length != 6 || !!error || saving}
+              on:input={codeInput}>Verify</button
+            >
+          </span>
+        </Popup>
+      {/if}
+    </div>
+  {/if}
   <div>
     <button id="logout" on:click={logOut}>
       <!-- https://icon-sets.iconify.design/mdi/exit-to-app/ -->
@@ -347,11 +413,44 @@
     font-size: 20px;
   }
 
-  .setting {
+  .account-info {
     flex-direction: row;
     background-color: var(--gray-200);
     padding: 10px;
     border-radius: 10px;
+  }
+
+  #verify {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px;
+  }
+
+  .verification-warning {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    color: var(--pink-500);
+    font-size: 20px;
+    margin: 0;
+  }
+
+  #verify-button {
+    border: unset;
+    border-radius: 5px;
+    padding: 10px 20px;
+    margin-top: 10px;
+    font-size: 18px;
+    background-color: var(--gray-300);
+    transition: background-color ease-in-out 125ms;
+    color: var(--color-text);
+  }
+
+  #verify-button:hover {
+    background-color: var(--gray-400);
   }
 
   h3 {
@@ -373,7 +472,7 @@
     font-size: 18px;
     background-color: var(--gray-300);
     transition: background-color ease-in-out 125ms;
-    color: var(--color-text);
+    color: #ccc;
     height: 40px;
     cursor: pointer;
   }
@@ -465,15 +564,15 @@
     padding: 10px 20px;
     margin-top: 10px;
     font-size: 18px;
-    background-color: var(--gray-300);
+    background-color: var(--pink-400);
     transition: background-color ease-in-out 125ms;
     align-items: center;
     gap: 5px;
-    color: var(--color-text);
+    color: #ccc;
   }
 
   #logout:hover {
-    background-color: var(--gray-400);
+    background-color: var(--pink-500);
   }
 
   @media only screen and (max-width: 1200px) {

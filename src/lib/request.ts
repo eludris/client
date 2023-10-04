@@ -8,6 +8,7 @@ userData.subscribe((d) => (data = d));
 export interface RequestOptions {
   apiUrl?: string;
   token?: string;
+  empty?: boolean;
 }
 
 export interface RequestErr {
@@ -36,7 +37,10 @@ export const request = async (
     body: body ? JSON.stringify(body) : null
   });
   if (resp.status >= 200 && resp.status < 300) {
-    return await resp.json();
+    if (options?.empty) {
+      return await resp.json();
+    }
+    return;
   }
   let err = await resp
     .json()
