@@ -1,8 +1,46 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import Markdown from '$lib/components/Markdown.svelte';
+  import { request } from '$lib/request';
   import userData from '$lib/user_data';
+
+  let statusIndicatorFocused = false;
+  let statuses = [
+    ['Online', ''],
+    ['Idle', ''],
+    ['Busy', 'You will not get any notifications'],
+    ['Offline', 'You will appear offline to other users']
+  ];
+  let statusSelector: HTMLUListElement;
+
+  let status_type = $userData!.user.status.type.toLowerCase();
+
+  const showStatusSwitcher = () => {
+    statusIndicatorFocused = true;
+  };
+
+  const updateStatus = async (status: string) => {
+    statusIndicatorFocused = false;
+    status_type = status.toUpperCase();
+    if (status_type != $userData!.user.status.type) {
+      try {
+        await request('PATCH', '/users/profile', { status_type });
+      } catch {}
+    }
+  };
+
+  const bodyClick = (e: MouseEvent) => {
+    if (
+      statusIndicatorFocused &&
+      e.target != statusSelector &&
+      !statusSelector.contains(e.target as Node)
+    ) {
+      statusIndicatorFocused = false;
+    }
+  };
 </script>
+
+<svelte:body on:click|preventDefault|stopPropagation={bodyClick} />
 
 <div id="options-div">
   <div id="instance-info">
@@ -19,7 +57,30 @@
     {/if}
   </div>
   <span id="user-info" class="user current-user">
-    <span class="user-avatar-container">
+    {#if statusIndicatorFocused}
+      <ul id="status-type-selector" bind:this={statusSelector}>
+        {#each statuses as [value, info]}
+          <li>
+            <label class="status-container {status_type == value.toLowerCase() ? 'checked' : ''}">
+              <span class="status-icon status-indicator {value.toLowerCase()}" />
+              <input
+                name="notifications"
+                class="status-radio"
+                type="radio"
+                {value}
+                on:click={async () => await updateStatus(value)}
+              />
+              <span class="status-text">
+                {value}
+                <span class="status-info">{info}</span>
+              </span>
+            </label>
+          </li>
+        {/each}
+      </ul>
+    {/if}
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <span class="user-avatar-container" on:click={showStatusSwitcher}>
       <img
         class="user-avatar"
         src={$userData?.user.avatar
@@ -185,6 +246,10 @@
     white-space: nowrap;
   }
 
+  #user-info {
+    position: relative;
+  }
+
   #warning {
     position: absolute;
     display: inline-block;
@@ -192,7 +257,80 @@
     height: 10px;
     border-radius: 100%;
     background-color: var(--pink-500);
-    top: -5px;
-    right: -5px;
+    top: 10px;
+    right: 10px;
+  }
+
+  .status-icon {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 100%;
+    flex-shrink: 0;
+  }
+
+  #status-type-selector {
+    position: absolute;
+    display: flex;
+    top: 0;
+    left: 50px;
+    flex-direction: column;
+    margin: 0;
+    padding: 10px;
+    background-color: var(--gray-200);
+    border-radius: 5px;
+    width: 200px;
+    z-index: 2;
+  }
+
+  #status-type-selector li {
+    list-style: none;
+    overflow: hidden;
+  }
+
+  #status-type-selector li:first-child {
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+  }
+
+  #status-type-selector li:last-child {
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+  }
+
+  .status-container {
+    display: flex;
+    width: 100%;
+    padding: 5px;
+    box-sizing: border-box;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .status-container .status-icon {
+    margin-top: 3px;
+    align-self: baseline;
+  }
+
+  .status-container:hover {
+    background-color: var(--gray-300);
+  }
+
+  .status-container.checked {
+    background-color: var(--gray-400);
+  }
+
+  .status-radio {
+    display: none;
+  }
+
+  .status-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .status-info {
+    font-size: 14px;
+    font-weight: 400;
   }
 </style>
