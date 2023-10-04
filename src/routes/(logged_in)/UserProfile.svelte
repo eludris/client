@@ -18,7 +18,7 @@
   let avatar = user.avatar
     ? `${$userData!.instanceInfo.effis_url}/avatars/${user.avatar}`
     : 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true';
-  let display_name = user.display_name;
+  let display_name = user.display_name || user.username;
   let status_type = user.status.type.toLowerCase();
   let status = user.status.text;
   let bio = user.bio;
