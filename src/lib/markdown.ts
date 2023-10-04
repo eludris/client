@@ -11,7 +11,7 @@ import { visit } from 'unist-util-visit';
 import data from '$lib/user_data';
 import state from './ws';
 import { get } from 'svelte/store';
-import { emojiDictionary, toCodePoints } from './emoji'
+import { emojiDictionary, toCodePoints } from './emoji';
 
 let effisHost: string | undefined = undefined;
 
@@ -160,13 +160,12 @@ export default async (content: string): Promise<string> => {
         /\|\|(.+?)\|\|/gm,
         '<span class="spoiler" onclick="this.style.color = \'var(--color-text)\';this.style.cursor = \'unset\'">$1</span>'
       )
-    ).then((res) =>
+    )
+    .then((res) =>
       // Prevents backslashes from rendering in newline markdown before tables/katex blocks etc.
-      res.replace(
-        /\n\\<\/p>\n<(table|div|h[1-6])/gm,
-        '\n<br>\n</p>\n<$1'
-      )
-    ).then((res) => {
+      res.replace(/\n\\<\/p>\n<(table|div|h[1-6])/gm, '\n<br>\n</p>\n<$1')
+    )
+    .then((res) => {
       return res.replace(/&#x3C;@(\d+)>/gm, (m, id, offset) => {
         let user = get(state).users[id];
         if (user && res.substring(0, offset).split(/<\\?code>/gm).length % 2 == 1) {
@@ -183,16 +182,18 @@ export default async (content: string): Promise<string> => {
       return res.replace(/:([a-zA-Z0-9_-]+):/gm, (m, emojiName, offset) => {
         let emoji = emojiDictionary[emojiName];
         if (emoji && res.substring(0, offset).split(/<\\?code>/gm).length % 2 == 1) {
-          if (emoji.startsWith("http")) {
+          if (emoji.startsWith('http')) {
             return `<img src="${emoji}" class="emoji${big}" />`;
           } else {
             if (emoji.indexOf('\u200d') < 0) {
               emoji = emoji.replace(/\uFE0F/g, '');
             }
-            return `<img class="emoji${big}" draggable="false" alt="${emoji}" src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/${toCodePoints(emoji)}.svg" title="${emoji}"/>`;
+            return `<img class="emoji${big}" draggable="false" alt="${emoji}" src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/${toCodePoints(
+              emoji
+            )}.svg" title="${emoji}"/>`;
           }
         }
         return m;
-      })
+      });
     });
 };

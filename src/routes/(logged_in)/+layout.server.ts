@@ -12,17 +12,17 @@ const facts = [
   'Coffee is kinda pog',
   'The name pengin (old client name) originally started as a joke about linux users while watching <a href="https://cdn.eludris.gay/static/pengin.mp4" target="_blank">this video</a> on loop',
   'ggVG is a sensible keybind.',
-  'It\'s been a long night and I can feel your anger',
+  "It's been a long night and I can feel your anger",
   'wei wei wei wei',
   'The only thing that you gotta know is that I do what it takes do what it takes!',
   'Kei nario nazasu',
   'This is getting a bit Derailed',
-  'It\'s quite sad- it\'s quite sad...',
+  "It's quite sad- it's quite sad...",
   'Life is a row of blocks in a menagerie of knights on a funny ark',
-  'Guys I\'m a lobster',
+  "Guys I'm a lobster",
   'Bob Bobster',
   '<span style="background-color: hsl(235 calc(1*85.6%) 64.7%/0.3); padding: 0 2px; border-radius: 3px;">@Duffelbag</span> eval',
-  'One two three four five once I caught a fish alive',
+  'One two three four five once I caught a fish alive'
 ];
 
 export function load() {

@@ -37,7 +37,7 @@ export const request = async (
     body: body ? JSON.stringify(body) : null
   });
   if (resp.status >= 200 && resp.status < 300) {
-    if (options?.empty) {
+    if (!options?.empty) {
       return await resp.json();
     }
     return;

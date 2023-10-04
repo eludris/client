@@ -1,4 +1,4 @@
-import { browser } from "$app/environment";
+import { browser } from '$app/environment';
 
 export default () => {
   if (!browser) return;
@@ -11,7 +11,10 @@ export default () => {
     return 'macos';
   } else if (userAgent.indexOf('android') != -1) {
     return 'android';
-  } else if (userAgent.indexOf('ipad') + userAgent.indexOf('ipod') + userAgent.indexOf('iphone') != -3) {
+  } else if (
+    userAgent.indexOf('ipad') + userAgent.indexOf('ipod') + userAgent.indexOf('iphone') !=
+    -3
+  ) {
     return 'ios';
   }
 };

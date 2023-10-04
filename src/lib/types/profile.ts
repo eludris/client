@@ -7,4 +7,4 @@ export interface UpdateUserProfile {
   bio?: string | null;
   avatar?: number | null;
   banner?: number | null;
-};
+}
