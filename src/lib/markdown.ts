@@ -76,7 +76,7 @@ const unScrewHtml = (html: string): string => {
     // solve weird bug with whitespace getting magically removed sometimes
     .replace(/`( +[^`\s]+? +)`/gm, '` $1 `')
     // ensure backslashes escaping mentions etc are retained
-    .replace(/\\([:@<>#])/gm, '\\\\$1');
+    .replace(/\\([:@<>#|])/gm, '\\\\$1');
 
   // we have to reassign to get the updated string
   // ensure ``` s have a new line before and after them
@@ -158,16 +158,18 @@ export default async (content: string): Promise<string> => {
     .process(unScrewHtml(content))
     .then((res) => res.toString())
     .then((res) =>
+      // Parse spoilers (||spoiler||)
       res.replace(
-        /\|\|(.+?)\|\|/gm,
+        /(?<!\\)\|\|(.+?)\|\|/gm,
         '<span class="spoiler" onclick="this.classList.add(\'unspoilered\')">$1</span>'
       )
     )
     .then((res) =>
-      // Prevents backslashes from rendering in newline markdown before tables/katex blocks etc.
+      // Prevent backslashes from rendering in newline markdown before tables/katex blocks etc.
       res.replace(/\n\\<\/p>\n<(table|div|h[1-6])/gm, '\n<br>\n</p>\n<$1')
     )
     .then((res) => {
+      // Parse mentions (<@id>)
       return res.replace(/(?<!\\)&#x3C;@(\d+)>/gm, (m, id, offset) => {
         let user = get(state).users[id];
         if (user && res.substring(0, offset).split(/<\\?code>/gm).length % 2 == 1) {
@@ -177,6 +179,8 @@ export default async (content: string): Promise<string> => {
       });
     })
     .then((res) => {
+      // Parse emoji (:name:), render them big if there's max 10 emoji and no
+      // further text in a message
       let big = !content.replace(/(?<!\\):[a-zA-Z0-9_-]+:/gm, '').trim() ? ' big' : '';
       if (big && content.split(':').length > 21) {
         big = '';
@@ -198,5 +202,8 @@ export default async (content: string): Promise<string> => {
         return m;
       });
     })
-    .then((res) => res.replace(/\\([:@&#x3C;>#])/gm, '$1'));
+    .then((res) =>
+      // Remove leading backslashes before special characters
+      res.replace(/\\([:@&#x3C;>#|])/gm, '$1')
+    );
 };
