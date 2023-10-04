@@ -1,11 +1,16 @@
 <script lang="ts">
+  import { page } from '$app/stores';
   import Markdown from '$lib/components/Markdown.svelte';
   import userData from '$lib/user_data';
 </script>
 
 <div id="options-div">
   <div id="instance-info">
-    <span id="instance-name">{$userData?.instanceInfo?.instance_name}</span>
+    {#if $page.url.pathname == '/'}
+      <span id="instance-name">{$userData?.instanceInfo?.instance_name}</span>
+    {:else}
+      <a id="instance-name" href="/">{$userData?.instanceInfo?.instance_name}</a>
+    {/if}
     {#if $userData?.instanceInfo?.description}
       <span id="instance-description">{$userData.instanceInfo.description}</span>
       <span id="instance-markdown">
@@ -67,6 +72,9 @@
     margin-right: 15px;
     font-size: 24px;
     align-self: baseline;
+    text-decoration: none;
+    color: inherit;
+    border: unset;
   }
 
   #instance-description {
