@@ -85,7 +85,6 @@
     (status || null) != $userData!.user.status.text ||
     (bio || null) != $userData!.user.bio;
 
-  $: console.log(changed);
   $: disableSave = saving || !!Object.keys(errors).length || !changed;
 
   let statusSelector: HTMLUListElement;
@@ -175,16 +174,16 @@
       avatarFile = undefined;
     }
     if (display_name != $userData?.user.display_name) {
-      newProfile.display_name = display_name || null;
+      newProfile.display_name = display_name?.trim() || null;
     }
     if (status_type.toUpperCase() != $userData?.user.status.type) {
       newProfile.status_type = status_type.toUpperCase() as StatusType;
     }
     if (status != $userData?.user.status.text) {
-      newProfile.status = status || null;
+      newProfile.status = status?.trim() || null;
     }
     if (bio != $userData?.user.bio) {
-      newProfile.bio = bio || null;
+      newProfile.bio = bio?.trim() || null;
     }
     try {
       await request('PATCH', '/users/profile', newProfile);

@@ -109,6 +109,7 @@
         user={message.author}
         on:close={closeAuthorContextMenu}
         on:mention
+        on:showProfile
       />
     {/if}
   </div>

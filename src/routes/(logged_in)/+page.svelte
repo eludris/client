@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import userData from '$lib/user_data';
   import userConfig from '$lib/user_config';
+  import activeContext from '$lib/context';
   import state from '$lib/ws';
   import { tick } from 'svelte';
   import { browser } from '$app/environment';
@@ -12,11 +13,18 @@
   import { StatusType, type User } from '$lib/types/user';
   import { slide, type SlideParams } from 'svelte/transition';
   import Navbar from '$lib/components/Navbar.svelte';
+  import UserProfile from './UserProfile.svelte';
+  import type { Unsubscriber } from 'svelte/store';
+  import UserContext from './UserContext.svelte';
 
   let messagesUList: HTMLUListElement;
   let value = '';
   let input: HTMLTextAreaElement;
   let usernames: { [key: string]: number } = {};
+  let currentProfile: number | undefined;
+  let currentContext: number;
+  let authorContext: User | undefined;
+  let authorContextDiv: HTMLDivElement;
 
   onMount(() => {
     messagesUList.scroll(0, messagesUList.scrollHeight);
@@ -102,7 +110,7 @@
     const reply = `${value.trim() ? '\n' : ''}${e.detail.content
       .split('\n')
       .map((l) => `> ${l}`)
-      .join('\n')}\n<@${e.detail.author.id}>\n\n`;
+      .join('\n')}\n@${e.detail.author.username}\n\n`;
     value = value.substring(0, start) + reply + value.substring(end);
     await tick();
 
@@ -115,7 +123,7 @@
     const start = input.selectionStart;
     const end = input.selectionEnd;
 
-    const mention = `<@${e.detail.id}>`;
+    const mention = `@${e.detail.username}`;
     value = value.substring(0, start) + mention + value.substring(end);
     await tick();
 
@@ -160,6 +168,54 @@
     if (window.screen.width > 1000) return { duration: 0 };
     return slide(node, params);
   };
+
+  const showProfile = (id: number) => {
+    currentProfile = id;
+  };
+
+  const userContext = async (e: MouseEvent, user: User) => {
+    $activeContext = $activeContext + 1;
+    currentContext = $activeContext;
+    let unsubscribe: Unsubscriber;
+    unsubscribe = activeContext.subscribe((id) => {
+      if (id != currentContext) {
+        authorContext = undefined;
+        unsubscribe();
+      }
+    });
+    authorContext = user;
+    await tick();
+    positionContextDiv(e, authorContextDiv);
+  };
+
+  const positionContextDiv = (e: MouseEvent, div: HTMLDivElement) => {
+    if (div.clientHeight + e.clientY < window.innerHeight) {
+      div.style.top = `${e.clientY}px`;
+      div.style.bottom = `auto`;
+    } else {
+      div.style.bottom = `${window.innerHeight - e.clientY}px`;
+      div.style.top = `auto`;
+    }
+    if (div.clientWidth + e.clientX < window.innerWidth) {
+      div.style.left = `${e.clientX}px`;
+      div.style.right = `auto`;
+    } else {
+      div.style.right = `${window.innerWidth - e.clientX}px`;
+      div.style.left = `auto`;
+    }
+  };
+
+  const showContextProfile = (e: CustomEvent<number>) => {
+    showProfile(e.detail);
+  };
+
+  const closeContext = () => {
+    authorContext = undefined;
+  };
+
+  const closeProfile = () => {
+    currentProfile = undefined;
+  };
 </script>
 
 <svelte:window
@@ -175,7 +231,12 @@
     <div id="message-channel-body" class={$userConfig.userList ? 'users-hidden' : ''}>
       <ul bind:this={messagesUList} id="messages">
         {#each $state.messages as message, i (i)}
-          <MessageComponent {message} on:reply={onReply} on:mention={onMention} />
+          <MessageComponent
+            {message}
+            on:reply={onReply}
+            on:showProfile={showContextProfile}
+            on:mention={onMention}
+          />
         {/each}
       </ul>
       <form id="message-input-form" on:submit|preventDefault={onSubmit}>
@@ -198,7 +259,13 @@
       <ul id="users" transition:phoneSlide={{ axis: 'x' }}>
         {#each users as user (user.id)}
           {#if user.status.type != StatusType.OFFLINE}
-            <div class="user">
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <div
+              class="user"
+              on:click={() => showProfile(user.id)}
+              on:contextmenu|preventDefault|stopPropagation={async (e) =>
+                await userContext(e, user)}
+            >
               <span class="user-avatar-container">
                 <img
                   class="user-avatar"
@@ -222,8 +289,21 @@
         {/each}
       </ul>
     {/if}
+    {#if authorContext}
+      <UserContext
+        user={authorContext}
+        bind:contextDiv={authorContextDiv}
+        on:close={closeContext}
+        on:showProfile={showContextProfile}
+        on:mention={onMention}
+      />
+    {/if}
   </div>
 </div>
+
+{#if currentProfile !== undefined}
+  <UserProfile user={$state.users[currentProfile]} on:close={closeProfile} />
+{/if}
 
 <style>
   #message-channel {
@@ -305,6 +385,17 @@
 
   #users .user-status-indicator {
     background-color: var(--purple-200);
+  }
+
+  .user {
+    cursor: pointer;
+    transition: background-color ease-in-out 125ms;
+    padding: 10px 0;
+    border-radius: 5px;
+  }
+
+  .user:hover {
+    background-color: var(--gray-300);
   }
 
   @media only screen and (max-width: 1000px) {

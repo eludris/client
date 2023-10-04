@@ -17,6 +17,11 @@
     });
   };
 
+  const profileButton = () => {
+    dispatch('showProfile', user.id);
+    dispatch('close');
+  };
+
   const mentionButton = () => {
     dispatch('mention', user);
     dispatch('close');
@@ -32,6 +37,7 @@
 <svelte:window on:mousedown={onClick} on:keydown={onKeyDown} />
 
 <div id="context" bind:this={contextDiv}>
+  <button on:click={profileButton}>Profile</button>
   <button on:click={mentionButton}>Mention</button>
   <hr />
   <button on:click={copyIdButton}>Copy ID</button>
