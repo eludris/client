@@ -411,7 +411,7 @@
   form {
     display: flex;
     flex-direction: column;
-    width: min(900px, 100%);
+    width: min(900px, 95%);
   }
 
   #user {
@@ -437,7 +437,6 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 900px;
   }
 
   #main-info-container {
@@ -666,10 +665,6 @@
   @media only screen and (max-width: 1200px) {
     .setting {
       padding: 20px 5px;
-    }
-
-    form {
-      width: 95%;
     }
   }
 </style>

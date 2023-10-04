@@ -91,7 +91,7 @@
     background-color: var(--gray-100);
     border-radius: 10px;
     overflow: hidden;
-    width: min(900px, 100%);
+    width: min(900px, 95%);
     height: fit-content;
   }
 
@@ -108,7 +108,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 900px;
+    width: 100%;
   }
 
   #main-info-container {
@@ -211,11 +211,5 @@
     min-height: 100px;
     margin: 0;
     border-radius: 10px;
-  }
-
-  @media only screen and (max-width: 1200px) {
-    #profile {
-      width: 95%;
-    }
   }
 </style>
