@@ -76,7 +76,7 @@ const unScrewHtml = (html: string): string => {
     // solve weird bug with whitespace getting magically removed sometimes
     .replace(/`( +[^`\s]+? +)`/gm, '` $1 `')
     // ensure backslashes escaping mentions etc are retained
-    .replace(/\\([:@<>#])/gm, '\\\\$1');
+    .replace(/\\([:@<>#|])/gm, '\\\\$1');
 
   // we have to reassign to get the updated string
   // ensure ``` s have a new line before and after them
@@ -159,7 +159,7 @@ export default async (content: string): Promise<string> => {
     .then((res) => res.toString())
     .then((res) =>
       res.replace(
-        /\|\|(.+?)\|\|/gm,
+        /(?<!\\)\|\|(.+?)\|\|/gm,
         '<span class="spoiler" onclick="this.classList.add(\'unspoilered\')">$1</span>'
       )
     )
@@ -198,5 +198,5 @@ export default async (content: string): Promise<string> => {
         return m;
       });
     })
-    .then((res) => res.replace(/\\([:@&#x3C;>#])/gm, '$1'));
+    .then((res) => res.replace(/\\([:@&#x3C;>#|])/gm, '$1'));
 };
