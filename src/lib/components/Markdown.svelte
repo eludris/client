@@ -71,6 +71,7 @@
   }
 
   :global(.md blockquote) {
+    display: inline-block;
     border-left: 5px solid var(--gray-300);
     margin: 0;
     padding: 0 20px; /* switcheroo */
@@ -88,6 +89,7 @@
   }
 
   :global(.md pre, pre[class*='language-'][class*='language-']) {
+    display: block;
     width: 80%;
     background-color: var(--gray-200);
     padding: 20px;
@@ -166,21 +168,28 @@
   }
 
   :global(.md ul) {
+    display: inline-block;
     padding: 0 20px;
   }
 
   :global(.md .spoiler) {
+    display: inline-block;
     background-color: var(--purple-100);
     color: transparent;
     cursor: pointer;
     padding: 2px;
   }
 
+  :global(.md .spoiler.unspoilered) {
+    color: inherit;
+    cursor: default;
+  }
+
   :global(.md .mention) {
+    display: inline-block;
     background-color: color-mix(in srgb, var(--pink-400) 50%, transparent);
     padding: 2px 5px;
     border-radius: 5px;
-    display: inline-block;
   }
 
   :global(.md .emoji) {
