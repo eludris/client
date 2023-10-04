@@ -37,7 +37,7 @@
         <span class="user-status">{$userData?.user.status.text}</span>
       {/if}
     </div>
-    <a id="settings-link" href="/settings">
+    <a id="settings-link" href={$page.url.pathname.startsWith('/settings') ? '/' : '/settings'}>
       <!--- https://icon-sets.iconify.design/mdi/cog/ --->
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
         ><path
