@@ -568,6 +568,7 @@
     align-items: center;
     gap: 5px;
     color: #ccc;
+    cursor: pointer;
   }
 
   #logout:hover {
