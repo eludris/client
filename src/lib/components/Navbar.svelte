@@ -81,7 +81,7 @@
       </ul>
     {/if}
     <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <span class="user-avatar-container" on:click={showStatusSwitcher}>
+    <span class="user-avatar-container" on:click|stopPropagation={showStatusSwitcher}>
       <img
         class="user-avatar"
         src={$userData?.user.avatar
