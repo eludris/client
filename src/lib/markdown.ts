@@ -158,7 +158,7 @@ export default async (content: string): Promise<string> => {
     .then((res) =>
       res.replace(
         /\|\|(.+?)\|\|/gm,
-        '<span class="spoiler" onclick="this.style.color = \'var(--color-text)\';this.style.cursor = \'unset\'">$1</span>'
+        '<span class="spoiler" onclick="this.classList.add(\'unspoilered\')">$1</span>',
       )
     )
     .then((res) =>

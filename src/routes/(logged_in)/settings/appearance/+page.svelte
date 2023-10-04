@@ -26,8 +26,8 @@
   };
 </script>
 
-<div class="setting">
-  <label for="styles">Custom Styles</label>
+<div class="setting grow">
+  <label for="styles">Custom styles</label>
   <textarea
     name="styles"
     bind:this={styleInput}
@@ -37,13 +37,49 @@
     spellcheck="false"
   />
 </div>
+<div class="setting">
+  <span>Spoilers</span>
+  <label class="spoiler-toggle" class:checked={$config.showSpoilers} for="spoileron">
+    <input type="checkbox" id="spoileron" name="spoileron" bind:checked={$config.showSpoilers} />
+    <span id="spoiler-checkbox" />
+    Always show spoilers
+  </label>
+</div>
 
 <style>
-  .setting {
+  .grow {
     flex-grow: 1;
   }
 
   textarea {
     flex-grow: 1;
+  }
+
+  span {
+    font-size: 20px;
+    display: inline-block;
+  }
+
+  .spoiler-toggle {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  #spoileron {
+    display: none;
+  }
+
+  #spoiler-checkbox {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border: 5px solid white;
+    border-radius: 5px;
+    background-color: white;
+  }
+
+  .spoiler-toggle.checked #spoiler-checkbox {
+    background-color: var(--gray-400);
   }
 </style>
