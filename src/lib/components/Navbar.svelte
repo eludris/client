@@ -36,11 +36,12 @@
       !statusSelector.contains(e.target as Node)
     ) {
       statusIndicatorFocused = false;
+      e.preventDefault();
     }
   };
 </script>
 
-<svelte:body on:click|preventDefault|stopPropagation={bodyClick} />
+<svelte:body on:click={bodyClick} />
 
 <div id="options-div">
   <div id="instance-info">
