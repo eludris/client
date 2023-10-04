@@ -21,12 +21,26 @@
 
   const updateStatus = async (status: string) => {
     statusIndicatorFocused = false;
-    status_type = status.toLowerCase();
-    try {
-      await request('PATCH', '/users/profile', { status_type: status_type.toUpperCase() });
-    } catch {}
+    status_type = status.toUpperCase();
+    if (status_type != $userData!.user.status.type) {
+      try {
+        await request('PATCH', '/users/profile', { status_type });
+      } catch {}
+    }
+  };
+
+  const bodyClick = (e: MouseEvent) => {
+    if (
+      statusIndicatorFocused &&
+      e.target != statusSelector &&
+      !statusSelector.contains(e.target as Node)
+    ) {
+      statusIndicatorFocused = false;
+    }
   };
 </script>
+
+<svelte:body on:click|preventDefault|stopPropagation={bodyClick} />
 
 <div id="options-div">
   <div id="instance-info">
