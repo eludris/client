@@ -54,7 +54,8 @@
       } catch (e) {
         let err = e as RequestErr;
         if (err.code == 409) {
-          error = `A user with this  ${err.err.item} already exists`;
+          // @ts-expect-error: this actually exists
+          error = `A user with this  ${err.err?.item} already exists`;
         } else {
           error = err.message;
         }
@@ -151,7 +152,7 @@
     background-color: var(--purple-100);
     border-radius: 10px;
     padding: 40px;
-    width: 400px;
+    width: min(400px, 95%);
   }
 
   #signup-form > h1 {
@@ -200,6 +201,7 @@
   #signup-form > button:disabled {
     background-color: var(--pink-300);
     box-shadow: 0 2px 2px var(--gray-100);
+    cursor: default;
   }
 
   .error {
