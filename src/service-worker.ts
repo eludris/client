@@ -67,7 +67,5 @@ worker.addEventListener('fetch', (event) => {
         })()
       );
     }
-  }
-  catch {
-  }
+  } catch {}
 });

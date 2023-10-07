@@ -5,4 +5,4 @@ export interface State {
   connected: boolean;
   users: { [key: number]: User };
   messages: ClientMessage[];
-};
+}

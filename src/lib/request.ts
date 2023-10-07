@@ -8,6 +8,7 @@ userData.subscribe((d) => (data = d));
 export interface RequestOptions {
   apiUrl?: string;
   token?: string;
+  empty?: boolean;
 }
 
 export interface RequestErr {
@@ -36,7 +37,10 @@ export const request = async (
     body: body ? JSON.stringify(body) : null
   });
   if (resp.status >= 200 && resp.status < 300) {
-    return await resp.json();
+    if (!options?.empty) {
+      return await resp.json();
+    }
+    return;
   }
   let err = await resp
     .json()
@@ -49,7 +53,7 @@ export const request = async (
       } else if (err.type == 'VALIDATION') {
         msg = `Invalid ${err.value_name}: ${err.info}`;
       } else if (err.type == 'RATE_LIMITED') {
-        msg = `Rate limited, try again after ${err.retry_after * 1000}s`;
+        msg = `Rate limited, try again after ${err.retry_after / 1000}s`;
       } else if (err.type == 'SERVER') {
         msg = `${err.status}: ${err.info}`;
       }

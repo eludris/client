@@ -18,14 +18,19 @@ let notification: Notification;
 let notification_opt: number;
 let connected = false;
 
-state.subscribe((state) => { connected = state.connected });
+state.subscribe((state) => {
+  connected = state.connected;
+});
 
 const retryConnect = (wait = 5_000) => {
-  state.update((state) => { state.connected = false; return state });
+  state.update((state) => {
+    state.connected = false;
+    return state;
+  });
   setTimeout(() => {
     let userData = get(data);
     if (userData) {
-      connect(userData)
+      connect(userData);
     }
   }, wait);
 };
@@ -56,7 +61,7 @@ const connect = async (userData: UserData) => {
         state.update((state) => {
           state.connected = true;
           state.users = [];
-          payload.d.users.forEach((u) => state.users[u.id] = u);
+          payload.d.users.forEach((u) => (state.users[u.id] = u));
           state.users[payload.d.user.id] = payload.d.user;
           return state;
         });
@@ -75,7 +80,9 @@ const connect = async (userData: UserData) => {
         });
         if (payload.d.id == userData.user.id) {
           data.update((d) => {
-            if (d) { d.user = payload.d; }
+            if (d) {
+              d.user = payload.d;
+            }
             return d;
           });
         }
@@ -87,17 +94,18 @@ const connect = async (userData: UserData) => {
               state.update((state) => {
                 state.users[payload.d.user_id] = u;
                 return state;
-              })
+              });
             });
-          }
-          else {
+          } else {
             s.users[payload.d.user_id].status = payload.d.status;
           }
           return s;
         });
         if (payload.d.user_id == userData.user.id) {
           data.update((d) => {
-            if (d) { d.user.status = payload.d.status; }
+            if (d) {
+              d.user.status = payload.d.status;
+            }
             return d;
           });
         }
@@ -106,7 +114,7 @@ const connect = async (userData: UserData) => {
           const message = {
             renderedContent: content,
             showAuthor: payload.d.author.id != lastAuthor,
-            mentioned: payload.d.content.toLowerCase().split(`<@${userData.user.id}>`).length > 1,
+            mentioned: new RegExp(`(?<!\)<@${userData.user.id}>`, 'gm').test(payload.d.content),
             ...payload.d
           };
           if (
@@ -123,7 +131,9 @@ const connect = async (userData: UserData) => {
                   : `New message from ${message.author.display_name ?? message.author.username}`,
                 {
                   body: message.content,
-                  icon: `${userData.instanceInfo.effis_url}/avatars/${message.author.avatar}` ?? '/das_ding.png',
+                  icon:
+                    `${userData.instanceInfo.effis_url}/avatars/${message.author.avatar}` ??
+                    '/das_ding.png',
                   renotify: true,
                   tag: 'NewMessage'
                 }
@@ -155,7 +165,10 @@ if (browser) {
     if (!connected && userData) {
       await connect(userData);
     } else if (!userData) {
-      state.update((state) => { state.connected = false; return state; });
+      state.update((state) => {
+        state.connected = false;
+        return state;
+      });
       ws?.close();
       if (pingInterval) clearInterval(pingInterval);
       ws = null;

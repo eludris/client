@@ -9,4 +9,5 @@ export interface InstanceInfo {
   effis_url: string;
   file_size: number;
   attachment_file_size: number;
+  email_address?: string;
 }

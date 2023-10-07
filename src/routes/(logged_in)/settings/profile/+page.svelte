@@ -5,6 +5,7 @@
   import Markdown from '$lib/components/Markdown.svelte';
   import { tick } from 'svelte';
   import type { StatusType } from '$lib/types/user';
+  import Popup from '$lib/components/Popup.svelte';
 
   let statuses = [
     ['Online', ''],
@@ -24,30 +25,17 @@
   let status = $userData!.user.status.text;
   let bio = $userData!.user.bio;
 
-  let bannerFile: FileList | undefined = undefined;
-  let avatarFile: FileList | undefined = undefined;
+  let bannerFile: FileList | undefined | null = undefined;
+  let avatarFile: FileList | undefined | null = undefined;
 
   let popupError = '';
-
-  $: if (avatarFile) {
-    if (avatarFile[0].size > $userData!.instanceInfo.file_size) {
-      popupError = `Your avatar image cannot be bigger than ${
-        $userData!.instanceInfo.file_size / 1000000
-      }MB`;
-    } else {
-      let reader = new FileReader();
-      reader.addEventListener('load', () => {
-        avatar = reader.result! as string;
-      });
-      reader.readAsDataURL(avatarFile[0]);
-    }
-  }
 
   $: if (bannerFile) {
     if (bannerFile[0].size > $userData!.instanceInfo.file_size) {
       popupError = `Your banner image cannot be bigger than ${
         $userData!.instanceInfo.file_size / 1000000
       }MB`;
+      bannerFile = undefined;
     } else {
       let reader = new FileReader();
       reader.addEventListener('load', () => {
@@ -57,6 +45,31 @@
     }
   }
 
+  const resetBanner = () => {
+    banner = null;
+    bannerFile = null;
+  };
+
+  $: if (avatarFile) {
+    if (avatarFile[0].size > $userData!.instanceInfo.file_size) {
+      popupError = `Your avatar image cannot be bigger than ${
+        $userData!.instanceInfo.file_size / 1000000
+      }MB`;
+      avatarFile = undefined;
+    } else {
+      let reader = new FileReader();
+      reader.addEventListener('load', () => {
+        avatar = reader.result! as string;
+      });
+      reader.readAsDataURL(avatarFile[0]);
+    }
+  }
+
+  const resetAvatar = () => {
+    avatar = 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true';
+    avatarFile = null;
+  };
+
   let bioFocused = false;
   let statusIndicatorFocused = false;
 
@@ -65,19 +78,17 @@
   let errors: { [field: string]: string | undefined } = {};
 
   $: changed =
-    bannerFile ||
-    avatarFile ||
+    bannerFile !== undefined ||
+    avatarFile !== undefined ||
     (display_name || null) != $userData!.user.display_name ||
     status_type != $userData!.user.status.type.toLowerCase() ||
     (status || null) != $userData!.user.status.text ||
     (bio || null) != $userData!.user.bio;
 
-  $: console.log(changed);
   $: disableSave = saving || !!Object.keys(errors).length || !changed;
 
   let statusSelector: HTMLUListElement;
   let bioInput: HTMLTextAreaElement;
-  let popup: HTMLDivElement;
 
   const statusIndicatorClick = () => {
     statusIndicatorFocused = true;
@@ -90,9 +101,6 @@
       !statusSelector.contains(e.target as Node)
     ) {
       statusIndicatorFocused = false;
-    }
-    if (popupError && e.target != popup && !popup.contains(e.target as Node)) {
-      popupDismiss();
     }
   };
 
@@ -147,27 +155,35 @@
   const updateProfile = async () => {
     saving = true;
     let newProfile: UpdateUserProfile = {};
-    if (avatarFile) {
-      let data = await uploadFile('avatars', avatarFile[0]);
-      newProfile.avatar = data.id;
-      avatarFile = undefined;
-    }
-    if (bannerFile) {
-      let data = await uploadFile('banners', bannerFile[0]);
-      newProfile.banner = data.id;
+    if (bannerFile !== undefined) {
+      if (bannerFile) {
+        let data = await uploadFile('banners', bannerFile[0]);
+        newProfile.banner = data.id;
+      } else {
+        newProfile.banner = null;
+      }
       bannerFile = undefined;
     }
+    if (avatarFile !== undefined) {
+      if (avatarFile) {
+        let data = await uploadFile('avatars', avatarFile[0]);
+        newProfile.avatar = data.id;
+      } else {
+        newProfile.avatar = null;
+      }
+      avatarFile = undefined;
+    }
     if (display_name != $userData?.user.display_name) {
-      newProfile.display_name = display_name || null;
+      newProfile.display_name = display_name?.trim() || null;
     }
     if (status_type.toUpperCase() != $userData?.user.status.type) {
       newProfile.status_type = status_type.toUpperCase() as StatusType;
     }
     if (status != $userData?.user.status.text) {
-      newProfile.status = status || null;
+      newProfile.status = status?.trim() || null;
     }
     if (bio != $userData?.user.bio) {
-      newProfile.bio = bio || null;
+      newProfile.bio = bio?.trim() || null;
     }
     try {
       await request('PATCH', '/users/profile', newProfile);
@@ -222,6 +238,9 @@
                 /></svg
               >
               <em>Max {$userData.instanceInfo.file_size / 1000000}MB</em>
+              {#if banner}
+                <button on:click={resetBanner}>Reset</button>
+              {/if}
             </span>
             <input
               id="image-input"
@@ -246,14 +265,17 @@
                     /></svg
                   >
                   <em>Max {$userData.instanceInfo.file_size / 1000000}MB</em>
+                  <input
+                    id="image-input"
+                    name="avatar"
+                    type="file"
+                    accept="image/*"
+                    bind:files={avatarFile}
+                  />
+                  {#if avatar != 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true'}
+                    <button on:click={resetAvatar}>Reset</button>
+                  {/if}
                 </span>
-                <input
-                  id="image-input"
-                  name="avatar"
-                  type="file"
-                  accept="image/*"
-                  bind:files={avatarFile}
-                />
               </span>
             </span>
           </span>
@@ -345,13 +367,10 @@
   </div>
 
   {#if popupError}
-    <div id="popup-container">
-      <div id="popup" bind:this={popup}>
-        <h2 id="popup-title">Error</h2>
-        <span id="popup-message">{popupError}</span>
-        <button id="popup-dismiss" on:click={popupDismiss}>Got it</button>
-      </div>
-    </div>
+    <Popup on:dismiss={popupDismiss}>
+      <span slot="title">Error</span>
+      {popupError}
+    </Popup>
   {/if}
 {/if}
 
@@ -392,7 +411,7 @@
   form {
     display: flex;
     flex-direction: column;
-    width: min(900px, 100%);
+    width: min(900px, 95%);
   }
 
   #user {
@@ -418,7 +437,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 900px;
+    height: 100%;
   }
 
   #main-info-container {
@@ -447,6 +466,7 @@
   #avatar {
     width: 100px;
     height: 100px;
+    object-fit: cover;
   }
 
   #image-input-wrapper {
@@ -464,6 +484,7 @@
     width: 100%;
     height: 100%;
     opacity: 0;
+    cursor: pointer;
   }
 
   #image-input-hover {
@@ -484,6 +505,18 @@
 
   #image-input-wrapper:hover #image-input-hover {
     opacity: 1;
+  }
+
+  #image-input-hover button {
+    background-color: unset;
+    border: unset;
+    color: var(--pink-700);
+    z-index: 2;
+    cursor: pointer;
+  }
+
+  #image-input-hover button:hover {
+    text-decoration: underline;
   }
 
   #name-container {
@@ -609,50 +642,6 @@
     color: var(--pink-700);
   }
 
-  #popup-container {
-    position: absolute;
-    display: flex;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    align-items: center;
-    justify-content: center;
-    background-color: #0008;
-  }
-
-  #popup {
-    display: flex;
-    border-radius: 10px;
-    flex-direction: column;
-    padding: 20px;
-    background-color: var(--gray-100);
-  }
-
-  #popup-title {
-    margin: 10px 5px;
-  }
-
-  #popup-message {
-    margin: 10px;
-  }
-
-  #popup-dismiss {
-    width: fit-content;
-    align-self: flex-end;
-    border: unset;
-    border-radius: 5px;
-    padding: 5px 7px;
-    margin-top: 10px;
-    font-size: 14px;
-    background-color: var(--pink-500);
-    transition: background-color ease-in-out 125ms;
-  }
-
-  #popup-dismiss:hover {
-    background-color: var(--pink-600);
-  }
-
   #save {
     width: fit-content;
     align-self: flex-end;
@@ -662,7 +651,7 @@
     margin-top: 10px;
     font-size: 18px;
     background-color: var(--gray-300);
-    transition: background-color ease-in-out 125ms;
+    transition: background-color ease-in-out 125ms, color ease-in-out 125ms;
     color: var(--color-text);
   }
 
@@ -672,15 +661,12 @@
 
   #save:disabled {
     background-color: var(--gray-200);
+    color: #aaa;
   }
 
   @media only screen and (max-width: 1200px) {
     .setting {
       padding: 20px 5px;
-    }
-
-    form {
-      width: 95%;
     }
   }
 </style>

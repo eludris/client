@@ -7,6 +7,7 @@
   import type { User } from '$lib/types/user';
   import type { SessionCreated } from '$lib/types/session';
   import { env } from '$env/dynamic/public';
+  import getPlatform from '$lib/platform';
 
   const EMAIL_REGEX = new RegExp(
     /^(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/
@@ -15,6 +16,7 @@
   let username = '';
   let email = '';
   let password = '';
+  let passwordConfirm = '';
   let instanceURL = env.PUBLIC_INSTANCE_URL ?? 'https://eludris.tooty.xyz';
   let error = '';
   let requesting = false;
@@ -36,7 +38,7 @@
         let session: SessionCreated = await request(
           'POST',
           'sessions',
-          { identifier: username, password, platform: 'linox', client: 'pengin' },
+          { identifier: username, password, platform: getPlatform(), client: 'pengin' },
           { apiUrl: instanceURL }
         );
         let user: User = await request('GET', 'users/@me', null, {
@@ -52,7 +54,8 @@
       } catch (e) {
         let err = e as RequestErr;
         if (err.code == 409) {
-          error = `A user with this  ${err.err.item} already exists`;
+          // @ts-expect-error: this actually exists
+          error = `A user with this  ${err.err?.item} already exists`;
         } else {
           error = err.message;
         }
@@ -73,6 +76,10 @@
     validateInputs();
   };
 
+  const onPasswordConfirmInput = () => {
+    validateInputs();
+  };
+
   const validateInputs = () => {
     if (requesting) {
       return;
@@ -84,6 +91,8 @@
       error = 'You must pass a valid email';
     } else if (password.length < 8) {
       error = 'Your password must be at least 8 characters long';
+    } else if (password != passwordConfirm) {
+      error = 'Your passwords must match';
     } else {
       error = '';
     }
@@ -108,6 +117,14 @@
       on:input={onPasswordInput}
       name="password"
       placeholder="Password"
+      type="password"
+    />
+    <label for="password-confirm">Confirm your password</label>
+    <input
+      bind:value={passwordConfirm}
+      on:input={onPasswordConfirmInput}
+      name="password-confirm"
+      placeholder="Confirm your password"
       type="password"
     />
     {#if error}
@@ -135,7 +152,7 @@
     background-color: var(--purple-100);
     border-radius: 10px;
     padding: 40px;
-    width: 400px;
+    width: min(400px, 95%);
   }
 
   #signup-form > h1 {
@@ -184,6 +201,7 @@
   #signup-form > button:disabled {
     background-color: var(--pink-300);
     box-shadow: 0 2px 2px var(--gray-100);
+    cursor: default;
   }
 
   .error {

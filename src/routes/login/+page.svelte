@@ -7,6 +7,7 @@
   import type { User } from '$lib/types/user';
   import type { SessionCreated } from '$lib/types/session';
   import { env } from '$env/dynamic/public';
+  import getPlatform from '$lib/platform';
 
   let username = '';
   let password = '';
@@ -30,7 +31,7 @@
         let session: SessionCreated = await request(
           'POST',
           'sessions',
-          { identifier: username, password, platform: 'linox', client: 'pengin' },
+          { identifier: username, password, platform: getPlatform(), client: 'pengin' },
           { apiUrl: instanceURL }
         );
         let user: User = await request('GET', 'users/@me', null, {
@@ -99,6 +100,11 @@
     {/if}
     <button type="submit" disabled={!!error}>Log in</button>
     <a id="signup-prompt" href="/signup">Don't have an account? Sign up!</a>
+    <a
+      id="password-reset-prompt"
+      href={username.indexOf('@') != -1 ? `/reset-password?email=${username}` : '/reset-password'}
+      >Forgot your password?</a
+    >
   </form>
 </div>
 
@@ -119,7 +125,7 @@
     background-color: var(--purple-100);
     border-radius: 10px;
     padding: 40px;
-    width: 400px;
+    width: min(400px, 95%);
   }
 
   #login-form > h1 {
@@ -168,6 +174,7 @@
   #login-form > button:disabled {
     background-color: var(--pink-300);
     box-shadow: 0 2px 2px var(--gray-100);
+    cursor: default;
   }
 
   .error {

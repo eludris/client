@@ -9,6 +9,14 @@
       {@html `<style>${$config.styles}</style>`}
     {/if}
   {/if}
+  {#if $config.showSpoilers}
+    <style>
+      .md .spoiler {
+        color: inherit;
+        cursor: default;
+      }
+    </style>
+  {/if}
 </svelte:head>
 
 <div id="bg" />
