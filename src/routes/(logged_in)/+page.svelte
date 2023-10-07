@@ -407,7 +407,6 @@
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
-    gap: 10px;
     padding: 20px 10px;
     margin: 0;
     background-color: var(--purple-200);
