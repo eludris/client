@@ -16,6 +16,7 @@
   import UserProfile from './UserProfile.svelte';
   import type { Unsubscriber } from 'svelte/store';
   import UserContext from './UserContext.svelte';
+  import Markdown from '$lib/components/Markdown.svelte';
 
   let messagesUList: HTMLUListElement;
   let value = '';
@@ -25,6 +26,7 @@
   let currentContext: number;
   let authorContext: User | undefined;
   let authorContextDiv: HTMLDivElement;
+  let previewMessage = false;
 
   onMount(() => {
     messagesUList.scroll(0, messagesUList.scrollHeight);
@@ -76,6 +78,7 @@
       );
     }
     value = '';
+    previewMessage = false;
     await tick();
     input.focus(); // for mobiles
   };
@@ -131,6 +134,15 @@
 
     input.focus();
   };
+
+  const togglePreviewMessage = () => {
+    previewMessage = !previewMessage;
+  };
+
+  const previewButtonKeyDown = (e: KeyboardEvent) => {
+    console.log('hi');
+    if (e.key == 'Enter') {onSubmit();} 
+  }
 
   const windowKeyDown = (e: KeyboardEvent) => {
     if (e.key == 'u' && e.ctrlKey) {
@@ -240,14 +252,24 @@
         {/each}
       </ul>
       <form id="message-input-form" on:submit|preventDefault={onSubmit}>
-        <MessageInput
-          bind:input
-          bind:value
-          on:submit={onSubmit}
-          on:submitFiles={submitFiles}
-          scrollContainer={messagesUList}
-        />
-        <button id="send-button">
+        {#if previewMessage}
+          <span id="markdown-wrapper">
+            <Markdown content={value}/>
+          </span>
+        {:else}
+          <MessageInput
+            bind:input
+            bind:value
+            on:submit={onSubmit}
+            on:submitFiles={submitFiles}
+            scrollContainer={messagesUList}
+          />
+        {/if}
+        <button id="preview-button" class="input-button" on:click|preventDefault={togglePreviewMessage} on:keydown|preventDefault={previewButtonKeyDown}>
+          <!--- https://icon-sets.iconify.design/mdi/eye/ --->
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12 9a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3m0 8a5 5 0 0 1-5-5a5 5 0 0 1 5-5a5 5 0 0 1 5 5a5 5 0 0 1-5 5m0-12.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5Z"/></svg>
+        </button>
+        <button id="send-button" class="input-button">
           <!--- https://icon-sets.iconify.design/mdi/send/ --->
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
             ><path fill="currentColor" d="m2 21l21-9L2 3v7l15 2l-15 2v7Z" /></svg
@@ -355,7 +377,15 @@
     border-radius: 10px;
   }
 
-  #send-button {
+  #markdown-wrapper {
+    flex-grow: 1;
+    overflow-y: auto;
+    margin: 10px 0 3px 5px;
+    max-height: 33vh;
+    display: inline-block;
+  }
+
+  .input-button {
     background: none;
     color: inherit;
     border: none;
@@ -368,7 +398,7 @@
     padding-top: 6px;
   }
 
-  #send-button:hover {
+  .input-button:hover {
     color: var(--gray-500);
   }
 
@@ -377,7 +407,6 @@
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
-    gap: 10px;
     padding: 20px 10px;
     margin: 0;
     background-color: var(--purple-200);

@@ -124,6 +124,9 @@
     padding: 5px;
     background-color: var(--colour-bg);
     transition: background-color ease-in-out 75ms;
+    /* This resets KaTeX equation numbers for each message */
+    /* https://github.com/KaTeX/KaTeX/issues/3048 */
+    counter-reset: katexEqnNo mmlEqnNo;
   }
 
   .message:hover {
