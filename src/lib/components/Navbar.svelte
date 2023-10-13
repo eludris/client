@@ -178,7 +178,7 @@
   }
 
   .current-user {
-    width: 300px;
+    max-width: min(80%, 300px);
   }
 
   :global(.user) {

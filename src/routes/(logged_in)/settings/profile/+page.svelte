@@ -526,6 +526,10 @@
     flex-grow: 1;
   }
 
+  #name-container * {
+    width: 100%;
+  }
+
   #display-name {
     font-weight: bold;
     font-size: 24px;
