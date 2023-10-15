@@ -1914,11 +1914,11 @@ export const emojiDictionary: { [emoji: string]: string } = {
     flushedd: 'https://cdn.discordapp.com/emojis/1012407508901580821.webp?quality=lossless',
     pog: 'https://cdn.discordapp.com/emojis/989499974775631873.webp?quality=lossless',
     wifu: 'https://media.discordapp.net/stickers/1162826787093491794.webp?quality=lossless',
-    thomas: 'https://cdn.discordapp.com/emojis/673331546412941313.webp?size=96&quality=lossless',
-    drooling: 'https://cdn.discordapp.com/emojis/1135920923732607107.webp?size=80&quality=lossless',
-    mike: 'https://cdn.discordapp.com/emojis/1145821208412172290.webp?size=80&quality=lossless',
-    uwuki: 'https://cdn.discordapp.com/emojis/1038675327204991076.webp?size=80&quality=lossless',
-    yummymilk: 'https://cdn.discordapp.com/emojis/1130361227944669234.webp?size=80&quality=lossless',
-    cunny: 'https://cdn.discordapp.com/emojis/1103360465641422858.webp?size=80&quality=lossless'
+    thomas: 'https://cdn.discordapp.com/emojis/673331546412941313.webp&quality=lossless',
+    drooling: 'https://cdn.discordapp.com/emojis/1135920923732607107.webp&quality=lossless',
+    mike: 'https://cdn.discordapp.com/emojis/1145821208412172290.webp0&quality=lossless',
+    uwuki: 'https://cdn.discordapp.com/emojis/1038675327204991076.webp&quality=lossless',
+    yummymilk: 'https://cdn.discordapp.com/emojis/1130361227944669234.webp0&quality=lossless',
+    cunny: 'https://cdn.discordapp.com/emojis/1103360465641422858.webp&quality=lossless'
   }
 };
