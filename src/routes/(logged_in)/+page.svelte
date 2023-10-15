@@ -407,7 +407,7 @@
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
-    padding: 20px 10px;
+    padding: 10px 10px;
     margin: 0;
     background-color: var(--purple-200);
     overflow-y: auto;

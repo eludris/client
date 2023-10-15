@@ -80,20 +80,24 @@ const unScrewHtml = (html: string): string => {
 
   // we have to reassign to get the updated string
   // ensure ``` s have a new line before and after them
-  html = html.replace(/(\S+)```(\S+ ?)?/gm, (_, p1, p2, offset) => {
-    p1 = p1 ?? '';
-    p2 = p2 ?? '';
-    offset = offset + p1.length;
-    const codeFencesBefore = html.substring(0, offset).split('```').length - 1;
-    const lastCodeFence = !html.substring(offset + 3).includes('```');
-    if (codeFencesBefore % 2 == 1 && html[offset - 1] != '\n') {
-      return `${p1}\n\`\`\`${p2 ? `\n${p2}` : ''}`;
-    }
-    if (codeFencesBefore % 2 == 0 && !lastCodeFence && html[offset + p2.length + 3] != '\n') {
-      return `${p1 ? `${p1}\n` : ''}\`\`\`${p2}\n`;
-    }
-    return `\`\`\`${p2}`;
-  });
+  // html = html.replace(/(\S+)```(\S+ ?)?/gm, (_, p1, p2, offset) => {
+  //   p1 = p1 ?? '';
+  //   p2 = p2 ?? '';
+  //   offset += p1.length;
+
+  //   console.log("hello")
+  //   console.log("hi", p1, p2, offset);
+
+  //   const codeFencesBefore = html.substring(0, offset).split('```').length - 1;
+  //   const lastCodeFence = !html.substring(offset + 3).includes('```');
+  //   if (codeFencesBefore % 2 == 1 && html[offset - 1] != '\n') {
+  //     return `${p1}\n\`\`\`${p2 ? `\n${p2}` : ''}`;
+  //   }
+  //   if (codeFencesBefore % 2 == 0 && !lastCodeFence && html[offset + p2.length + 3] != '\n') {
+  //     return `${p1 ? `${p1}\n` : ''}\`\`\`${p2}\n`;
+  //   }
+  //   return `\`\`\`${p2}`;
+  // });
 
   // number list supremacy
   html = html.replace(/^(\+ |\* )/gm, (match, _, offset) => {
@@ -115,7 +119,7 @@ const unScrewHtml = (html: string): string => {
     const currentLine = preNewline.substring(preNewline.lastIndexOf('\n')).trim();
     if (/^(?:>|#|- |\d+\. )/.test(currentLine)) return match;
     if (
-      preNewline.split('```').length % 2 == 1 &&
+      (preNewline.split(/\n```\S?/gm).length + +preNewline.startsWith('```')) % 2 == 1 &&
       preNewline.replace(/```/gm, '').split('`').length % 2 == 1 &&
       preNewline.split('$$').length % 2 == 1 &&
       preNewline.replace(/$$/gm, '').split('`').length % 2 == 1
@@ -126,13 +130,13 @@ const unScrewHtml = (html: string): string => {
   });
 
   // add trailing line after lists to make them not merge
-  html = html.replace(/^((?:\d+ |- ).+)(\n[^- ]|$)/g, '$1\n$2');
+  html = html.replace(/^((?:\d+\. |- ).+)(\n[^- ]|$)/g, '$1\n$2');
 
   // trailing ```s leading to an entire code block is...annoying
   if (html.includes('```')) {
     const lastCodeFence = html.lastIndexOf('```');
     const preCodeFence = html.substring(0, lastCodeFence);
-    if (preCodeFence.split('```').length % 2 == 1) {
+    if ((preCodeFence.split(/\n```\S?/gm).length + +preCodeFence.startsWith('```')) % 2 == 1) {
       html = preCodeFence + '\\`\\`\\`' + html.substring(lastCodeFence + 3);
     }
   }

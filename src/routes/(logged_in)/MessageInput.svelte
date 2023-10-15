@@ -35,12 +35,14 @@
   });
 
   const onInputKeyPress = (e: KeyboardEvent) => {
+    const preSelection = value.substring(0, input.selectionStart);
+
     if (
       e.key == 'Enter' &&
       !mobile &&
       !e.shiftKey &&
-      value.substring(0, input.selectionStart).split('```').length % 2 == 1 &&
-      value.substring(0, input.selectionStart).split('$$').length % 2 == 1 &&
+      (preSelection.split(/\n```\S?/gm).length + +preSelection.startsWith('```')) % 2 == 1 &&
+      preSelection.split('$$').length % 2 == 1 &&
       value.trim().length > 0
     ) {
       dispatch('submit');
