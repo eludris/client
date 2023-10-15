@@ -138,6 +138,7 @@ const connect = async (userData: UserData) => {
                   tag: 'NewMessage'
                 }
               );
+            new Audio('https://cdn.discordapp.com/attachments/897776163995406346/1163015792003129404/voice_en_char_4072_ironmn_CN_025.mp3').play();
           }
           lastAuthor = payload.d.author.id;
           state.update((state) => {
