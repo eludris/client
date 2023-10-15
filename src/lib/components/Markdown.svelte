@@ -172,6 +172,10 @@
     padding: 0 20px;
   }
 
+  :global(.md li) {
+    white-space: initial; 
+  }
+
   :global(.md .spoiler) {
     display: inline-block;
     background-color: var(--purple-100);
