@@ -410,6 +410,7 @@
     padding: 20px 10px;
     margin: 0;
     background-color: var(--purple-200);
+    overflow-y: auto;
   }
 
   #users .user-status-indicator {
