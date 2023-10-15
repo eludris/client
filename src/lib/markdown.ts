@@ -126,7 +126,7 @@ const unScrewHtml = (html: string): string => {
   });
 
   // add trailing line after lists to make them not merge
-  html = html.replace(/^((?:\d+ |- ).+)(\n[^- ]|$)/g, '$1\n$2');
+  html = html.replace(/^((?:\d+\. |- ).+)(\n[^- ]|$)/g, '$1\n$2');
 
   // trailing ```s leading to an entire code block is...annoying
   if (html.includes('```')) {
