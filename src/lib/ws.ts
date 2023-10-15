@@ -124,7 +124,7 @@ const connect = async (userData: UserData) => {
             !document.hasFocus() &&
             notification_opt > 0
           ) {
-            if (notification_opt >= 3 || message.mentioned)
+            if (notification_opt >= 3 || message.mentioned) {
               notification = new Notification(
                 message.mentioned
                   ? `New mention from ${message.author.display_name ?? message.author.username}`
@@ -138,7 +138,8 @@ const connect = async (userData: UserData) => {
                   tag: 'NewMessage'
                 }
               );
-            new Audio('https://cdn.discordapp.com/attachments/897776163995406346/1163015792003129404/voice_en_char_4072_ironmn_CN_025.mp3').play();
+              // new Audio('...').play();
+            };
           }
           lastAuthor = payload.d.author.id;
           state.update((state) => {
