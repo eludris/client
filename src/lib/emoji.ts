@@ -1913,5 +1913,8 @@ export const emojiDictionary: { [emoji: string]: string } = {
     kaldance: 'https://media.discordapp.net/stickers/1143840253476614144.png',
     flushedd: 'https://cdn.discordapp.com/emojis/1012407508901580821.webp?quality=lossless',
     pog: 'https://cdn.discordapp.com/emojis/989499974775631873.webp?quality=lossless',
+    wifu: 'https://media.discordapp.net/stickers/1162826787093491794.webp?quality=lossless',
+    uwuki: 'https://cdn.discordapp.com/emojis/1038675327204991076.webp?quality=lossless',
+    cunny: 'https://cdn.discordapp.com/emojis/1103360465641422858.webp?quality=lossless'
   }
 };
