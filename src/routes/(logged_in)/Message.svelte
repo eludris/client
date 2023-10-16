@@ -149,7 +149,7 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    overflow-x: hidden;
+    overflow: hidden;
   }
 
   .content {
