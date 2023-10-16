@@ -273,8 +273,8 @@
   #status-type-selector {
     position: absolute;
     display: flex;
-    top: 0;
-    left: 50px;
+    top: 8px;
+    left: 11px;
     flex-direction: column;
     margin: 0;
     padding: 10px;
