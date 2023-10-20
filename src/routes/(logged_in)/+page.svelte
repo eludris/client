@@ -9,14 +9,12 @@
   import MessageInput from './MessageInput.svelte';
   import MessageComponent from './Message.svelte';
   import type { ClientMessage } from '$lib/types/ui/message';
-  import { request } from '$lib/request';
   import { StatusType, type User } from '$lib/types/user';
   import { slide, type SlideParams } from 'svelte/transition';
   import Navbar from '$lib/components/Navbar.svelte';
   import UserProfile from './UserProfile.svelte';
   import type { Unsubscriber } from 'svelte/store';
   import UserContext from './UserContext.svelte';
-  import Markdown from '$lib/components/Markdown.svelte';
 
   let messagesUList: HTMLUListElement;
   let value = '';
@@ -26,7 +24,6 @@
   let currentContext: number;
   let authorContext: User | undefined;
   let authorContextDiv: HTMLDivElement;
-  let previewMessage = false;
 
   onMount(() => {
     messagesUList.scroll(0, messagesUList.scrollHeight);
@@ -60,52 +57,6 @@
       messagesUList.scroll(0, messagesUList.scrollHeight);
   };
 
-  const onSubmit = async () => {
-    if (value.trim()) {
-      let headers = new Headers();
-      headers.set('Authorization', $userData!.session.token);
-      if (value.startsWith('/shrug')) value = value.substring(7) + ' ¯\\\\\\_(ツ)_/¯';
-      value = value.replace(/@([a-z0-9_-]+)/gm, (m, username) => {
-        let id = usernames[username];
-        if (id != undefined) {
-          return `<@${id}>`;
-        } else {
-          return m;
-        }
-      });
-      request('POST', 'messages', { content: value }).then((_) =>
-        messagesUList.scroll(0, messagesUList.scrollHeight)
-      );
-    }
-    value = '';
-    previewMessage = false;
-    await tick();
-    input.focus(); // for mobiles
-  };
-
-  const submitFiles = async (e: CustomEvent<DataTransferItemList>) => {
-    let fileDatas = [];
-    for (let i = 0; i < e.detail.length; i++) {
-      if (e.detail[i].kind == 'file') {
-        const file = e.detail[i].getAsFile()!;
-        let formData = new FormData();
-        formData.append('file', file, file.name);
-        const data = await fetch($userData?.instanceInfo.effis_url!, {
-          body: formData,
-          method: 'POST'
-        }).then((r) => r.json());
-        fileDatas.push(data);
-      }
-    }
-    request('POST', 'messages', {
-      content: fileDatas
-        .map((d) => `![${d.name}](${$userData?.instanceInfo.effis_url}${d.id})`)
-        .join('\n')
-    }).then((_) => messagesUList.scroll(0, messagesUList.scrollHeight));
-    await tick();
-    input.focus(); // for mobiles
-  };
-
   const onReply = async (e: CustomEvent<ClientMessage>) => {
     const start = input.selectionStart;
     const end = input.selectionEnd;
@@ -135,15 +86,6 @@
     input.focus();
   };
 
-  const togglePreviewMessage = () => {
-    previewMessage = !previewMessage;
-  };
-
-  const previewButtonKeyDown = (e: KeyboardEvent) => {
-    console.log('hi');
-    if (e.key == 'Enter') {onSubmit();} 
-  }
-
   const windowKeyDown = (e: KeyboardEvent) => {
     if (e.key == 'u' && e.ctrlKey) {
       $userConfig.userList = !$userConfig.userList;
@@ -162,7 +104,7 @@
     if (screenWidth > 1000) return;
     let touchEndX = e.touches[0].clientX;
     let diff = touchX - touchEndX;
-    if (Math.abs(touchX - touchEndX) > screenWidth / 4) {
+    if (Math.abs(touchX - touchEndX) > screenWidth / 5) {
       if (diff > 0) {
         if ($userConfig.userList) {
           $userConfig.userList = false;
@@ -251,31 +193,7 @@
           />
         {/each}
       </ul>
-      <form id="message-input-form" on:submit|preventDefault={onSubmit}>
-        {#if previewMessage}
-          <span id="markdown-wrapper">
-            <Markdown content={value}/>
-          </span>
-        {:else}
-          <MessageInput
-            bind:input
-            bind:value
-            on:submit={onSubmit}
-            on:submitFiles={submitFiles}
-            scrollContainer={messagesUList}
-          />
-        {/if}
-        <button id="preview-button" class="input-button" on:click|preventDefault={togglePreviewMessage} on:keydown|preventDefault={previewButtonKeyDown}>
-          <!--- https://icon-sets.iconify.design/mdi/eye/ --->
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12 9a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3m0 8a5 5 0 0 1-5-5a5 5 0 0 1 5-5a5 5 0 0 1 5 5a5 5 0 0 1-5 5m0-12.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5Z"/></svg>
-        </button>
-        <button id="send-button" class="input-button">
-          <!--- https://icon-sets.iconify.design/mdi/send/ --->
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-            ><path fill="currentColor" d="m2 21l21-9L2 3v7l15 2l-15 2v7Z" /></svg
-          >
-        </button>
-      </form>
+      <MessageInput bind:input bind:value bind:usernames {messagesUList} />
     </div>
     {#if !$userConfig.userList}
       <ul id="users" transition:phoneSlide={{ axis: 'x' }}>
@@ -363,43 +281,6 @@
     padding: 0;
     margin-top: 0;
     margin-bottom: 0; /* where is react native marginVertical when you need it? */
-  }
-
-  #message-input-form {
-    width: calc(100% - 10px);
-    display: flex;
-    background-color: var(--gray-200);
-    color: var(--gray-600);
-    padding: 2px;
-    margin: 0 5px 10px 5px;
-    font-size: 18px;
-    height: auto;
-    border-radius: 10px;
-  }
-
-  #markdown-wrapper {
-    flex-grow: 1;
-    overflow-y: auto;
-    margin: 10px 0 3px 5px;
-    max-height: 33vh;
-    display: inline-block;
-  }
-
-  .input-button {
-    background: none;
-    color: inherit;
-    border: none;
-    cursor: pointer;
-    margin: 3px 5px 3px 0;
-    font-size: inherit;
-    transition: color ease-in-out 125ms;
-    cursor: pointer;
-    height: 32px;
-    padding-top: 6px;
-  }
-
-  .input-button:hover {
-    color: var(--gray-500);
   }
 
   #users {
