@@ -73,8 +73,7 @@
   afterUpdate(() => {
     if (messagesUList && !previewMessage) {
       let scroll =
-        messagesUList.scrollHeight - messagesUList.offsetHeight - messagesUList.scrollTop <=
-        10;
+        messagesUList.scrollHeight - messagesUList.offsetHeight - messagesUList.scrollTop <= 10;
       input.style.height = '1px'; // we do this to avoid it getting incrementally bigger with every press
       input.style.height = `${Math.min(
         Math.max(26, input.scrollHeight),
@@ -89,9 +88,11 @@
   };
 
   const previewButtonKeyDown = (e: KeyboardEvent) => {
-    if (e.key == 'Enter') {onSubmit();} 
-  }
-  
+    if (e.key == 'Enter') {
+      onSubmit();
+    }
+  };
+
   const onInputKeyPress = (e: KeyboardEvent) => {
     if (
       e.key == 'Enter' &&
@@ -118,9 +119,20 @@
     }
   };
 
-  const onWindowKeyDown = (e: KeyboardEvent) => {
-    if ((!e.ctrlKey || e.key == 'v') && !e.altKey && !e.metaKey && !previewMessage) {
-      input.focus();
+  const onWindowKeyDown = async (e: KeyboardEvent) => {
+    if (e.key == 'p' && e.ctrlKey) {
+      togglePreviewMessage();
+      e.preventDefault();
+      await tick();
+      input?.focus();
+    }
+    if ((!e.ctrlKey || e.key == 'v') && !e.altKey && !e.metaKey) {
+      if (e.key == 'Enter' && previewMessage) {
+        onSubmit();
+        e.preventDefault();
+      }
+      await tick();
+      input?.focus();
     }
   };
 
@@ -142,7 +154,7 @@
 <form id="message-input-form" on:submit|preventDefault={onSubmit}>
   {#if previewMessage}
     <span id="markdown-wrapper">
-      <Markdown content={value}/>
+      <Markdown content={value} />
     </span>
   {:else}
     <textarea
@@ -157,9 +169,20 @@
       spellcheck="true"
     />
   {/if}
-  <button id="preview-button" class="input-button" on:click|preventDefault={togglePreviewMessage} on:keydown|preventDefault={previewButtonKeyDown}>
+  <button
+    id="preview-button"
+    class="input-button"
+    class:toggled={previewMessage}
+    on:click|preventDefault={togglePreviewMessage}
+    on:keydown|preventDefault={previewButtonKeyDown}
+  >
     <!--- https://icon-sets.iconify.design/mdi/eye/ --->
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12 9a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3m0 8a5 5 0 0 1-5-5a5 5 0 0 1 5-5a5 5 0 0 1 5 5a5 5 0 0 1-5 5m0-12.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5Z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+      ><path
+        fill="currentColor"
+        d="M12 9a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3m0 8a5 5 0 0 1-5-5a5 5 0 0 1 5-5a5 5 0 0 1 5 5a5 5 0 0 1-5 5m0-12.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5Z"
+      /></svg
+    >
   </button>
   <button id="send-button" class="input-button">
     <!--- https://icon-sets.iconify.design/mdi/send/ --->
@@ -169,12 +192,8 @@
   </button>
 </form>
 
-
-
-
 <style>
-
-.input-button {
+  .input-button {
     background: none;
     color: inherit;
     border: none;
@@ -189,6 +208,14 @@
 
   .input-button:hover {
     color: var(--gray-500);
+  }
+
+  #preview-button.toggled {
+    color: var(--pink-400);
+  }
+
+  #preview-button.toggled:hover {
+    color: var(--pink-600);
   }
 
   #message-input {

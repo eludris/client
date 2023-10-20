@@ -104,7 +104,7 @@
     if (screenWidth > 1000) return;
     let touchEndX = e.touches[0].clientX;
     let diff = touchX - touchEndX;
-    if (Math.abs(touchX - touchEndX) > screenWidth / 4) {
+    if (Math.abs(touchX - touchEndX) > screenWidth / 5) {
       if (diff > 0) {
         if ($userConfig.userList) {
           $userConfig.userList = false;
@@ -193,12 +193,7 @@
           />
         {/each}
       </ul>
-      <MessageInput
-        bind:input
-        bind:value
-        bind:usernames
-        messagesUList={messagesUList}
-      />
+      <MessageInput bind:input bind:value bind:usernames {messagesUList} />
     </div>
     {#if !$userConfig.userList}
       <ul id="users" transition:phoneSlide={{ axis: 'x' }}>
