@@ -43,7 +43,7 @@
   <div id="profile" bind:this={profile}>
     <div id="banner-container">
       {#if banner}
-        <img src={banner} alt="Your banner" id="banner" />
+        <img src={banner} alt="{display_name}'s banner" id="banner" />
       {/if}
     </div>
     <span id="main-info-container">
