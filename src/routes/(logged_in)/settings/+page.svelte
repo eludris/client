@@ -405,6 +405,7 @@
     border-radius: 100%;
     width: 100px;
     height: 100px;
+    object-fit: cover;
   }
 
   #username {
