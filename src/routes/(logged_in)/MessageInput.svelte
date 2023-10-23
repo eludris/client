@@ -1,11 +1,61 @@
 <script lang="ts">
-  import { afterUpdate, createEventDispatcher, onMount, tick } from 'svelte';
+  import { afterUpdate, onMount, tick } from 'svelte';
+  import Markdown from '$lib/components/Markdown.svelte';
+  import userData from '$lib/user_data';
+  import { request } from '$lib/request';
 
   export let value = '';
   export let input: HTMLTextAreaElement;
-  export let scrollContainer: HTMLElement;
-  const dispatch = createEventDispatcher();
+  export let messagesUList: HTMLElement;
+  export let usernames: { [key: string]: number };
   let mobile = false;
+  let previewMessage = false;
+
+  const onSubmit = async () => {
+    if (value.trim()) {
+      let headers = new Headers();
+      headers.set('Authorization', $userData!.session.token);
+      if (value.startsWith('/shrug')) value = value.substring(7) + ' ¯\\\\\\_(ツ)_/¯';
+      value = value.replace(/@([a-z0-9_-]+)/gm, (m, username) => {
+        let id = usernames[username];
+        if (id != undefined) {
+          return `<@${id}>`;
+        } else {
+          return m;
+        }
+      });
+      request('POST', 'messages', { content: value }).then((_) =>
+        messagesUList.scroll(0, messagesUList.scrollHeight)
+      );
+    }
+    value = '';
+    previewMessage = false;
+    await tick();
+    input?.focus(); // for mobiles
+  };
+
+  const submitFiles = async (files: DataTransferItemList) => {
+    let fileDatas = [];
+    for (let i = 0; i < files.length; i++) {
+      if (files[i].kind == 'file') {
+        const file = files[i].getAsFile()!;
+        let formData = new FormData();
+        formData.append('file', file, file.name);
+        const data = await fetch($userData?.instanceInfo.effis_url!, {
+          body: formData,
+          method: 'POST'
+        }).then((r) => r.json());
+        fileDatas.push(data);
+      }
+    }
+    request('POST', 'messages', {
+      content: fileDatas
+        .map((d) => `![${d.name}](${$userData?.instanceInfo.effis_url}${d.id})`)
+        .join('\n')
+    }).then((_) => messagesUList.scroll(0, messagesUList.scrollHeight));
+    await tick();
+    input?.focus(); // for mobiles
+  };
 
   onMount(() => {
     if (
@@ -21,18 +71,27 @@
   });
 
   afterUpdate(() => {
-    if (scrollContainer) {
+    if (messagesUList && !previewMessage) {
       let scroll =
-        scrollContainer.scrollHeight - scrollContainer.offsetHeight - scrollContainer.scrollTop <=
-        10;
+        messagesUList.scrollHeight - messagesUList.offsetHeight - messagesUList.scrollTop <= 10;
       input.style.height = '1px'; // we do this to avoid it getting incrementally bigger with every press
       input.style.height = `${Math.min(
         Math.max(26, input.scrollHeight),
         window.innerHeight / 3
       )}px`;
-      if (scroll) scrollContainer.scroll(0, scrollContainer.scrollHeight);
+      if (scroll) messagesUList.scroll(0, messagesUList.scrollHeight);
     }
   });
+
+  const togglePreviewMessage = () => {
+    previewMessage = !previewMessage;
+  };
+
+  const previewButtonKeyDown = (e: KeyboardEvent) => {
+    if (e.key == 'Enter') {
+      onSubmit();
+    }
+  };
 
   const onInputKeyPress = (e: KeyboardEvent) => {
     const preSelection = value.substring(0, input.selectionStart);
@@ -45,7 +104,7 @@
       preSelection.split('$$').length % 2 == 1 &&
       value.trim().length > 0
     ) {
-      dispatch('submit');
+      onSubmit();
       e.preventDefault();
     }
   };
@@ -62,9 +121,20 @@
     }
   };
 
-  const onWindowKeyDown = (e: KeyboardEvent) => {
+  const onWindowKeyDown = async (e: KeyboardEvent) => {
+    if (e.key == 'p' && e.ctrlKey) {
+      togglePreviewMessage();
+      e.preventDefault();
+      await tick();
+      input?.focus();
+    }
     if ((!e.ctrlKey || e.key == 'v') && !e.altKey && !e.metaKey) {
-      input.focus();
+      if (e.key == 'Enter' && previewMessage) {
+        onSubmit();
+        e.preventDefault();
+      }
+      await tick();
+      input?.focus();
     }
   };
 
@@ -72,7 +142,7 @@
     if (e.clipboardData?.items.length) {
       for (let i = 0; i < e.clipboardData.items.length; i++) {
         if (e.clipboardData.items[i].kind == 'file') {
-          dispatch('submitFiles', e.clipboardData.items);
+          submitFiles(e.clipboardData.items);
           e.preventDefault();
           break;
         }
@@ -83,19 +153,73 @@
 
 <svelte:window on:keydown={onWindowKeyDown} />
 
-<textarea
-  bind:this={input}
-  bind:value
-  on:keypress={onInputKeyPress}
-  on:keydown={onInputKeyDown}
-  on:paste={onPaste}
-  id="message-input"
-  placeholder="Send a message to Eludris"
-  autocomplete="off"
-  spellcheck="true"
-/>
+<form id="message-input-form" on:submit|preventDefault={onSubmit}>
+  {#if previewMessage}
+    <span id="markdown-wrapper">
+      <Markdown content={value} />
+    </span>
+  {:else}
+    <textarea
+      bind:this={input}
+      bind:value
+      on:keypress={onInputKeyPress}
+      on:keydown={onInputKeyDown}
+      on:paste={onPaste}
+      id="message-input"
+      placeholder="Send a message to Eludris"
+      autocomplete="off"
+      spellcheck="true"
+    />
+  {/if}
+  <button
+    id="preview-button"
+    class="input-button"
+    class:toggled={previewMessage}
+    on:click|preventDefault={togglePreviewMessage}
+    on:keydown|preventDefault={previewButtonKeyDown}
+  >
+    <!--- https://icon-sets.iconify.design/mdi/eye/ --->
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+      ><path
+        fill="currentColor"
+        d="M12 9a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3m0 8a5 5 0 0 1-5-5a5 5 0 0 1 5-5a5 5 0 0 1 5 5a5 5 0 0 1-5 5m0-12.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5Z"
+      /></svg
+    >
+  </button>
+  <button id="send-button" class="input-button">
+    <!--- https://icon-sets.iconify.design/mdi/send/ --->
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+      ><path fill="currentColor" d="m2 21l21-9L2 3v7l15 2l-15 2v7Z" /></svg
+    >
+  </button>
+</form>
 
 <style>
+  .input-button {
+    background: none;
+    color: inherit;
+    border: none;
+    cursor: pointer;
+    margin: 3px 5px 3px 0;
+    font-size: inherit;
+    transition: color ease-in-out 125ms;
+    cursor: pointer;
+    height: 32px;
+    padding-top: 6px;
+  }
+
+  .input-button:hover {
+    color: var(--gray-500);
+  }
+
+  #preview-button.toggled {
+    color: var(--pink-400);
+  }
+
+  #preview-button.toggled:hover {
+    color: var(--pink-600);
+  }
+
   #message-input {
     flex-grow: 1;
     background: none;
@@ -112,5 +236,25 @@
     outline: none;
     resize: none;
     font-family: inherit;
+  }
+
+  #message-input-form {
+    width: calc(100% - 10px);
+    display: flex;
+    background-color: var(--gray-200);
+    color: var(--gray-600);
+    padding: 2px;
+    margin: 0 5px 10px 5px;
+    font-size: 18px;
+    height: auto;
+    border-radius: 10px;
+  }
+
+  #markdown-wrapper {
+    flex-grow: 1;
+    overflow-y: auto;
+    margin: 10px 0 3px 5px;
+    max-height: 33vh;
+    display: inline-block;
   }
 </style>
