@@ -430,6 +430,8 @@
     height: 150px;
     background-color: var(--gray-200);
     overflow: hidden;
+    border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
   }
 
   #banner {
