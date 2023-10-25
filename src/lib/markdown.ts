@@ -170,7 +170,7 @@ export default async (content: string): Promise<string> => {
     )
     .then((res) =>
       // Prevent backslashes from rendering in newline markdown before tables/katex blocks etc.
-      res.replace(/\n\\<\/p>\n<(table|div|h[1-6])/gm, '\n<br>\n</p>\n<$1')
+      res.replace(/\n\\<\/p>\n<(table|div|h[1-6]|pre)/gm, '\n<br>\n</p>\n<$1')
     )
     .then((res) => {
       // Parse mentions (<@id>)
