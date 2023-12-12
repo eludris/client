@@ -163,15 +163,19 @@
   }
 
   :global(.md li) {
-    white-space: initial; 
+    white-space: initial;
   }
 
   :global(.md .spoiler) {
-    display: inline-block;
+    display: inline;
     background-color: var(--purple-100);
     color: transparent;
     cursor: pointer;
     padding: 2px;
+  }
+
+  :global(.md .spoiler img) {
+    filter: blur(10px);
   }
 
   :global(.md .spoiler.unspoilered) {

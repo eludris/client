@@ -17,7 +17,7 @@
       }
 
       .md .spoiler img {
-        filter: blur(20px);
+        filter: none;
       }
     </style>
   {/if}
