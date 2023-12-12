@@ -15,6 +15,10 @@
         color: inherit;
         cursor: default;
       }
+
+      .md .spoiler img {
+        filter: blur(20px);
+      }
     </style>
   {/if}
 </svelte:head>

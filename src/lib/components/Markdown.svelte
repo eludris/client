@@ -189,6 +189,10 @@
     cursor: default;
   }
 
+  :global(.md .spoiler.unspoilered img) {
+    filter: none;
+  }
+
   :global(.md .mention) {
     display: inline-block;
     background-color: color-mix(in srgb, var(--pink-400) 50%, transparent);
