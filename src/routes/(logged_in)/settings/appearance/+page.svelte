@@ -38,7 +38,7 @@
   />
 </div>
 <div class="setting">
-  <span>Spoilers</span>
+  <label>Spoilers</label>
   <label class="spoiler-toggle" class:checked={$config.showSpoilers} for="spoileron">
     <input type="checkbox" id="spoileron" name="spoileron" bind:checked={$config.showSpoilers} />
     <span id="spoiler-checkbox" />
