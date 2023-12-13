@@ -196,6 +196,8 @@
 
   :global(.md .emoji) {
     height: 22px;
+    aspect-ratio: 1;
+    object-fit: contain;
     vertical-align: bottom;
   }
 
