@@ -15,7 +15,7 @@ const facts = [
   "It's been a long night and I can feel your anger",
   'wei wei wei wei',
   'The only thing that you gotta know is that I do what it takes do what it takes!',
-  'Kei nario nazasu',
+  'KEI <img class="emoji" draggable="false" alt="🏋" src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f3cb.svg" title="🏋"> NARIO <img class="emoji" draggable="false" alt="🤸‍♂️" src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f938-200d-2642-fe0f.svg" title="🤸‍♂️"> NAZASU <img class="emoji" draggable="false" alt="💪" src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f4aa.svg" title="💪">',
   'This is getting a bit Derailed',
   "It's quite sad- it's quite sad...",
   'Life is a row of blocks in a menagerie of knights on a funny ark',
