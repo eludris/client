@@ -79,7 +79,8 @@
     min-height: calc(100% - 90px);
   }
 
-  #settings-div {
+  #settings-div,
+  #settings-container {
     display: flex;
     margin: 0 auto;
     width: 60%;
@@ -87,6 +88,10 @@
     align-items: center;
     gap: 20px;
     flex-grow: 1;
+  }
+
+  #settings-container {
+    width: 100%;
   }
 
   #settings-nav {
