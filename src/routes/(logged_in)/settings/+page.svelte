@@ -191,10 +191,10 @@
 </script>
 
 {#if $userData}
-  <div id="user-display">
+  <a id="user-display" href="/settings/profile">
     <img src={avatar} alt="Your avatar" id="avatar" />
     <span id="username"> {$userData.user.display_name || $userData.user.username}</span>
-  </div>
+  </a>
   <div class="setting account-info">
     <span class="current">
       <h3>Username</h3>
@@ -399,6 +399,8 @@
 <style>
   #user-display {
     display: flex;
+    color: unset;
+    border: unset;
   }
 
   #avatar {
