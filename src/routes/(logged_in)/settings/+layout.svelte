@@ -54,7 +54,9 @@
         Back</a
       >
     </div>
-    <slot />
+    <span id="settings-container">
+      <slot />
+    </span>
   </div>
 
   <footer>
