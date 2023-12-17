@@ -36,7 +36,7 @@
       <a class="help-option" href="https://discord.gg/vV6v2DhWQB" target="_blank" rel="noreferrer"
         >Get help</a
       >
-      <span id="seperator" />
+      <span id="separator" />
       <button class="help-option" on:click={logOut}>Log out</button>
     </div>
   {/if}
@@ -77,7 +77,7 @@
     padding: 10px;
   }
 
-  #seperator {
+  #separator {
     display: inline-block;
     height: 1px;
     width: 7px;
