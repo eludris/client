@@ -51,8 +51,22 @@ const remarkKillImages: Plugin = () => {
 
 const rehypeExternalAnchors: Plugin = () => {
   return (tree) =>
-    visit(tree, 'element', (node: { tagName: string; properties: { target: string } }) => {
+    visit(tree, 'element', (node: { tagName: string; properties: { target: string, href: string } }) => {
       if (node.tagName == 'a') {
+        try {
+          const url = new URL(node.properties.href);
+          if (url.hostname == 'tenor.com') {
+            const gif = node as any; //typing hack for my sanity
+            gif.tagName = 'img';
+            gif.properties.src = node.properties.href;
+            if (!gif.properties.src.endsWith('.gif')) {
+              gif.properties.src += '.gif';
+            }
+            gif.properties.href = undefined;
+            gif.children = [];
+          }
+          return;
+        } catch { }
         node.properties.target = '_blank';
       }
     });
