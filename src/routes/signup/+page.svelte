@@ -9,8 +9,14 @@
   import { env } from '$env/dynamic/public';
   import getPlatform from '$lib/platform';
 
+  const EMAIL_REGEX = new RegExp(
+    /^(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/
+  );
+
   let username = '';
+  let email = '';
   let password = '';
+  let passwordConfirm = '';
   let instanceURL = env.PUBLIC_INSTANCE_URL ?? 'https://eludris.tooty.xyz';
   let error = '';
   let requesting = false;
@@ -28,6 +34,7 @@
       requesting = true;
       try {
         let instanceInfo: InstanceInfo = await request('GET', '', null, { apiUrl: instanceURL });
+        await request('POST', 'users', { username, email, password }, { apiUrl: instanceURL });
         let session: SessionCreated = await request(
           'POST',
           'sessions',
@@ -46,8 +53,9 @@
         goto('/');
       } catch (e) {
         let err = e as RequestErr;
-        if (err.code == 404 || err.code == 401) {
-          error = 'Incorrect username or password';
+        if (err.code == 409) {
+          // @ts-expect-error: this actually exists
+          error = `A user with this  ${err.err?.item} already exists`;
         } else {
           error = err.message;
         }
@@ -60,7 +68,15 @@
     validateInputs();
   };
 
+  const onEmailInput = () => {
+    validateInputs();
+  };
+
   const onPasswordInput = () => {
+    validateInputs();
+  };
+
+  const onPasswordConfirmInput = () => {
     validateInputs();
   };
 
@@ -68,25 +84,33 @@
     if (requesting) {
       return;
     }
-    username = username.trim();
-    if (password.length < 8) {
+    username = username.trim().toLowerCase();
+    if (username.length < 2 || username.length > 32) {
+      error = 'Your username must be between 2 and 32 characters in length';
+    } else if (!EMAIL_REGEX.test(email)) {
+      error = 'You must pass a valid email';
+    } else if (password.length < 8) {
       error = 'Your password must be at least 8 characters long';
+    } else if (password != passwordConfirm) {
+      error = 'Your passwords must match';
     } else {
       error = '';
     }
   };
 </script>
 
-<div id="login-div">
-  <form id="login-form" on:submit|preventDefault={onSubmit}>
-    <h1>Log in to Eludris</h1>
-    <label for="username">Username / Email</label>
+<div id="signup-div">
+  <form id="signup-form" on:submit|preventDefault={onSubmit}>
+    <h1>Make an Eludris account</h1>
+    <label for="username">Username</label>
     <input
       bind:value={username}
       on:input={onUsernameInput}
       name="username"
-      placeholder="Username / Email"
+      placeholder="Username"
     />
+    <label for="email">Email</label>
+    <input bind:value={email} on:input={onEmailInput} name="email" placeholder="Email" />
     <label for="password">Password</label>
     <input
       bind:value={password}
@@ -95,21 +119,24 @@
       placeholder="Password"
       type="password"
     />
+    <label for="password-confirm">Confirm your password</label>
+    <input
+      bind:value={passwordConfirm}
+      on:input={onPasswordConfirmInput}
+      name="password-confirm"
+      placeholder="Confirm your password"
+      type="password"
+    />
     {#if error}
       <span class="error">{error}</span>
     {/if}
-    <button type="submit" disabled={!!error}>Log in</button>
-    <a id="signup-prompt" href="/signup">Don't have an account? Sign up!</a>
-    <a
-      id="password-reset-prompt"
-      href={username.indexOf('@') != -1 ? `/reset-password?email=${username}` : '/reset-password'}
-      >Forgot your password?</a
-    >
+    <button type="submit" disabled={!!error}>Sign up</button>
+    <a id="login-prompt" href="/login">Already have an account? Log in!</a>
   </form>
 </div>
 
 <style>
-  #login-div {
+  #signup-div {
     width: 100%;
     height: 100%;
     display: flex;
@@ -117,7 +144,7 @@
     justify-content: center;
   }
 
-  #login-form {
+  #signup-form {
     display: flex;
     align-items: center;
     justify-items: center;
@@ -128,16 +155,16 @@
     width: min(400px, 95%);
   }
 
-  #login-form > h1 {
+  #signup-form > h1 {
     font-size: 34px;
   }
 
-  #login-form > label {
+  #signup-form > label {
     font-size: 20px;
     margin-bottom: 5px;
   }
 
-  #login-form > input {
+  #signup-form > input {
     margin: 20px;
     margin-top: 0;
     width: 90%;
@@ -150,7 +177,7 @@
     color: inherit;
   }
 
-  #login-form > button {
+  #signup-form > button {
     margin: 20px;
     font-size: 20px;
     padding: 13px 20px;
@@ -166,12 +193,12 @@
     cursor: pointer;
   }
 
-  #login-form > button:hover {
+  #signup-form > button:hover {
     box-shadow: 0 5px 20px var(--purple-200);
     background-color: var(--pink-600);
   }
 
-  #login-form > button:disabled {
+  #signup-form > button:disabled {
     background-color: var(--pink-300);
     box-shadow: 0 2px 2px var(--gray-100);
     cursor: default;
@@ -182,16 +209,16 @@
     text-align: center;
   }
 
-  #signup-prompt {
+  #login-prompt {
     font-weight: 300;
   }
 
   @media only screen and (max-width: 1200px) {
-    #login-form > h1 {
+    #signup-form > h1 {
       font-size: 36px;
     }
 
-    #login-div {
+    #signup-div {
       margin: 10px;
       margin-top: 0;
       width: 95%;

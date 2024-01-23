@@ -1,110 +1,157 @@
 import { browser } from '$app/environment';
-import { writable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 import data from '$lib/user_data';
 import config from '$lib/user_config';
-import type { InstanceInfo } from '$lib/types/instance';
 import { PayloadOP, type IncomingPayload } from '$lib/types/event';
 import markdown from '$lib/markdown';
-import type { PenginMessage } from './types/ui/message';
 import type { UserData } from './types/ui/user';
+import type { State } from './types/ui/state';
+import { request } from './request';
+import type { InstanceInfo } from './types/instance';
 
-const messages = writable<Array<PenginMessage> | null>(null);
+const state = writable<State>({ connected: false, messages: [], users: [] });
 
-let instanceURL: string | null = null;
 let ws: WebSocket | null = null;
 let pingInterval: NodeJS.Timer | null = null;
-let lastAuthor: string | null = null;
+let lastAuthor: number | null = null;
 let notification: Notification;
 let notification_opt: number;
-let oldMessages: Array<PenginMessage> | null = null;
+let connected = false;
 
-const retryConnect = (wait = 3_000) => {
-  messages.subscribe((messages) => {
-    if (messages) oldMessages = messages;
-  })();
-  messages.set(null);
+state.subscribe((state) => {
+  connected = state.connected;
+});
+
+const retryConnect = (wait = 5_000) => {
+  state.update((state) => {
+    state.connected = false;
+    return state;
+  });
   setTimeout(() => {
-    data.subscribe((userData) => {
-      if (userData) connect(userData, true);
-    })();
+    let userData = get(data);
+    if (userData) {
+      connect(userData);
+    }
   }, wait);
 };
 
-const connect = async (userData: UserData, reconnect = false) => {
-  if (userData.instanceURL == instanceURL && !reconnect) return;
-  instanceURL = userData.instanceURL;
+const connect = async (userData: UserData) => {
   ws?.close();
   if (pingInterval) clearInterval(pingInterval);
-  const res = await fetch(userData.instanceURL);
-  const info: InstanceInfo = await res.json();
 
-  if (!info.pandemonium_url) {
-    return retryConnect(5_000);
-  }
-
-  data.update((userData) => {
-    if (userData) userData.instanceInfo = info;
-    return userData;
-  });
-
-  const innerWs = new WebSocket(info.pandemonium_url);
+  const innerWs = new WebSocket(userData.instanceInfo.pandemonium_url);
 
   innerWs.addEventListener('open', () => {
-    messages.set(oldMessages ?? []);
-
     innerWs?.addEventListener('message', (msg: MessageEvent) => {
       const payload: IncomingPayload = JSON.parse(msg.data);
 
+      let instanceInfo: InstanceInfo;
       if (payload.op == PayloadOP.HELLO) {
-        messages.set([]);
+        setTimeout(() => {
+          ws?.send(JSON.stringify({ op: PayloadOP.PING }));
+          pingInterval = setInterval(
+            () => ws?.send(JSON.stringify({ op: PayloadOP.PING })),
+            payload.d.heartbeat_interval
+          );
+        }, payload.d.heartbeat_interval * Math.random());
         ws = innerWs;
-        setTimeout(
-          () => {
-            ws?.send(JSON.stringify({ op: PayloadOP.PING }));
-            pingInterval = setInterval(() => ws?.send(JSON.stringify({ op: PayloadOP.PING })), payload.d.heartbeat_interval);
-          },
-          payload.d.heartbeat_interval * Math.random()
-        );
-      }
-      else if (payload.op == PayloadOP.MESSAGE_CREATE)
+        instanceInfo = payload.d.instance_info;
+        ws?.send(JSON.stringify({ op: PayloadOP.AUTHENTICATE, d: userData.session.token }));
+      } else if (payload.op == PayloadOP.AUTHENTICATED) {
+        state.update((state) => {
+          state.connected = true;
+          state.users = [];
+          payload.d.users.forEach((u) => (state.users[u.id] = u));
+          state.users[payload.d.user.id] = payload.d.user;
+          return state;
+        });
+        data.update((data) => {
+          if (data) {
+            data.user = payload.d.user;
+            if (instanceInfo) data.instanceInfo = instanceInfo;
+          }
+          return data;
+        });
+      } else if (payload.op == PayloadOP.USER_UPDATE) {
+        state.update((state) => {
+          state.connected = true;
+          state.users[payload.d.id] = payload.d;
+          return state;
+        });
+        if (payload.d.id == userData.user.id) {
+          data.update((d) => {
+            if (d) {
+              d.user = payload.d;
+            }
+            return d;
+          });
+        }
+      } else if (payload.op == PayloadOP.PRESENCE_UPDATE) {
+        state.update((s) => {
+          s.connected = true;
+          if (!s.users[payload.d.user_id]) {
+            request('GET', `/users/${payload.d.user_id}`).then((u) => {
+              state.update((state) => {
+                state.users[payload.d.user_id] = u;
+                return state;
+              });
+            });
+          } else {
+            s.users[payload.d.user_id].status = payload.d.status;
+          }
+          return s;
+        });
+        if (payload.d.user_id == userData.user.id) {
+          data.update((d) => {
+            if (d) {
+              d.user.status = payload.d.status;
+            }
+            return d;
+          });
+        }
+      } else if (payload.op == PayloadOP.MESSAGE_CREATE)
         markdown(payload.d.content).then((content) => {
           const message = {
             renderedContent: content,
-            showAuthor: payload.d.author != lastAuthor,
-            mentioned: content.toLowerCase().split(`@${userData.name.toLowerCase()}`).length > 1,
+            showAuthor: payload.d.author.id != lastAuthor,
+            mentioned: new RegExp(`(?<!\\\\)<@${userData.user.id}>`, 'gm').test(payload.d.content),
             ...payload.d
           };
           if (
             'Notification' in window &&
             Notification.permission == 'granted' &&
-            message.author != userData.name &&
+            message.author.id != userData.user.id &&
             !document.hasFocus() &&
             notification_opt > 0
           ) {
-            if (notification_opt >= 3 || message.mentioned)
+            if (notification_opt >= 3 || message.mentioned) {
               notification = new Notification(
                 message.mentioned
-                  ? `New mention from ${message.author}`
-                  : `New message from ${message.author}`,
+                  ? `New mention from ${message.author.display_name ?? message.author.username}`
+                  : `New message from ${message.author.display_name ?? message.author.username}`,
                 {
                   body: message.content,
-                  icon: '/das_ding.png',
+                  icon:
+                    `${userData.instanceInfo.effis_url}/avatars/${message.author.avatar}` ??
+                    '/das_ding.png',
                   renotify: true,
                   tag: 'NewMessage'
                 }
               );
+              // new Audio('...').play();
+            };
           }
-          lastAuthor = payload.d.author;
-          messages.update((messages) => {
-            messages?.push(message);
-            return messages;
+          lastAuthor = payload.d.author.id;
+          state.update((state) => {
+            state.messages.push(message);
+            return state;
           });
         });
     });
 
     innerWs?.addEventListener('close', () => {
       console.warn('WebSocket connection closed, reconnecting');
-      retryConnect();
+      retryConnect(7_000);
     });
   });
 
@@ -117,11 +164,13 @@ const connect = async (userData: UserData, reconnect = false) => {
 if (browser) {
   data.subscribe(async (userData) => {
     // You have to log out to change the instance's url.
-    if (userData) {
+    if (!connected && userData) {
       await connect(userData);
-    } else {
-      messages.set(null);
-      oldMessages = null;
+    } else if (!userData) {
+      state.update((state) => {
+        state.connected = false;
+        return state;
+      });
       ws?.close();
       if (pingInterval) clearInterval(pingInterval);
       ws = null;
@@ -140,4 +189,4 @@ if (browser) {
   });
 }
 
-export default messages;
+export default state;

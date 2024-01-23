@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { ClientMessage } from '$lib/types/ui/message';
+  import type { User } from '$lib/types/user';
   import { createEventDispatcher } from 'svelte';
 
-  export let message: ClientMessage;
+  export let user: User;
 
   const dispatch = createEventDispatcher();
   export let contextDiv: HTMLDivElement;
@@ -11,14 +11,19 @@
     if (e.target != contextDiv && !contextDiv.contains(e.target as Node)) dispatch('close');
   };
 
-  const copyButton = () => {
-    navigator.clipboard.writeText(message.content).then(() => {
+  const copyIdButton = () => {
+    navigator.clipboard.writeText(user.id.toString()).then(() => {
       dispatch('close');
     });
   };
 
-  const replyButton = () => {
-    dispatch('reply', message);
+  const profileButton = () => {
+    dispatch('showProfile', user.id);
+    dispatch('close');
+  };
+
+  const mentionButton = () => {
+    dispatch('mention', user);
     dispatch('close');
   };
 
@@ -32,8 +37,10 @@
 <svelte:window on:mousedown={onClick} on:keydown={onKeyDown} />
 
 <div id="context" bind:this={contextDiv}>
-  <button on:click={copyButton}>Copy</button>
-  <button on:click={replyButton}>Reply</button>
+  <button on:click={profileButton}>Profile</button>
+  <button on:click={mentionButton}>Mention</button>
+  <hr />
+  <button on:click={copyIdButton}>Copy ID</button>
 </div>
 
 <style>
@@ -59,5 +66,10 @@
     color: inherit;
     background-color: var(--purple-300);
     padding: 5px;
+  }
+
+  hr {
+    width: 90%;
+    color: #fff3;
   }
 </style>
