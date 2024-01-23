@@ -10,6 +10,7 @@ const facts = [
   'Eludris is factually better than Disco- well, maybe not yet',
   'I am the storm that is approaching',
   'Coffee is kinda pog',
+  'Faust knows all outcomes',
   'The name pengin (old client name) originally started as a joke about linux users while watching <a href="https://cdn.eludris.gay/static/pengin.mp4" target="_blank">this video</a> on loop',
   'ggVG is a sensible keybind.',
   "It's been a long night and I can feel your anger",
@@ -23,7 +24,7 @@ const facts = [
   'Bob Bobster',
   '<span style="background-color: hsl(235 calc(1*85.6%) 64.7%/0.3); padding: 0 2px; border-radius: 3px;">@Duffelbag</span> eval',
   'One two three four five once I caught a fish alive',
-  "There's a secret magical hidden /setting/reset-theme route for when the epic theme from untrusted sources you install makes your client unusable!"
+  "There's a secret magical hidden /setting/reset-theme route for when the epic theme from untrusted sources you install makes your client unusable!".
 ];
 
 export function load() {
