@@ -24,7 +24,7 @@ const facts = [
   'Bob Bobster',
   '<span style="background-color: hsl(235 calc(1*85.6%) 64.7%/0.3); padding: 0 2px; border-radius: 3px;">@Duffelbag</span> eval',
   'One two three four five once I caught a fish alive',
-  "There's a secret magical hidden /setting/reset-theme route for when the epic theme from untrusted sources you install makes your client unusable!".
+  "There's a secret magical hidden /setting/reset-theme route for when the epic theme from untrusted sources you install makes your client unusable!",
 ];
 
 export function load() {
