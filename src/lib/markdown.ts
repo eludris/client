@@ -64,8 +64,8 @@ const rehypeExternalAnchors: Plugin = () => {
             }
             gif.properties.href = undefined;
             gif.children = [];
+            return;
           }
-          return;
         } catch { }
         node.properties.target = '_blank';
       }
