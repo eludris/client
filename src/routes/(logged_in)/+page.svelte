@@ -309,7 +309,7 @@
     background-color: var(--gray-300);
   }
 
-  @media only screen and (max-width: 1000px) {
+  @media only screen and (max-width: 1200px) {
     #message-channel-body {
       width: 100%;
       position: relative;

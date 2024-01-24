@@ -204,4 +204,10 @@
   :global(.md .emoji.big) {
     height: 100px;
   }
+
+  @media only screen and (max-width: 1000px) {
+    :global(.md img) {
+      max-width: 100%;
+    }
+  }
 </style>
