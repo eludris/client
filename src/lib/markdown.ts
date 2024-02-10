@@ -14,10 +14,12 @@ import { get } from 'svelte/store';
 import { emojiDictionary, toCodePoints } from './emoji';
 
 let effisHost: string | undefined = undefined;
+let effisUrl: string | undefined = undefined;
 
 data.subscribe((value) => {
   if (value?.instanceInfo?.effis_url) {
     try {
+      effisUrl = value.instanceInfo.effis_url;
       const url = new URL(value.instanceInfo.effis_url);
       effisHost = url.hostname;
     } catch {
@@ -35,16 +37,14 @@ const remarkTextifyHtml: Plugin = () => {
 
 const remarkKillImages: Plugin = () => {
   return (tree) =>
-    visit(tree, 'image', (node: { type: string; alt: string; value: string; url: string }) => {
+    visit(tree, 'image', (node: { url: string }) => {
       try {
         const url = new URL(node.url);
         if (url.hostname != effisHost) {
-          node.type = 'text';
-          node.value = node.alt;
+          node.url = `${effisUrl}/proxy?url=${node.url}`;
         }
       } catch {
-        node.type = 'text';
-        node.value = node.alt;
+        node.url = `${effisUrl}/proxy?url=${node.url}`;
       }
     });
 };
@@ -55,7 +55,7 @@ const rehypeExternalAnchors: Plugin = () => {
       if (node.tagName == 'a') {
         try {
           const url = new URL(node.properties.href);
-          if (url.hostname == 'tenor.com') {
+          if (url.hostname == 'tenor.com' || 'media1.tenor.com') {
             const gif = node as any; //typing hack for my sanity
             gif.tagName = 'img';
             gif.properties.src = node.properties.href;
