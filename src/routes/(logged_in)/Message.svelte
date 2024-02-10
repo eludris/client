@@ -82,7 +82,9 @@
       <img
         on:contextmenu|preventDefault|stopPropagation={onAuthorContextMenu}
         on:click|preventDefault|stopPropagation={onAuthorContextMenu}
-        src={message.author.avatar
+        src={message._disguise?.avatar
+          ? `${$userData?.instanceInfo.effis_url}/proxy?url=${message._disguise?.avatar}`
+          : message.author.avatar
           ? `${$userData?.instanceInfo.effis_url}/avatars/${message.author.avatar}`
           : 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true'}
         alt=""
@@ -98,7 +100,7 @@
         on:click|preventDefault|stopPropagation={onAuthorContextMenu}
         class="author-name"
       >
-        {message.author.display_name ?? message.author.username}
+        {message._disguise?.name ?? message.author.display_name ?? message.author.username}
       </span>
     {/if}
     <div class="content"><Markdown content={message.renderedContent} preRendered /></div>

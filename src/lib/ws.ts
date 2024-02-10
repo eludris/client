@@ -13,7 +13,7 @@ const state = writable<State>({ connected: false, messages: [], users: [] });
 
 let ws: WebSocket | null = null;
 let pingInterval: NodeJS.Timer | null = null;
-let lastAuthor: number | null = null;
+let lastAuthorData: { name: string, avatar: string | number | undefined } | null = null;
 let notification: Notification;
 let notification_opt: number;
 let connected = false;
@@ -111,12 +111,21 @@ const connect = async (userData: UserData) => {
         }
       } else if (payload.op == PayloadOP.MESSAGE_CREATE)
         markdown(payload.d.content).then((content) => {
+          const authorData = {
+            name:
+              payload.d._disguise?.name ??
+              payload.d.author.display_name ?? payload.d.author.username,
+            avatar:
+              payload.d._disguise?.avatar ??
+              payload.d.author.avatar
+          };
           const message = {
             renderedContent: content,
-            showAuthor: payload.d.author.id != lastAuthor,
+            showAuthor: authorData != lastAuthorData,
             mentioned: new RegExp(`(?<!\\\\)<@${userData.user.id}>`, 'gm').test(payload.d.content),
             ...payload.d
           };
+          lastAuthorData = authorData;
           if (
             'Notification' in window &&
             Notification.permission == 'granted' &&
@@ -141,7 +150,6 @@ const connect = async (userData: UserData) => {
               // new Audio('...').play();
             };
           }
-          lastAuthor = payload.d.author.id;
           state.update((state) => {
             state.messages.push(message);
             return state;
