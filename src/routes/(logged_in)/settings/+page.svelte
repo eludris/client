@@ -18,6 +18,7 @@
   let edit = '';
   let error = '';
   let saving = false;
+  let resendVerificationDisabled = false;
 
   let username = '';
   let email = '';
@@ -96,6 +97,14 @@
 
   const verifyCode = () => {
     edit = 'verify';
+  };
+
+  const resendVerification = async () => {
+    await request('POST', '/users/resend-verification');
+    resendVerificationDisabled = true;
+    setTimeout(() => {
+      resendVerificationDisabled = false;
+    }, 5 * 60 * 1000);
   };
 
   const popupDismiss = () => {
@@ -356,9 +365,12 @@
         Unverified accounts get deleted after 7 days, please verify your account to maintain access
         to it
       </span>
-      <button id="verify-button" on:click={verifyCode}>Verify Account</button>
+      <span id="verify-buttons">
+        <button id="verify-button" on:click={verifyCode}>Verify Account</button>
+        <button id="resend-code-button" on:click={resendVerification} disabled={resendVerificationDisabled}>Resend Code</button>
+      </span>
       {#if edit == 'verify'}
-        <Popup on:dismiss={popupDismiss}>
+      <Popup on:dismiss={popupDismiss}>
           <span slot="title">Verify your account</span>
           <div class="popup-body">
             <span style="text-align: center;"
@@ -427,7 +439,6 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
-    padding: 20px;
   }
 
   .verification-warning {
@@ -440,11 +451,16 @@
     margin: 0;
   }
 
+  #verify-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
   #verify-button {
     border: unset;
     border-radius: 5px;
     padding: 10px 20px;
-    margin-top: 10px;
     font-size: 18px;
     background-color: var(--gray-300);
     transition: background-color ease-in-out 125ms;
@@ -453,6 +469,26 @@
 
   #verify-button:hover {
     background-color: var(--gray-400);
+  }
+
+  #resend-code-button {
+    border: unset;
+    font-size: 16px;
+    background-color: transparent;
+    transition: color ease-in-out 125ms, border-color ease-in-out 125ms;
+    color: #888;
+    border-bottom: 2px solid #888;
+    height: fit-content;
+  }
+
+  #resend-code-button:hover {
+    color: #bbb;
+    border-color: #bbb;
+  }
+
+  #resend-code-button:disabled {
+    color: #555;
+    border-color: #555;
   }
 
   h3 {
