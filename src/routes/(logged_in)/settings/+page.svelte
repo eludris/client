@@ -73,7 +73,7 @@
   };
 
   const codeInput = () => {
-    code = code.trim();
+    code = code.replace(/ /gi, '');
     error = '';
   };
 
@@ -367,10 +367,14 @@
       </span>
       <span id="verify-buttons">
         <button id="verify-button" on:click={verifyCode}>Verify Account</button>
-        <button id="resend-code-button" on:click={resendVerification} disabled={resendVerificationDisabled}>Resend Code</button>
+        <button
+          id="resend-code-button"
+          on:click={resendVerification}
+          disabled={resendVerificationDisabled}>Resend Code</button
+        >
       </span>
       {#if edit == 'verify'}
-      <Popup on:dismiss={popupDismiss}>
+        <Popup on:dismiss={popupDismiss}>
           <span slot="title">Verify your account</span>
           <div class="popup-body">
             <span style="text-align: center;"
