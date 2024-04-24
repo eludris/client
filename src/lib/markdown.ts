@@ -55,7 +55,7 @@ const rehypeExternalAnchors: Plugin = () => {
       if (node.tagName == 'a') {
         try {
           const url = new URL(node.properties.href);
-          if (url.hostname == 'tenor.com' || 'media1.tenor.com') {
+          if (url.hostname == 'tenor.com' || url.hostname == 'media1.tenor.com') {
             const gif = node as any; //typing hack for my sanity
             gif.tagName = 'img';
             gif.properties.src = node.properties.href;
