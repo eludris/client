@@ -317,7 +317,7 @@
 
     #users {
       position: absolute;
-      width: 80%;
+      width: min(80%, 300px);
       right: 0;
       height: calc(100% - 60px);
       box-sizing: border-box;
