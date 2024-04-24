@@ -13,6 +13,7 @@ const state = writable<State>({ connected: false, messages: [], users: [] });
 
 let ws: WebSocket | null = null;
 let pingInterval: NodeJS.Timer | null = null;
+let lastAuthorID = 0;
 let lastAuthorData: { name: string, avatar: string | number | undefined } | null = null;
 let notification: Notification;
 let notification_opt: number;
@@ -119,13 +120,15 @@ const connect = async (userData: UserData) => {
               payload.d._disguise?.avatar ??
               payload.d.author.avatar
           };
+          let sameData = authorData.name == lastAuthorData?.name && authorData.avatar == lastAuthorData.avatar;
           const message = {
             renderedContent: content,
-            showAuthor: authorData != lastAuthorData,
+            showAuthor: !sameData && payload.d.author.id != lastAuthorID,
             mentioned: new RegExp(`(?<!\\\\)<@${userData.user.id}>`, 'gm').test(payload.d.content),
             ...payload.d
           };
           lastAuthorData = authorData;
+          lastAuthorID = payload.d.author.id;
           if (
             'Notification' in window &&
             Notification.permission == 'granted' &&
