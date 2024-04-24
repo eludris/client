@@ -24,10 +24,13 @@ state.subscribe((state) => {
 });
 
 const retryConnect = (wait = 5_000) => {
+  if (connected == false) return; // this should hopefully maybe prevent having more than one pending reconnects
   state.update((state) => {
     state.connected = false;
     return state;
   });
+  ws?.close();
+  if (pingInterval) clearInterval(pingInterval);
   setTimeout(() => {
     let userData = get(data);
     if (userData) {
