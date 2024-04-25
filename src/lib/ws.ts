@@ -126,7 +126,7 @@ const connect = async (userData: UserData) => {
           let sameData = authorData.name == lastAuthorData?.name && authorData.avatar == lastAuthorData.avatar;
           const message = {
             renderedContent: content,
-            showAuthor: !sameData && payload.d.author.id != lastAuthorID,
+            showAuthor: !sameData || payload.d.author.id != lastAuthorID,
             mentioned: new RegExp(`(?<!\\\\)<@${userData.user.id}>`, 'gm').test(payload.d.content),
             ...payload.d
           };
@@ -140,15 +140,18 @@ const connect = async (userData: UserData) => {
             notification_opt > 0
           ) {
             if (notification_opt >= 3 || message.mentioned) {
+              let icon = message._disguise?.avatar
+                ? `${userData.instanceInfo.effis_url}/proxy?url=${message._disguise?.avatar}`
+                : message.author.avatar
+                  ? `${userData.instanceInfo.effis_url}/avatars/${message.author.avatar}`
+                  : 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true';
               notification = new Notification(
                 message.mentioned
-                  ? `New mention from ${message.author.display_name ?? message.author.username}`
-                  : `New message from ${message.author.display_name ?? message.author.username}`,
+                  ? `New mention from ${lastAuthorData.name}`
+                  : `New message from ${lastAuthorData.name}`,
                 {
                   body: message.content,
-                  icon:
-                    `${userData.instanceInfo.effis_url}/avatars/${message.author.avatar}` ??
-                    '/das_ding.png',
+                  icon,
                   renotify: true,
                   tag: 'NewMessage'
                 }
