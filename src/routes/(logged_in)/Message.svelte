@@ -100,7 +100,9 @@
         on:click|preventDefault|stopPropagation={onAuthorContextMenu}
         class="author-name"
       >
-        {message._disguise?.name ?? message.author.display_name ?? message.author.username}
+        <span>
+          {message._disguise?.name ?? message.author.display_name ?? message.author.username}
+        </span>
         {#if message._disguise} <span class="bridge-indicator">BRIDGE</span> {/if}
       </span>
     {/if}
@@ -174,7 +176,7 @@
     font-size: 12px;
   }
 
-  .author-name:hover {
+  .author-name > span:hover {
     text-decoration: underline;
   }
 
