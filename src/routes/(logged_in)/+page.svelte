@@ -64,7 +64,7 @@
     const reply = `${value.trim() ? '\n' : ''}${e.detail.content
       .split('\n')
       .map((l) => `> ${l}`)
-      .join('\n')}\n@${e.detail.author.username}\n\n`;
+      .join('\n')}\n@${e.detail._disguise?.name ?? e.detail.author.username}\n\n`;
     value = value.substring(0, start) + reply + value.substring(end);
     await tick();
 
