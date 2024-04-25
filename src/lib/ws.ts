@@ -141,7 +141,7 @@ const connect = async (userData: UserData) => {
           ) {
             if (notification_opt >= 3 || message.mentioned) {
               let icon = message._disguise?.avatar
-                ? `${userData.instanceInfo.effis_url}/proxy?url=${message._disguise?.avatar}`
+                ? `${userData.instanceInfo.effis_url}/proxy?url=${encodeURIComponent(message._disguise?.avatar)}`
                 : message.author.avatar
                   ? `${userData.instanceInfo.effis_url}/avatars/${message.author.avatar}`
                   : 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true';
