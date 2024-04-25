@@ -57,7 +57,7 @@
   }
 
   :global(.md a) {
-    display: inline;
+    float: left;
   }
 
   :global(.md blockquote) {
