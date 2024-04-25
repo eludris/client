@@ -101,6 +101,7 @@
         class="author-name"
       >
         {message._disguise?.name ?? message.author.display_name ?? message.author.username}
+        {#if message._disguise} <span class="bridge-indicator">BRIDGE</span> {/if}
       </span>
     {/if}
     <div class="content"><Markdown content={message.renderedContent} preRendered /></div>
@@ -162,6 +163,15 @@
     white-space: pre;
     font-weight: bold;
     width: fit-content;
+    display: flex;
+    align-items: center;
+  }
+
+  .bridge-indicator {
+    background-color: var(--purple-600);
+    border-radius: 3px;
+    padding: 0 2px;
+    font-size: 12px;
   }
 
   .author-name:hover {
