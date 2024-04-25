@@ -96,6 +96,7 @@
 
   :global(.md img) {
     max-width: 30%;
+    max-height: 80vw;
     border-radius: 5px;
   }
 
