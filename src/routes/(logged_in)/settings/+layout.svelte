@@ -104,6 +104,7 @@
 
   #settings-nav a {
     border: unset;
+    text-decoration: none;
     padding: 10px;
     transition: unset;
   }

@@ -92,6 +92,7 @@
     cursor: pointer;
     align-self: baseline;
     transition: color ease-in-out 125ms;
+    text-decoration: underline;
   }
 
   .help-option:hover {
