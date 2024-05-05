@@ -246,7 +246,7 @@
   }
 
   #error {
-    color: var(--pink-700);
+    color: var(--pink-600);
     text-align: center;
   }
 </style>

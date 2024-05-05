@@ -618,6 +618,10 @@
     background-color: var(--pink-500);
   }
 
+  .error {
+    color: var(--pink-600);
+  }
+
   @media only screen and (max-width: 1200px) {
     .popup-body {
       width: min(80vw, 400px);
