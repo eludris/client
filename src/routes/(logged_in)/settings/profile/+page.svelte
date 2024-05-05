@@ -6,6 +6,7 @@
   import { tick } from 'svelte';
   import type { StatusType } from '$lib/types/user';
   import Popup from '$lib/components/Popup.svelte';
+  import CropperComponent from './cropper.svelte';
 
   let statuses = [
     ['Online', ''],
@@ -29,6 +30,8 @@
   let avatarFile: FileList | undefined | null = undefined;
 
   let popupError = '';
+
+  let showCropper = false;
 
   $: if (bannerFile) {
     if (bannerFile[0].size > $userData!.instanceInfo.file_size) {
@@ -57,11 +60,11 @@
       }MB`;
       avatarFile = undefined;
     } else {
-      let reader = new FileReader();
-      reader.addEventListener('load', () => {
-        avatar = reader.result! as string;
-      });
-      reader.readAsDataURL(avatarFile[0]);
+      // let reader = new FileReader();
+      // reader.addEventListener('load', () => {
+      //   avatar = reader.result! as string;
+      // });
+      // reader.readAsDataURL(avatarFile[0]);
     }
   }
 
@@ -69,6 +72,11 @@
     avatar = 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true';
     avatarFile = null;
   };
+
+  let avatarCropSuccess = (e: CustomEvent<string>) => {
+    avatar = e.detail;
+    closeCropper();
+  }
 
   let bioFocused = false;
   let statusIndicatorFocused = false;
@@ -197,6 +205,14 @@
   const popupDismiss = () => {
     popupError = '';
   };
+
+  const openCropper = () => {
+    showCropper = true;
+  };
+
+  const closeCropper = () => {
+    showCropper = false;
+  };
 </script>
 
 <svelte:body on:click={bodyClick} />
@@ -271,6 +287,7 @@
                     type="file"
                     accept="image/*"
                     bind:files={avatarFile}
+                    on:change={openCropper}
                   />
                   {#if avatar != 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true'}
                     <button on:click={resetAvatar}>Reset</button>
@@ -371,6 +388,14 @@
       <span slot="title">Error</span>
       {popupError}
     </Popup>
+  {/if}
+
+  {#if showCropper}
+    <CropperComponent
+      on:dismiss={closeCropper}
+      on:success={avatarCropSuccess}
+      {avatarFile}
+    />
   {/if}
 {/if}
 
