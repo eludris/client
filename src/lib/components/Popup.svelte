@@ -11,10 +11,19 @@
     }
   };
 
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.key == 'Escape') {
+      popupDismiss();
+    }
+  };
+
   const popupDismiss = () => {
     dispatch('dismiss');
   };
+
 </script>
+
+<svelte:body on:keydown|stopPropagation|capture={onKeyDown} />
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div id="popup-container" on:click={containerClick}>
