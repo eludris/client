@@ -30,23 +30,23 @@
   let avatarFiles: FileList | undefined | null = undefined;
   let bannerFile: Blob | null | undefined = undefined;
   let avatarFile: Blob | null | undefined = undefined;
+  let cropperFile: Blob | null = null; 
 
   let popupError = '';
 
   let showCropper = false;
+  let cropperKind = 'avatar'
 
   $: if (bannerFiles) {
     if (bannerFiles[0].size > $userData!.instanceInfo.file_size) {
       popupError = `Your banner image cannot be bigger than ${
         $userData!.instanceInfo.file_size / 1000000
       }MB`;
-      bannerFiles = undefined;
+      bannerFiles = bannerFile = undefined;
     } else {
-      let reader = new FileReader();
-      reader.addEventListener('load', () => {
-        banner = reader.result! as string;
-      });
-      reader.readAsDataURL(bannerFiles[0]);
+      cropperFile = bannerFile = bannerFiles![0];
+      cropperKind = "banner";
+      openCropper();
     }
   }
 
@@ -62,8 +62,9 @@
       }MB`;
       avatarFiles = avatarFile = undefined;
     } else {
-      avatarFile = avatarFiles![0];
-      openCropper()
+      cropperFile = avatarFile = avatarFiles![0];
+      cropperKind = "avatar";
+      openCropper();
     }
   }
 
@@ -72,9 +73,14 @@
     avatarFiles = null;
   };
 
-  let avatarCropSuccess = (e: CustomEvent<Blob>) => {
-    avatarFile = e.detail;
-    avatar = URL.createObjectURL(avatarFile);
+  let cropSuccess = (e: CustomEvent<Blob>) => {
+    if (cropperKind == "avatar") {
+      avatarFile = e.detail;
+      avatar = URL.createObjectURL(avatarFile);
+    } else {
+      bannerFile = e.detail;
+      banner = URL.createObjectURL(bannerFile);
+    }
     closeCropper();
   }
 
@@ -392,8 +398,9 @@
   {#if showCropper}
     <CropperComponent
       on:dismiss={closeCropper}
-      on:success={avatarCropSuccess}
-      {avatarFile}
+      on:success={cropSuccess}
+      {cropperFile}
+      {cropperKind}
     />
   {/if}
 {/if}

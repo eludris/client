@@ -2,7 +2,8 @@
   import { createEventDispatcher, onMount, tick } from 'svelte';
   import Popup from '$lib/components/Popup.svelte';
 
-  export let avatarFile: Blob | null | undefined;
+  export let cropperFile: Blob | null | undefined;
+  export let cropperKind: string;
 
   let image: HTMLImageElement = document.createElement('img');
   let cutout: HTMLDivElement = document.createElement('div');
@@ -25,7 +26,7 @@
     await tick();
     updateBoundaries();
   });
-  reader.readAsDataURL(avatarFile!);
+  reader.readAsDataURL(cropperFile!);
 
   const dispatcher = createEventDispatcher();
   const cropperDismiss = () => {
@@ -67,6 +68,7 @@
   };
 
   const touchStartDrag = (e: TouchEvent) => {
+    // TODO: Maybe support zoom by dragging with two fingers
     startDrag(e.touches[0].clientX, e.touches[0].clientY);
   };
 
@@ -107,6 +109,13 @@
     let contentType = imageResponse.headers.get('content-type');
     let blob: Blob;
 
+    if (cropperKind == "banner") {
+      canvas.height = 512;
+      canvas.width = canvas.height * 6;
+    } else {
+      canvas.height = canvas.width = 256;
+    }
+
     if (contentType == 'image/gif') {
       // await cropGif(imageResponse);
       throw new Error("Gif cropping is not yet implemented.")
@@ -140,7 +149,7 @@
   };
 
   const cropSkip = () => {
-    dispatcher('success', image.src);
+    dispatcher('success', cropperFile);
   }
 </script>
 
@@ -162,7 +171,11 @@
         on:touchstart={touchStartDrag}
         on:wheel={onWheel}
       >
-        <div id="overlay-cutout" bind:this={cutout} />
+        <div
+          id="overlay-cutout"
+          class={cropperKind}
+          bind:this={cutout}
+        />
       </div>
     </div>
     <div id="cropper-slider">
@@ -186,8 +199,6 @@
 </Popup>
 <canvas
   id="cropper-canvas"
-  width=512
-  height=512
   bind:this={canvas}
 />
 
@@ -232,13 +243,22 @@
     touch-action: none;
   }
 
-  #overlay-cutout {
+  #overlay-cutout.avatar{
     border: 3px solid white;
     border-radius: 10px;
     box-shadow: 0 0 200px 200px #000c;
     width: 256px;
     height: 256px;
     border-radius: 100%;
+  }
+
+  #overlay-cutout.banner{
+    border: 3px solid white;
+    border-radius: 10px;
+    box-shadow: 0 0 200px 200px #000c;
+    width: 90%;
+    aspect-ratio: 6;
+    border-radius: 5px;
   }
 
   #cropper-slider {
