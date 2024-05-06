@@ -26,55 +26,55 @@
   let status = $userData!.user.status.text;
   let bio = $userData!.user.bio;
 
-  let bannerFile: FileList | undefined | null = undefined;
-  let avatarFile: FileList | undefined | null = undefined;
+  let bannerFiles: FileList | undefined | null = undefined;
+  let avatarFiles: FileList | undefined | null = undefined;
+  let bannerFile: Blob | null | undefined = undefined;
+  let avatarFile: Blob | null | undefined = undefined;
 
   let popupError = '';
 
   let showCropper = false;
 
-  $: if (bannerFile) {
-    if (bannerFile[0].size > $userData!.instanceInfo.file_size) {
+  $: if (bannerFiles) {
+    if (bannerFiles[0].size > $userData!.instanceInfo.file_size) {
       popupError = `Your banner image cannot be bigger than ${
         $userData!.instanceInfo.file_size / 1000000
       }MB`;
-      bannerFile = undefined;
+      bannerFiles = undefined;
     } else {
       let reader = new FileReader();
       reader.addEventListener('load', () => {
         banner = reader.result! as string;
       });
-      reader.readAsDataURL(bannerFile[0]);
+      reader.readAsDataURL(bannerFiles[0]);
     }
   }
 
   const resetBanner = () => {
     banner = null;
-    bannerFile = null;
+    bannerFiles = null;
   };
 
-  $: if (avatarFile) {
-    if (avatarFile[0].size > $userData!.instanceInfo.file_size) {
+  $: if (avatarFiles) {
+    if (avatarFiles[0].size > $userData!.instanceInfo.file_size) {
       popupError = `Your avatar image cannot be bigger than ${
         $userData!.instanceInfo.file_size / 1000000
       }MB`;
-      avatarFile = undefined;
+      avatarFiles = avatarFile = undefined;
     } else {
-      // let reader = new FileReader();
-      // reader.addEventListener('load', () => {
-      //   avatar = reader.result! as string;
-      // });
-      // reader.readAsDataURL(avatarFile[0]);
+      avatarFile = avatarFiles![0];
+      openCropper()
     }
   }
 
   const resetAvatar = () => {
     avatar = 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true';
-    avatarFile = null;
+    avatarFiles = null;
   };
 
-  let avatarCropSuccess = (e: CustomEvent<string>) => {
-    avatar = e.detail;
+  let avatarCropSuccess = (e: CustomEvent<Blob>) => {
+    avatarFile = e.detail;
+    avatar = URL.createObjectURL(avatarFile);
     closeCropper();
   }
 
@@ -86,8 +86,8 @@
   let errors: { [field: string]: string | undefined } = {};
 
   $: changed =
-    bannerFile !== undefined ||
-    avatarFile !== undefined ||
+    bannerFiles !== undefined ||
+    avatarFiles !== undefined ||
     (display_name || null) != $userData!.user.display_name ||
     status_type != $userData!.user.status.type.toLowerCase() ||
     (status || null) != $userData!.user.status.text ||
@@ -151,7 +151,7 @@
     }
   };
 
-  const uploadFile = async (bucket: string, file: File) => {
+  const uploadFile = async (bucket: string, file: Blob) => {
     let formData = new FormData();
     formData.append('file', file, file.name);
     return await fetch($userData?.instanceInfo.effis_url! + `/${bucket}`, {
@@ -163,23 +163,23 @@
   const updateProfile = async () => {
     saving = true;
     let newProfile: UpdateUserProfile = {};
-    if (bannerFile !== undefined) {
-      if (bannerFile) {
-        let data = await uploadFile('banners', bannerFile[0]);
+    if (bannerFiles !== undefined) {
+      if (bannerFiles) {
+        let data = await uploadFile('banners', bannerFiles[0]);
         newProfile.banner = data.id;
       } else {
         newProfile.banner = null;
       }
-      bannerFile = undefined;
+      bannerFiles = undefined;
     }
     if (avatarFile !== undefined) {
       if (avatarFile) {
-        let data = await uploadFile('avatars', avatarFile[0]);
+        let data = await uploadFile('avatars', avatarFile);
         newProfile.avatar = data.id;
       } else {
         newProfile.avatar = null;
       }
-      avatarFile = undefined;
+      avatarFile = avatarFiles = undefined;
     }
     if (display_name != $userData?.user.display_name) {
       newProfile.display_name = display_name?.trim() || null;
@@ -263,7 +263,7 @@
               name="banner"
               type="file"
               accept="image/*"
-              bind:files={bannerFile}
+              bind:files={bannerFiles}
             />
           </span>
         </div>
@@ -286,8 +286,7 @@
                     name="avatar"
                     type="file"
                     accept="image/*"
-                    bind:files={avatarFile}
-                    on:change={openCropper}
+                    bind:files={avatarFiles}
                   />
                   {#if avatar != 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true'}
                     <button on:click={resetAvatar}>Reset</button>

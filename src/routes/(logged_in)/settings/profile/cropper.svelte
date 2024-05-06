@@ -2,7 +2,7 @@
   import { createEventDispatcher, onMount, tick } from 'svelte';
   import Popup from '$lib/components/Popup.svelte';
 
-  export let avatarFile: FileList | undefined | null;
+  export let avatarFile: Blob | null | undefined;
 
   let image: HTMLImageElement = document.createElement('img');
   let cutout: HTMLDivElement = document.createElement('div');
@@ -25,7 +25,7 @@
     await tick();
     updateBoundaries();
   });
-  reader.readAsDataURL(avatarFile![0]);
+  reader.readAsDataURL(avatarFile!);
 
   const dispatcher = createEventDispatcher();
   const cropperDismiss = () => {
@@ -89,19 +89,19 @@
   const doCrop = async () => {
     let imageResponse = await fetch(image.src);
     let contentType = imageResponse.headers.get('content-type');
-    let url: string;
+    let blob: Blob;
 
     if (contentType == 'image/gif') {
       // await cropGif(imageResponse);
-      url = 'placeholder';  // TODO: finish
+      throw new Error("Gif cropping is not yet implemented.")
     } else {
-      url = cropImage();
+      blob = await cropImage();
     }
 
-    dispatcher('success', url);
+    dispatcher('success', blob);
   }
 
-  const cropImage = () => {
+  const cropImage = async () => {
     const ctx = canvas.getContext('2d')!;
 
     // Compensate for any scaling automatically done by css
@@ -120,7 +120,7 @@
       cutout.clientHeight
     );
 
-    return canvas.toDataURL();
+    return (await new Promise<Blob | null>(resolve => {canvas.toBlob(resolve)}))!
   };
 
   const cropSkip = () => {
@@ -156,7 +156,12 @@
     </div>
   </span>
 </Popup>
-<canvas width={cutout.clientWidth} height={cutout.clientHeight} bind:this={canvas} />
+<canvas
+  id="cropper-canvas"
+  width={cutout.clientWidth}
+  height={cutout.clientHeight}
+  bind:this={canvas}
+/>
 
 <style>
   #cropper-image-preview {
@@ -234,5 +239,9 @@
 
   #cropper-crop-button:hover {
     background-color: var(--gray-400);
+  }
+
+  #cropper-canvas {
+    display: none;
   }
 </style>
