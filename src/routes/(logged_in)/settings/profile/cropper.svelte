@@ -64,6 +64,7 @@
   };
 
   const startDrag = (x: number, y: number) => {
+    updateBoundaries();  // Somehow prevents a bug where boundaries aren't set correctly
     lastX = x;
     lastY = y;
     dragging = true;
