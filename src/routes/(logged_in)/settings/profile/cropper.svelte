@@ -116,8 +116,8 @@
       cutout.clientHeight / effectiveScale,
       0,
       0,
-      cutout.clientWidth,
-      cutout.clientHeight
+      canvas.width,
+      canvas.height
     );
 
     return (await new Promise<Blob | null>(resolve => {canvas.toBlob(resolve)}))!
@@ -132,14 +132,16 @@
 
 <Popup on:dismiss={cropperDismiss}>
   <span slot="title">Edit image</span>
-  <div id="cropper-image-preview">
-    <img alt="Fucking balls." id="cropper-img" bind:this={image} />
-    <div id="overlay" on:mousedown={startDrag} on:wheel={onWheel}>
-      <div id="overlay-cutout" bind:this={cutout} />
+  <div id="cropper">
+    <div id="cropper-image-preview">
+      <img alt="Fucking balls." id="cropper-img" bind:this={image} />
+      <div id="overlay" on:mousedown={startDrag} on:wheel={onWheel}>
+        <div id="overlay-cutout" bind:this={cutout} />
+      </div>
     </div>
-  </div>
-  <div id="cropper-slider">
-    <input type="range" min="0.5" max="5" step="0.0001" bind:value={scale} on:input={scaleImage} />
+    <div id="cropper-slider">
+      <input type="range" min="0.5" max="5" step="0.0001" bind:value={scale} on:input={scaleImage} />
+    </div>
   </div>
   <span slot="control">
     <div id="cropper-buttons">
@@ -158,12 +160,21 @@
 </Popup>
 <canvas
   id="cropper-canvas"
-  width={cutout.clientWidth}
-  height={cutout.clientHeight}
+  width=512
+  height=512
   bind:this={canvas}
 />
 
 <style>
+  #cropper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+
   #cropper-image-preview {
     display: flex;
     align-items: center;
@@ -172,12 +183,14 @@
     background-color: var(--purple-100);
     border-radius: 5px;
     overflow: hidden;
+    width: max(300px, 60vw);
+    height: 300px;
   }
 
   #cropper-img {
-    width: 100%;
     border-radius: 5px;
     object-fit: cover;
+    height: 100%;
   }
 
   #overlay {
