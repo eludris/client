@@ -139,11 +139,6 @@
     
     // Loop over each frame, paste it on the temp canvas, and crop it onto the main canvas.
     frames.forEach((frame) => {
-      console.log(
-        frame.patch.length,
-        image.width,
-        image.height,
-      )
       imageData.data.set(frame.patch);
       tempCtx.putImageData(imageData, 0, 0);
 
