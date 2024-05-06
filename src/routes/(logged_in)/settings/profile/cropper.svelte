@@ -56,15 +56,42 @@
     updateImagePosition();
   };
 
-  const startDrag = (e: MouseEvent) => {
-    lastX = e.x;
-    lastY = e.y;
+  const startDrag = (x: number, y: number) => {
+    lastX = x;
+    lastY = y;
     dragging = true;
+  };
+
+  const mouseStartDrag = (e: MouseEvent) => {
+    startDrag(e.x, e.y);
+  };
+
+  const touchStartDrag = (e: TouchEvent) => {
+    startDrag(e.touches[0].clientX, e.touches[0].clientY);
   };
 
   const stopDrag = () => {
     dragging = false;
   };
+
+  const move = (x: number, y: number) => {
+    if (dragging) {
+      // Divide move distance by scale to slow down movement when zoomed.
+      imageX += (x - lastX) / scale;
+      imageY += (y - lastY) / scale;
+      updateImagePosition();
+      lastX = x;
+      lastY = y;
+    }
+  }
+
+  const mouseMove = (e: MouseEvent) => {
+    move(e.x, e.y);
+  };
+  
+  const touchMove = (e: TouchEvent) => {
+    move(e.touches[0].clientX, e.touches[0].clientY)
+  }
 
   const onWheel = (e: WheelEvent) => {
     if (e.deltaY < 0) {
@@ -73,17 +100,6 @@
       scale = Math.max(scale - 0.1, 0.5);
     }
     scaleImage();
-  };
-
-  const mouseMove = (e: MouseEvent) => {
-    if (dragging) {
-      // Divide move distance by scale to slow down movement when zoomed.
-      imageX += (e.x - lastX) / scale;
-      imageY += (e.y - lastY) / scale;
-      updateImagePosition();
-      lastX = e.x;
-      lastY = e.y;
-    }
   };
 
   const doCrop = async () => {
@@ -128,14 +144,24 @@
   }
 </script>
 
-<svelte:body on:mouseup={stopDrag} on:mousemove={mouseMove} />
+<svelte:body
+  on:mouseup={stopDrag}
+  on:mousemove={mouseMove}
+  on:touchend={stopDrag}
+  on:touchmove={touchMove}
+/>
 
 <Popup on:dismiss={cropperDismiss}>
   <span slot="title">Edit image</span>
   <div id="cropper">
     <div id="cropper-image-preview">
       <img alt="Fucking balls." id="cropper-img" bind:this={image} />
-      <div id="overlay" on:mousedown={startDrag} on:wheel={onWheel}>
+      <div
+        id="overlay"
+        on:mousedown={mouseStartDrag}
+        on:touchstart={touchStartDrag}
+        on:wheel={onWheel}
+      >
         <div id="overlay-cutout" bind:this={cutout} />
       </div>
     </div>

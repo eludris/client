@@ -48,6 +48,7 @@
     align-items: center;
     justify-content: center;
     background-color: #0008;
+    z-index: 999;
   }
 
   #popup {
