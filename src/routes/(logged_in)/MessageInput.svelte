@@ -12,34 +12,36 @@
   let mobile = false;
   let previewMessage = false;
 
-  let emojiMatch: string = ""
-  let suggestedEmoji: {name: string, display: string}[] = new Array;
+  let emojiMatch: string = '';
+  let suggestedEmoji: { name: string; display: string }[] = new Array();
   const maxEmoji = 10;
-  
+
   $: {
-    let matches = value.match(/:(\w{2,})$/)
+    let matches = value.match(/:(\w{2,})$/);
     suggestedEmoji.length = 0;
 
     if (matches) {
       emojiMatch = matches[1];
-      let emojiRegex = new RegExp(`^${emojiMatch}`, "i");
+      let emojiRegex = new RegExp(`^${emojiMatch}`, 'i');
 
       for (let [emojiName, display] of Object.entries(emojiDictionary)) {
         if (emojiRegex.test(emojiName)) {
           if (!display.startsWith('http')) {
-            console.log(emojiName, emojiName.startsWith("http"))
+            console.log(emojiName, emojiName.startsWith('http'));
             if (emojiName.indexOf('\u200d') < 0) {
               emojiName = emojiName.replace(/\uFE0F/g, '');
             }
-            display = `https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/${toCodePoints(display)}.svg`;
+            display = `https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/${toCodePoints(
+              display
+            )}.svg`;
           }
-          suggestedEmoji.push({name: emojiName, display: display})
+          suggestedEmoji.push({ name: emojiName, display: display });
         }
 
         if (suggestedEmoji.length >= maxEmoji) break;
       }
-      console.log(emojiRegex, suggestedEmoji)
-    } 
+      console.log(emojiRegex, suggestedEmoji);
+    }
   }
 
   const onSubmit = async () => {
@@ -167,7 +169,7 @@
       await tick();
       input?.focus();
     }
-    if ((e.key == "Tab") && suggestedEmoji.length >= 0) {
+    if (e.key == 'Tab' && suggestedEmoji.length >= 0) {
       e.preventDefault();
       autocompleteEmoji(suggestedEmoji[0].name);
     }
@@ -186,10 +188,9 @@
   };
 
   const autocompleteEmoji = (emoji_name: string) => {
-    value += emoji_name.replace(emojiMatch, "") + ":";
+    value += emoji_name.replace(emojiMatch, '') + ':';
     input?.focus();
-  }
-
+  };
 </script>
 
 <svelte:window on:keydown={onWindowKeyDown} />
@@ -235,18 +236,21 @@
   </button>
   {#if suggestedEmoji.length > 0}
     <div id="emoji-preview">
-        {#each suggestedEmoji as emoji}
-        <button id="emoji-preview-entry" type="button" on:click={() => autocompleteEmoji(emoji.name)}>
-          <img id="emoji-preview-display" src={emoji.display} alt={emoji.name}>
+      {#each suggestedEmoji as emoji}
+        <button
+          id="emoji-preview-entry"
+          type="button"
+          on:click={() => autocompleteEmoji(emoji.name)}
+        >
+          <img id="emoji-preview-display" src={emoji.display} alt={emoji.name} />
           <div id="emoji-preview-name">{emoji.name}</div>
           <div id="emoji-preview-spacer" />
-          <div id="emoji-preview-sphere"></div>
+          <div id="emoji-preview-sphere" />
         </button>
       {/each}
     </div>
   {/if}
 </form>
-
 
 <style>
   .input-button {
@@ -342,7 +346,8 @@
     border: none;
   }
 
-  #emoji-preview-entry:hover, #emoji-preview-entry:focus {
+  #emoji-preview-entry:hover,
+  #emoji-preview-entry:focus {
     background-color: var(--purple-400);
     border-radius: 5px;
   }
