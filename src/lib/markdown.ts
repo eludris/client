@@ -204,11 +204,10 @@ export default async (content: string): Promise<string> => {
         big = '';
       }
       return res.replace(/(?<!\\):([a-zA-Z0-9_-]+):/gm, (m, emojiName, offset) => {
-        let emoji = emojiDictionary[emojiName]
-        if (
-          emoji && res.substring(0, offset).split(/<\\?code>/gm).length % 2 == 1
-        ) {
-          return `<img class="emoji${big}" draggable="false" alt="${emoji}" src="${toUrl(emojiName)}" title="${emoji}"/>`;
+        let emoji = emojiDictionary[emojiName];
+        if (emoji && res.substring(0, offset).split(/<\\?code>/gm).length % 2 == 1) {
+          return `<img class="emoji${big}" draggable="false" alt="${emoji}"
+            src="${toUrl(emojiName)}" title="${emoji}"/>`;
         }
         return m;
       });

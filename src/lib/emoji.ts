@@ -32,7 +32,7 @@ export const toUrl = (emojiName: string): string => {
   }
 
   return `https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/${toCodePoints(emoji)}.svg`;
-}
+};
 
 export const emojiDictionary: { [emoji: string]: string } = {
   100: '💯',
@@ -1930,6 +1930,6 @@ export const emojiDictionary: { [emoji: string]: string } = {
     uwuki: 'https://cdn.discordapp.com/emojis/1038675327204991076.webp?quality=lossless',
     cunny: 'https://cdn.discordapp.com/emojis/1103360465641422858.webp?quality=lossless',
     ferrisballSweat: 'https://cdn.discordapp.com/emojis/1022173242695372933.webp?quality=lossless',
-    mlynar_gaming: 'https://cdn.discordapp.com/emojis/1182806139449131010.webp?quality=lossless',
+    mlynar_gaming: 'https://cdn.discordapp.com/emojis/1182806139449131010.webp?quality=lossless'
   }
 };
