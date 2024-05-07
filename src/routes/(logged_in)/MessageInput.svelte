@@ -178,8 +178,8 @@
     }
   };
 
-  const autocompleteEmoji = (emoji_name: string) => {
-    value += emoji_name.replace(emojiMatch, '') + ':';
+  const autocompleteEmoji = (emojiName: string) => {
+    value = value.slice(0, -emojiMatch.length) + emojiName + ":";
     input?.focus();
   };
 </script>
