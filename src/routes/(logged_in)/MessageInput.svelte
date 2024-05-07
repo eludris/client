@@ -3,6 +3,7 @@
   import Markdown from '$lib/components/Markdown.svelte';
   import userData from '$lib/user_data';
   import { request } from '$lib/request';
+  import { emojiDictionary, toCodePoints } from '$lib/emoji';
 
   export let value = '';
   export let input: HTMLTextAreaElement;
@@ -10,6 +11,36 @@
   export let usernames: { [key: string]: number };
   let mobile = false;
   let previewMessage = false;
+
+  let emojiMatch: string = ""
+  let suggestedEmoji: {name: string, display: string}[] = new Array;
+  const maxEmoji = 10;
+  
+  $: {
+    let matches = value.match(/:(\w{2,})$/)
+    suggestedEmoji.length = 0;
+
+    if (matches) {
+      emojiMatch = matches[1];
+      let emojiRegex = new RegExp(`^${emojiMatch}`, "i");
+
+      for (let [emojiName, display] of Object.entries(emojiDictionary)) {
+        if (emojiRegex.test(emojiName)) {
+          if (!display.startsWith('http')) {
+            console.log(emojiName, emojiName.startsWith("http"))
+            if (emojiName.indexOf('\u200d') < 0) {
+              emojiName = emojiName.replace(/\uFE0F/g, '');
+            }
+            display = `https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/${toCodePoints(display)}.svg`;
+          }
+          suggestedEmoji.push({name: emojiName, display: display})
+        }
+
+        if (suggestedEmoji.length >= maxEmoji) break;
+      }
+      console.log(emojiRegex, suggestedEmoji)
+    } 
+  }
 
   const onSubmit = async () => {
     if (value.trim()) {
@@ -136,6 +167,10 @@
       await tick();
       input?.focus();
     }
+    if ((e.key == "Tab") && suggestedEmoji.length >= 0) {
+      e.preventDefault();
+      autocompleteEmoji(suggestedEmoji[0].name);
+    }
   };
 
   const onPaste = (e: ClipboardEvent) => {
@@ -149,6 +184,12 @@
       }
     }
   };
+
+  const autocompleteEmoji = (emoji_name: string) => {
+    value += emoji_name.replace(emojiMatch, "") + ":";
+    input?.focus();
+  }
+
 </script>
 
 <svelte:window on:keydown={onWindowKeyDown} />
@@ -192,7 +233,20 @@
       ><path fill="currentColor" d="m2 21l21-9L2 3v7l15 2l-15 2v7Z" /></svg
     >
   </button>
+  {#if suggestedEmoji.length > 0}
+    <div id="emoji-preview">
+        {#each suggestedEmoji as emoji}
+        <button id="emoji-preview-entry" type="button" on:click={() => autocompleteEmoji(emoji.name)}>
+          <img id="emoji-preview-display" src={emoji.display} alt={emoji.name}>
+          <div id="emoji-preview-name">{emoji.name}</div>
+          <div id="emoji-preview-spacer" />
+          <div id="emoji-preview-sphere"></div>
+        </button>
+      {/each}
+    </div>
+  {/if}
 </form>
+
 
 <style>
   .input-button {
@@ -248,6 +302,7 @@
     font-size: 18px;
     height: auto;
     border-radius: 10px;
+    position: relative;
   }
 
   #markdown-wrapper {
@@ -256,5 +311,58 @@
     margin: 10px 0 3px 5px;
     max-height: 33vh;
     display: inline-block;
+  }
+
+  #emoji-preview {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    bottom: 100%;
+    left: 0px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-height: 800px;
+    width: 100%;
+    background-color: var(--gray-200);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+
+  #emoji-preview-entry {
+    color: var(--gray-600);
+    display: flex;
+    flex-direction: row;
+    height: 30px;
+    width: 100%;
+    background: none;
+    border: none;
+  }
+
+  #emoji-preview-entry:hover, #emoji-preview-entry:focus {
+    background-color: var(--purple-400);
+    border-radius: 5px;
+  }
+
+  #emoji-preview-display {
+    display: flex;
+    flex-direction: row;
+    width: 30px;
+    object-fit: contain;
+    padding-right: 1em;
+  }
+
+  #emoji-preview-name {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+  }
+
+  #emoji-preview-spacer {
+    flex-grow: 1;
+    width: 100%;
   }
 </style>
