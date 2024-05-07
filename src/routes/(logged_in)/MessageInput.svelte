@@ -12,28 +12,41 @@
   let mobile = false;
   let previewMessage = false;
 
+  let emojiPreview: HTMLDivElement;
+  let currentEmoji: HTMLButtonElement | undefined;
   let emojiMatch: string = '';
   let suggestedEmoji: { name: string; display: string }[] = new Array();
   const maxEmoji = 10;
 
-  $: {
+  $: (
+    async () => {
     let matches = value.match(/:(\w{2,})$/);
-    suggestedEmoji.length = 0;
 
     if (matches) {
-      emojiMatch = matches[1];
-      let emojiRegex = new RegExp(`^${emojiMatch}`, 'i');
+      if (emojiMatch != matches[1]) {
+        suggestedEmoji.length = 0;
 
-      for (let emojiName of Object.keys(emojiDictionary)) {
-        if (emojiRegex.test(emojiName)) {
-          suggestedEmoji.push({ name: emojiName, display: toUrl(emojiName) });
+        emojiMatch = matches[1];
+        let emojiRegex = new RegExp(`^${emojiMatch}`, 'i');
+
+        for (let emojiName of Object.keys(emojiDictionary)) {
+          if (emojiRegex.test(emojiName)) {
+            suggestedEmoji.push({ name: emojiName, display: toUrl(emojiName) });
+          }
+
+          if (suggestedEmoji.length >= maxEmoji) break;
         }
 
-        if (suggestedEmoji.length >= maxEmoji) break;
-      }
-      console.log(emojiRegex, suggestedEmoji);
+        await tick()
+        currentEmoji = emojiPreview?.firstElementChild! as HTMLButtonElement;
+        currentEmoji?.focus();
+    }
+    } else {
+      suggestedEmoji.length = 0;
+      emojiMatch = '';
     }
   }
+)()
 
   const onSubmit = async () => {
     if (value.trim()) {
@@ -54,6 +67,7 @@
     }
     value = '';
     previewMessage = false;
+    currentEmoji = undefined;
     await tick();
     input?.focus(); // for mobiles
   };
@@ -143,6 +157,9 @@
       await tick();
       input.selectionStart = input.selectionEnd = start + 1;
     }
+    if ((e.key == 'ArrowDown' || e.key == 'ArrowUp') && currentEmoji) {
+      e.preventDefault();
+    }
   };
 
   const onWindowKeyDown = async (e: KeyboardEvent) => {
@@ -160,9 +177,23 @@
       await tick();
       input?.focus();
     }
-    if (e.key == 'Tab' && suggestedEmoji.length >= 0) {
+    if ((e.key == 'Tab' || e.key == 'Enter') && currentEmoji) {
       e.preventDefault();
-      autocompleteEmoji(suggestedEmoji[0].name);
+      currentEmoji.click();
+      await tick();
+      input?.focus();
+    }
+    if (e.key == 'ArrowDown' && currentEmoji) {
+      e.preventDefault()
+      currentEmoji = currentEmoji.nextElementSibling as HTMLButtonElement;
+      await tick();
+      currentEmoji?.focus();
+    }
+    if (e.key == 'ArrowUp' && currentEmoji) {
+      e.preventDefault()
+      currentEmoji = currentEmoji.previousElementSibling as HTMLButtonElement;
+      await tick();
+      currentEmoji?.focus();
     }
   };
 
@@ -180,6 +211,8 @@
 
   const autocompleteEmoji = (emojiName: string) => {
     value = value.slice(0, -emojiMatch.length) + emojiName + ":";
+    currentEmoji = undefined;
+    emojiMatch = '';
     input?.focus();
   };
 </script>
@@ -226,7 +259,7 @@
     >
   </button>
   {#if suggestedEmoji.length > 0}
-    <div id="emoji-preview">
+    <div id="emoji-preview" bind:this={emojiPreview}>
       {#each suggestedEmoji as emoji}
         <button
           id="emoji-preview-entry"
