@@ -28,8 +28,8 @@
         if (emojiRegex.test(emojiName)) {
           if (!display.startsWith('http')) {
             console.log(emojiName, emojiName.startsWith('http'));
-            if (emojiName.indexOf('\u200d') < 0) {
-              emojiName = emojiName.replace(/\uFE0F/g, '');
+            if (display.indexOf('\u200d') < 0) {
+              display = display.replace(/\uFE0F/g, '');
             }
             display = `https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/${toCodePoints(
               display
