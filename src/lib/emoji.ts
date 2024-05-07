@@ -20,6 +20,20 @@ export const toCodePoints = (emoji: string) => {
   return codePoint.join('-');
 };
 
+export const toUrl = (emojiName: string): string => {
+  let emoji = emojiDictionary[emojiName];
+
+  if (emoji.startsWith('http')) {
+    return emoji;
+  }
+
+  if (emoji.indexOf('\u200d') < 0) {
+    emoji = emoji.replace(/\uFE0F/g, '');
+  }
+
+  return `https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/${toCodePoints(emoji)}.svg`;
+}
+
 export const emojiDictionary: { [emoji: string]: string } = {
   100: '💯',
   1234: '🔢',

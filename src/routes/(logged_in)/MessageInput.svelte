@@ -3,7 +3,7 @@
   import Markdown from '$lib/components/Markdown.svelte';
   import userData from '$lib/user_data';
   import { request } from '$lib/request';
-  import { emojiDictionary, toCodePoints } from '$lib/emoji';
+  import { emojiDictionary, toUrl } from '$lib/emoji';
 
   export let value = '';
   export let input: HTMLTextAreaElement;
@@ -24,18 +24,9 @@
       emojiMatch = matches[1];
       let emojiRegex = new RegExp(`^${emojiMatch}`, 'i');
 
-      for (let [emojiName, display] of Object.entries(emojiDictionary)) {
+      for (let emojiName of Object.keys(emojiDictionary)) {
         if (emojiRegex.test(emojiName)) {
-          if (!display.startsWith('http')) {
-            console.log(emojiName, emojiName.startsWith('http'));
-            if (display.indexOf('\u200d') < 0) {
-              display = display.replace(/\uFE0F/g, '');
-            }
-            display = `https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/${toCodePoints(
-              display
-            )}.svg`;
-          }
-          suggestedEmoji.push({ name: emojiName, display: display });
+          suggestedEmoji.push({ name: emojiName, display: toUrl(emojiName) });
         }
 
         if (suggestedEmoji.length >= maxEmoji) break;
