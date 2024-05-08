@@ -223,7 +223,7 @@
 
     let emojiPart = value.slice(0, cursorPos).replace(/(?<=\:)[a-zA-Z0-9_-]{2,}$/, `${emojiName}:`);
     let remainder = value.slice(cursorPos);
-    if (remainder && !/^\s+$/.test(remainder)) {
+    if (remainder && !/^\s+/.test(remainder)) {
       value = emojiPart + ' ' + remainder;
     } else {
       value = emojiPart + remainder;
