@@ -230,6 +230,7 @@
     }
 
     currentEmoji = undefined;
+    suggestedEmoji.length = 0;
     emojiMatch = '';
     await tick();
     input.selectionStart = input.selectionEnd = emojiPart.length;
