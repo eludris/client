@@ -14,13 +14,13 @@
 
   let emojiPreview: HTMLDivElement;
   let currentEmoji: HTMLButtonElement | undefined;
+  let currentEmojiIndex: number | undefined;
   let emojiMatch: string = '';
   let suggestedEmoji: { name: string; display: string }[] = new Array();
   const maxEmoji = 10;
 
-  $: (
-    async () => {
-    let matches = value.match(/:(\w{2,})$/);
+  const getMatchingEmoji = async (searchString: string) => {
+    let matches = searchString.match(/:([a-zA-Z0-9_-]{2,})$/);
 
     if (matches) {
       if (emojiMatch != matches[1]) {
@@ -37,16 +37,15 @@
           if (suggestedEmoji.length >= maxEmoji) break;
         }
 
-        await tick()
+        await tick();
         currentEmoji = emojiPreview?.firstElementChild! as HTMLButtonElement;
-        currentEmoji?.focus();
-    }
+        currentEmojiIndex = 0;
+      }
     } else {
       suggestedEmoji.length = 0;
       emojiMatch = '';
     }
-  }
-)()
+  };
 
   const onSubmit = async () => {
     if (value.trim()) {
@@ -184,16 +183,22 @@
       input?.focus();
     }
     if (e.key == 'ArrowDown' && currentEmoji) {
-      e.preventDefault()
-      currentEmoji = currentEmoji.nextElementSibling as HTMLButtonElement;
-      await tick();
-      currentEmoji?.focus();
+      if (currentEmoji.nextElementSibling) {
+        currentEmojiIndex!++;
+        currentEmoji = currentEmoji.nextElementSibling as HTMLButtonElement;
+      } else {
+        currentEmojiIndex = 0;
+        currentEmoji = emojiPreview.firstElementChild as HTMLButtonElement;
+      }
     }
     if (e.key == 'ArrowUp' && currentEmoji) {
-      e.preventDefault()
-      currentEmoji = currentEmoji.previousElementSibling as HTMLButtonElement;
-      await tick();
-      currentEmoji?.focus();
+      if (currentEmoji.previousElementSibling) {
+        currentEmojiIndex!--;
+        currentEmoji = currentEmoji.previousElementSibling as HTMLButtonElement;
+      } else {
+        currentEmojiIndex = suggestedEmoji.length - 1;
+        currentEmoji = emojiPreview.lastElementChild as HTMLButtonElement;
+      }
     }
   };
 
@@ -209,10 +214,25 @@
     }
   };
 
-  const autocompleteEmoji = (emojiName: string) => {
-    value = value.slice(0, -emojiMatch.length) + emojiName + ":";
+  const onSelectionChange = async () => {
+    await getMatchingEmoji(value.slice(0, input.selectionStart));
+  };
+
+  const autocompleteEmoji = async (emojiName: string) => {
+    let cursorPos = input.selectionStart;
+
+    let emojiPart = value.slice(0, cursorPos).replace(/(?<=\:)[a-zA-Z0-9_-]{2,}$/, `${emojiName}:`);
+    let remainder = value.slice(cursorPos);
+    if (remainder && !/^\s+$/.test(remainder)) {
+      value = emojiPart + ' ' + remainder;
+    } else {
+      value = emojiPart + remainder;
+    }
+
     currentEmoji = undefined;
     emojiMatch = '';
+    await tick();
+    input.selectionStart = input.selectionEnd = emojiPart.length;
     input?.focus();
   };
 </script>
@@ -231,6 +251,7 @@
       on:keypress={onInputKeyPress}
       on:keydown={onInputKeyDown}
       on:paste={onPaste}
+      on:selectionchange={onSelectionChange}
       id="message-input"
       placeholder="Send a message to Eludris"
       autocomplete="off"
@@ -260,8 +281,9 @@
   </button>
   {#if suggestedEmoji.length > 0}
     <div id="emoji-preview" bind:this={emojiPreview}>
-      {#each suggestedEmoji as emoji}
+      {#each suggestedEmoji as emoji, i}
         <button
+          class={`${currentEmojiIndex == i ? 'highlight' : ''}`}
           id="emoji-preview-entry"
           type="button"
           on:click={() => autocompleteEmoji(emoji.name)}
@@ -370,8 +392,8 @@
     border: none;
   }
 
-  #emoji-preview-entry:hover,
-  #emoji-preview-entry:focus {
+  #emoji-preview-entry.highlight,
+  #emoji-preview-entry.highlight {
     background-color: var(--purple-400);
     border-radius: 5px;
   }
