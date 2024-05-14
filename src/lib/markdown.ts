@@ -11,7 +11,7 @@ import { visit } from 'unist-util-visit';
 import data from '$lib/user_data';
 import state from './ws';
 import { get } from 'svelte/store';
-import { emojiDictionary, toCodePoints } from './emoji';
+import { emojiDictionary, toUrl } from './emoji';
 
 let effisHost: string | undefined = undefined;
 let effisUrl: string | undefined = undefined;
@@ -206,16 +206,8 @@ export default async (content: string): Promise<string> => {
       return res.replace(/(?<!\\):([a-zA-Z0-9_-]+):/gm, (m, emojiName, offset) => {
         let emoji = emojiDictionary[emojiName];
         if (emoji && res.substring(0, offset).split(/<\\?code>/gm).length % 2 == 1) {
-          if (emoji.startsWith('http')) {
-            return `<img src="${emoji}" class="emoji${big}" />`;
-          } else {
-            if (emoji.indexOf('\u200d') < 0) {
-              emoji = emoji.replace(/\uFE0F/g, '');
-            }
-            return `<img class="emoji${big}" draggable="false" alt="${emoji}" src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/${toCodePoints(
-              emoji
-            )}.svg" title="${emoji}"/>`;
-          }
+          return `<img class="emoji${big}" draggable="false" alt="${emoji}"
+            src="${toUrl(emojiName)}" title="${emoji}"/>`;
         }
         return m;
       });

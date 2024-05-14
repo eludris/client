@@ -20,6 +20,20 @@ export const toCodePoints = (emoji: string) => {
   return codePoint.join('-');
 };
 
+export const toUrl = (emojiName: string): string => {
+  let emoji = emojiDictionary[emojiName];
+
+  if (emoji.startsWith('http')) {
+    return emoji;
+  }
+
+  if (emoji.indexOf('\u200d') < 0) {
+    emoji = emoji.replace(/\uFE0F/g, '');
+  }
+
+  return `https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/${toCodePoints(emoji)}.svg`;
+};
+
 export const emojiDictionary: { [emoji: string]: string } = {
   100: '💯',
   1234: '🔢',
@@ -1908,8 +1922,7 @@ export const emojiDictionary: { [emoji: string]: string } = {
     halal: 'https://cdn.discordapp.com/emojis/1098216622621200464.webp?quality=lossless',
     haram: 'https://cdn.discordapp.com/emojis/1098216666745282670.webp?quality=lossless',
     woof: 'https://media.tenor.com/ljcdej9JsBsAAAAd/vanitas-vanitas-no-carte.gif',
-    uwoogh:
-      'https://cdn.discordapp.com/attachments/980412957794136087/1157332050056060928/suzUOOOOHHHHHHHH.png',
+    uwoogh: 'https://cdn.eludris.gay/4266150985739',
     kaldance: 'https://media.discordapp.net/stickers/1143840253476614144.png',
     flushedd: 'https://cdn.discordapp.com/emojis/1012407508901580821.webp?quality=lossless',
     pog: 'https://cdn.discordapp.com/emojis/989499974775631873.webp?quality=lossless',
@@ -1917,6 +1930,6 @@ export const emojiDictionary: { [emoji: string]: string } = {
     uwuki: 'https://cdn.discordapp.com/emojis/1038675327204991076.webp?quality=lossless',
     cunny: 'https://cdn.discordapp.com/emojis/1103360465641422858.webp?quality=lossless',
     ferrisballSweat: 'https://cdn.discordapp.com/emojis/1022173242695372933.webp?quality=lossless',
-    mlynar_gaming: 'https://cdn.discordapp.com/emojis/1182806139449131010.webp?quality=lossless',
+    mlynar_gaming: 'https://cdn.discordapp.com/emojis/1182806139449131010.webp?quality=lossless'
   }
 };

@@ -3,6 +3,7 @@
   import Markdown from '$lib/components/Markdown.svelte';
   import userData from '$lib/user_data';
   import { request } from '$lib/request';
+  import { emojiDictionary, toUrl } from '$lib/emoji';
 
   export let value = '';
   export let input: HTMLTextAreaElement;
@@ -10,6 +11,41 @@
   export let usernames: { [key: string]: number };
   let mobile = false;
   let previewMessage = false;
+
+  let emojiPreview: HTMLDivElement;
+  let currentEmoji: HTMLButtonElement | undefined;
+  let currentEmojiIndex: number | undefined;
+  let emojiMatch: string = '';
+  let suggestedEmoji: { name: string; display: string }[] = new Array();
+  const maxEmoji = 10;
+
+  const getMatchingEmoji = async (searchString: string) => {
+    let matches = searchString.match(/:([a-zA-Z0-9_-]{2,})$/);
+
+    if (matches) {
+      if (emojiMatch != matches[1]) {
+        suggestedEmoji.length = 0;
+
+        emojiMatch = matches[1];
+        let emojiRegex = new RegExp(`^${emojiMatch}`, 'i');
+
+        for (let emojiName of Object.keys(emojiDictionary)) {
+          if (emojiRegex.test(emojiName)) {
+            suggestedEmoji.push({ name: emojiName, display: toUrl(emojiName) });
+          }
+
+          if (suggestedEmoji.length >= maxEmoji) break;
+        }
+
+        await tick();
+        currentEmoji = emojiPreview?.firstElementChild! as HTMLButtonElement;
+        currentEmojiIndex = 0;
+      }
+    } else {
+      suggestedEmoji.length = 0;
+      emojiMatch = '';
+    }
+  };
 
   const onSubmit = async () => {
     if (value.trim()) {
@@ -30,6 +66,7 @@
     }
     value = '';
     previewMessage = false;
+    currentEmoji = undefined;
     await tick();
     input?.focus(); // for mobiles
   };
@@ -119,6 +156,9 @@
       await tick();
       input.selectionStart = input.selectionEnd = start + 1;
     }
+    if ((e.key == 'ArrowDown' || e.key == 'ArrowUp') && currentEmoji) {
+      e.preventDefault();
+    }
   };
 
   const onWindowKeyDown = async (e: KeyboardEvent) => {
@@ -136,6 +176,30 @@
       await tick();
       input?.focus();
     }
+    if ((e.key == 'Tab' || e.key == 'Enter') && currentEmoji) {
+      e.preventDefault();
+      currentEmoji.click();
+      await tick();
+      input?.focus();
+    }
+    if (e.key == 'ArrowDown' && currentEmoji) {
+      if (currentEmoji.nextElementSibling) {
+        currentEmojiIndex!++;
+        currentEmoji = currentEmoji.nextElementSibling as HTMLButtonElement;
+      } else {
+        currentEmojiIndex = 0;
+        currentEmoji = emojiPreview.firstElementChild as HTMLButtonElement;
+      }
+    }
+    if (e.key == 'ArrowUp' && currentEmoji) {
+      if (currentEmoji.previousElementSibling) {
+        currentEmojiIndex!--;
+        currentEmoji = currentEmoji.previousElementSibling as HTMLButtonElement;
+      } else {
+        currentEmojiIndex = suggestedEmoji.length - 1;
+        currentEmoji = emojiPreview.lastElementChild as HTMLButtonElement;
+      }
+    }
   };
 
   const onPaste = (e: ClipboardEvent) => {
@@ -149,6 +213,36 @@
       }
     }
   };
+
+  const onSelectionChange = async () => {
+    await getMatchingEmoji(value.slice(0, input.selectionStart));
+  };
+
+  const autocompleteEmoji = async (emojiName: string) => {
+    let cursorPos = input.selectionStart;
+
+    let emojiPart = value.slice(0, cursorPos).replace(/(?<=\:)[a-zA-Z0-9_-]{2,}$/, `${emojiName}:`);
+    let remainder = value.slice(cursorPos);
+    if (remainder && !/^\s+/.test(remainder)) {
+      value = emojiPart + ' ' + remainder;
+    } else {
+      value = emojiPart + remainder;
+    }
+
+    currentEmoji = undefined;
+    suggestedEmoji.length = 0;
+    emojiMatch = '';
+    await tick();
+    input.selectionStart = input.selectionEnd = emojiPart.length;
+    input?.focus();
+  };
+
+  const previewEntryHover = (i: number) => {
+    currentEmoji?.classList.remove("highlight");
+    currentEmoji = emojiPreview.children[i] as HTMLButtonElement;
+    currentEmoji.classList.add("highlight");
+    currentEmojiIndex = i;
+  }
 </script>
 
 <svelte:window on:keydown={onWindowKeyDown} />
@@ -165,6 +259,7 @@
       on:keypress={onInputKeyPress}
       on:keydown={onInputKeyDown}
       on:paste={onPaste}
+      on:selectionchange={onSelectionChange}
       id="message-input"
       placeholder="Send a message to Eludris"
       autocomplete="off"
@@ -192,6 +287,24 @@
       ><path fill="currentColor" d="m2 21l21-9L2 3v7l15 2l-15 2v7Z" /></svg
     >
   </button>
+  {#if suggestedEmoji.length > 0}
+    <div id="emoji-preview" bind:this={emojiPreview}>
+      {#each suggestedEmoji as emoji, i}
+        <button
+          class={`${currentEmojiIndex == i ? 'highlight' : ''}`}
+          id="emoji-preview-entry"
+          type="button"
+          on:click={() => autocompleteEmoji(emoji.name)}
+          on:mouseenter={() => previewEntryHover(i)}
+        >
+          <img id="emoji-preview-display" src={emoji.display} alt={emoji.name} />
+          <div id="emoji-preview-name">{emoji.name}</div>
+          <div id="emoji-preview-spacer" />
+          <div id="emoji-preview-sphere" />
+        </button>
+      {/each}
+    </div>
+  {/if}
 </form>
 
 <style>
@@ -248,6 +361,7 @@
     font-size: 18px;
     height: auto;
     border-radius: 10px;
+    position: relative;
   }
 
   #markdown-wrapper {
@@ -256,5 +370,59 @@
     margin: 10px 0 3px 5px;
     max-height: 33vh;
     display: inline-block;
+  }
+
+  #emoji-preview {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    bottom: 100%;
+    left: 0px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-height: 800px;
+    width: 100%;
+    background-color: var(--gray-200);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+
+  #emoji-preview-entry {
+    color: var(--gray-600);
+    display: flex;
+    flex-direction: row;
+    height: 30px;
+    width: 100%;
+    background: none;
+    border: none;
+  }
+
+  #emoji-preview-entry.highlight,
+  #emoji-preview-entry.highlight {
+    background-color: var(--purple-400);
+    border-radius: 5px;
+  }
+
+  #emoji-preview-display {
+    display: flex;
+    flex-direction: row;
+    width: 30px;
+    object-fit: contain;
+    padding-right: 1em;
+  }
+
+  #emoji-preview-name {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+  }
+
+  #emoji-preview-spacer {
+    flex-grow: 1;
+    width: 100%;
   }
 </style>
