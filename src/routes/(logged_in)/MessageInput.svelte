@@ -76,7 +76,7 @@
       for (let i = 0; i < usedEmojis.length; i++) {
         let emoji = usedEmojis[i];
         $userConfig.recentEmojis.filter((e) => e != emoji);
-        $userConfig.recentEmojis.push(emoji);
+        $userConfig.recentEmojis.unshift(emoji);
         $userConfig.recentEmojis = $userConfig.recentEmojis;
       }
     } else {
