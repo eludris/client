@@ -236,6 +236,13 @@
     input.selectionStart = input.selectionEnd = emojiPart.length;
     input?.focus();
   };
+
+  const previewEntryHover = (i: number) => {
+    currentEmoji?.classList.remove("highlight");
+    currentEmoji = emojiPreview.children[i] as HTMLButtonElement;
+    currentEmoji.classList.add("highlight");
+    currentEmojiIndex = i;
+  }
 </script>
 
 <svelte:window on:keydown={onWindowKeyDown} />
@@ -288,6 +295,7 @@
           id="emoji-preview-entry"
           type="button"
           on:click={() => autocompleteEmoji(emoji.name)}
+          on:mouseenter={() => previewEntryHover(i)}
         >
           <img id="emoji-preview-display" src={emoji.display} alt={emoji.name} />
           <div id="emoji-preview-name">{emoji.name}</div>
