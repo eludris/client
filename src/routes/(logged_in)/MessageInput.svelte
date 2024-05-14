@@ -2,8 +2,9 @@
   import { afterUpdate, onMount, tick } from 'svelte';
   import Markdown from '$lib/components/Markdown.svelte';
   import userData from '$lib/user_data';
+  import userConfig from '$lib/user_config';
   import { request } from '$lib/request';
-  import { emojiDictionary, toUrl } from '$lib/emoji';
+  import { emojiDictionary, toUrl, EMOJI_REGEX } from '$lib/emoji';
 
   export let value = '';
   export let input: HTMLTextAreaElement;
@@ -29,12 +30,18 @@
         emojiMatch = matches[1];
         let emojiRegex = new RegExp(`^${emojiMatch}`, 'i');
 
+        for (let i = 0; i < ($userConfig.recentEmojis?.length ?? 0); i++) {
+          let emoji = $userConfig.recentEmojis![i];
+          if (emojiRegex.test(emoji)) {
+            suggestedEmoji.push({ name: emoji, display: toUrl(emoji) });
+          }
+        }
         for (let emojiName of Object.keys(emojiDictionary)) {
+          if (suggestedEmoji.find((e) => e.name == emojiName)) continue;
+          if (suggestedEmoji.length >= maxEmoji) break;
           if (emojiRegex.test(emojiName)) {
             suggestedEmoji.push({ name: emojiName, display: toUrl(emojiName) });
           }
-
-          if (suggestedEmoji.length >= maxEmoji) break;
         }
 
         await tick();
@@ -63,6 +70,17 @@
       request('POST', 'messages', { content: value }).then((_) =>
         messagesUList.scroll(0, messagesUList.scrollHeight)
       );
+    }
+    let usedEmojis = value.match(EMOJI_REGEX)?.map((m) => m.slice(1, -1)) ?? [];
+    if ($userConfig.recentEmojis) {
+      for (let i = 0; i < usedEmojis.length; i++) {
+        let emoji = usedEmojis[i];
+        $userConfig.recentEmojis.filter((e) => e != emoji);
+        $userConfig.recentEmojis.push(emoji);
+        $userConfig.recentEmojis = $userConfig.recentEmojis;
+      }
+    } else {
+      $userConfig.recentEmojis = usedEmojis;
     }
     value = '';
     previewMessage = false;
@@ -238,11 +256,11 @@
   };
 
   const previewEntryHover = (i: number) => {
-    currentEmoji?.classList.remove("highlight");
+    currentEmoji?.classList.remove('highlight');
     currentEmoji = emojiPreview.children[i] as HTMLButtonElement;
-    currentEmoji.classList.add("highlight");
+    currentEmoji.classList.add('highlight');
     currentEmojiIndex = i;
-  }
+  };
 </script>
 
 <svelte:window on:keydown={onWindowKeyDown} />

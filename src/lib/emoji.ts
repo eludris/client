@@ -1,3 +1,5 @@
+export const EMOJI_REGEX = /(?<!\\):([a-zA-Z0-9_-]+):/gm;
+
 // adapted from https://github.com/twitter/twemoji/blob/d94f4cf793e6d5ca592aa00f58a88f6a4229ad43/scripts/build.js#L571-L589
 export const toCodePoints = (emoji: string) => {
   let codePoint = [];

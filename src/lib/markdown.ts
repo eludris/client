@@ -11,7 +11,7 @@ import { visit } from 'unist-util-visit';
 import data from '$lib/user_data';
 import state from './ws';
 import { get } from 'svelte/store';
-import { emojiDictionary, toUrl } from './emoji';
+import { emojiDictionary, EMOJI_REGEX, toUrl } from './emoji';
 
 let effisHost: string | undefined = undefined;
 let effisUrl: string | undefined = undefined;
@@ -199,11 +199,11 @@ export default async (content: string): Promise<string> => {
     .then((res) => {
       // Parse emoji (:name:), render them big if there's max 10 emoji and no
       // further text in a message
-      let big = !content.replace(/(?<!\\):[a-zA-Z0-9_-]+:/gm, '').trim() ? ' big' : '';
+      let big = !content.replace(EMOJI_REGEX, '').trim() ? ' big' : '';
       if (big && content.split(':').length > 21) {
         big = '';
       }
-      return res.replace(/(?<!\\):([a-zA-Z0-9_-]+):/gm, (m, emojiName, offset) => {
+      return res.replace(EMOJI_REGEX, (m, emojiName, offset) => {
         let emoji = emojiDictionary[emojiName];
         if (emoji && res.substring(0, offset).split(/<\\?code>/gm).length % 2 == 1) {
           return `<img class="emoji${big}" draggable="false" alt="${emoji}"
