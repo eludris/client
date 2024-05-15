@@ -50,8 +50,8 @@
   const populateMessages = () => {
     let lastAuthorID: number | null = null;
     let lastAuthorData: { name: string; avatar: string | number | undefined } | null = null;
+    messages = [];
     request('GET', `channels/${channel.id}/messages`).then((data) => {
-      $state.messages[channel.id] = [];
       data.forEach((m: Message) => {
         markdown(m.content ?? '').then((content) => {
           const authorData = {
@@ -68,9 +68,10 @@
           };
           lastAuthorData = authorData;
           lastAuthorID = m.author.id;
-          $state.messages[channel.id] = [...$state.messages[channel.id], message];
+          messages.push(message);
         });
       });
+      $state.messages[channel.id] = messages;
     });
   };
 
