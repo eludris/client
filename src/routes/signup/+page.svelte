@@ -17,7 +17,7 @@
   let email = '';
   let password = '';
   let passwordConfirm = '';
-  let instanceURL = env.PUBLIC_INSTANCE_URL ?? 'https://eludris.tooty.xyz';
+  let instanceURL = env.PUBLIC_INSTANCE_URL ?? 'https://eludris.tooty.xyz/next';
   let error = '';
   let requesting = false;
 
