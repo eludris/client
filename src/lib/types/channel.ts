@@ -46,6 +46,7 @@ export interface GroupChannel {
 
 export interface DirectMessageChannel {
   type: NonSphereChannelType.DIRECT;
+  id: number;
   owner: User;
   recipient: User;
 };

@@ -1,6 +1,8 @@
 <script lang="ts">
+  import { page } from '$app/stores';
   import { onMount } from 'svelte';
   import userConfig from '$lib/user_config';
+  import userData from '$lib/user_data';
   import activeContext from '$lib/context';
   import state from '$lib/ws';
   import { tick } from 'svelte';
@@ -14,6 +16,9 @@
   import type { Unsubscriber } from 'svelte/store';
   import UserContext from './UserContext.svelte';
   import UsersBar from './UsersBar.svelte';
+  import { request } from '$lib/request';
+  import markdown from '$lib/markdown';
+  import type { Message } from '$lib/types/message';
 
   let messagesUList: HTMLUListElement;
   let value = '';
@@ -23,6 +28,8 @@
   let currentContext: number;
   let authorContext: User | undefined;
   let authorContextDiv: HTMLDivElement;
+  // TODO: handle channels not existing
+  let channel = $state.channels[Number.parseInt($page.params.channel_id)];
 
   onMount(() => {
     messagesUList.scroll(0, messagesUList.scrollHeight);
@@ -35,16 +42,46 @@
     users.forEach((u) => (usernames[u.username] = u.id));
   }
 
-  $: {
-    if ($state.connected) {
-      let scroll =
-        messagesUList &&
-        messagesUList.scrollHeight - messagesUList.offsetHeight - messagesUList.scrollTop <
-          window.outerHeight / 4;
-      tick().then(() => {
-        if (scroll) messagesUList?.scroll(0, messagesUList.scrollHeight);
+  $: messages = $state.messages[channel.id] ?? [];
+  $: if (!messages.length) {
+    populateMessages();
+  }
+
+  const populateMessages = () => {
+    let lastAuthorID: number | null = null;
+    let lastAuthorData: { name: string; avatar: string | number | undefined } | null = null;
+    request('GET', `channels/${channel.id}/messages`).then((data) => {
+      $state.messages[channel.id] = [];
+      data.forEach((m: Message) => {
+        markdown(m.content ?? '').then((content) => {
+          const authorData = {
+            name: m._disguise?.name ?? m.author.display_name ?? m.author.username,
+            avatar: m._disguise?.avatar ?? m.author.avatar
+          };
+          let sameData =
+            authorData.name == lastAuthorData?.name && authorData.avatar == lastAuthorData.avatar;
+          const message = {
+            renderedContent: content,
+            showAuthor: !sameData || m.author.id != lastAuthorID,
+            mentioned: new RegExp(`(?<!\\\\)<@${$userData?.user.id}>`, 'gm').test(m.content ?? ''),
+            ...m
+          };
+          lastAuthorData = authorData;
+          lastAuthorID = m.author.id;
+          $state.messages[channel.id] = [...$state.messages[channel.id], message];
+        });
       });
-    }
+    });
+  };
+
+  $: if ($state.connected) {
+    let scroll =
+      messagesUList &&
+      messagesUList.scrollHeight - messagesUList.offsetHeight - messagesUList.scrollTop <
+        window.outerHeight / 4;
+    tick().then(() => {
+      if (scroll) messagesUList?.scroll(0, messagesUList.scrollHeight);
+    });
   }
 
   const autoScroll = async () => {
@@ -182,7 +219,7 @@
   <div id="channel-view">
     <div id="message-channel-body" class={$userConfig.userList ? 'users-hidden' : ''}>
       <ul bind:this={messagesUList} id="messages">
-        {#each $state.messages[0] ?? [] as message, i (i)}
+        {#each messages as message, i (i)}
           <MessageComponent
             {message}
             on:reply={onReply}
@@ -191,7 +228,7 @@
           />
         {/each}
       </ul>
-      <MessageInput bind:input bind:value bind:usernames {messagesUList} />
+      <MessageInput channel_id={channel.id} bind:input bind:value bind:usernames {messagesUList} />
     </div>
     {#if !$userConfig.userList}
       <UsersBar {users} on:showProfile={showContextProfile} on:userContext={userContextFromEvent} />
@@ -254,14 +291,6 @@
     #message-channel-body {
       width: 100%;
       position: relative;
-    }
-
-    #users {
-      position: absolute;
-      width: min(80%, 300px);
-      right: 0;
-      height: calc(100% - 60px);
-      box-sizing: border-box;
     }
   }
 </style>

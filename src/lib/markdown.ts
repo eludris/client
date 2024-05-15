@@ -43,7 +43,7 @@ const remarkKillImages: Plugin = () => {
         if (url.hostname != effisHost) {
           node.url = `${effisUrl}/proxy?url=${encodeURIComponent(node.url)}`;
         }
-      } catch {
+      } catch (e) {
         node.url = `${effisUrl}/proxy?url=${encodeURIComponent(node.url)}`;
       }
     });

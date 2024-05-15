@@ -13,7 +13,7 @@ const state = writable<State>({ connected: false, messages: [], users: [], spher
 
 let ws: WebSocket | null = null;
 let pingInterval: NodeJS.Timer | null = null;
-let lastAuthorID = 0;
+let lastAuthorID: number | null = null;
 let lastAuthorData: { name: string, avatar: string | number | undefined } | null = null;
 let notification: Notification;
 let notification_opt: number;
