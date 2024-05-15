@@ -9,7 +9,7 @@ import type { State } from './types/ui/state';
 import { request } from './request';
 import type { InstanceInfo } from './types/instance';
 
-const state = writable<State>({ connected: false, messages: [], users: [] });
+const state = writable<State>({ connected: false, messages: [], users: [], spheres: [], channels: [] });
 
 let ws: WebSocket | null = null;
 let pingInterval: NodeJS.Timer | null = null;
@@ -65,7 +65,15 @@ const connect = async (userData: UserData) => {
         state.update((state) => {
           state.connected = true;
           state.users = [];
-          payload.d.users.forEach((u) => (state.users[u.id] = u));
+          payload.d.spheres.forEach((u) => {
+            u.members.forEach((m) => {
+              state.users[m.user.id] = m.user;
+            });
+            u.channels.forEach((c) => {
+              state.channels[c.id] = c;
+            });
+            state.spheres[u.id] = u;
+          });
           state.users[payload.d.user.id] = payload.d.user;
           return state;
         });
@@ -114,7 +122,7 @@ const connect = async (userData: UserData) => {
           });
         }
       } else if (payload.op == PayloadOP.MESSAGE_CREATE)
-        markdown(payload.d.content).then((content) => {
+        markdown(payload.d.content ?? '').then((content) => {
           const authorData = {
             name:
               payload.d._disguise?.name ??
@@ -127,7 +135,7 @@ const connect = async (userData: UserData) => {
           const message = {
             renderedContent: content,
             showAuthor: !sameData || payload.d.author.id != lastAuthorID,
-            mentioned: new RegExp(`(?<!\\\\)<@${userData.user.id}>`, 'gm').test(payload.d.content),
+            mentioned: new RegExp(`(?<!\\\\)<@${userData.user.id}>`, 'gm').test(payload.d.content ?? ''),
             ...payload.d
           };
           lastAuthorData = authorData;
@@ -160,7 +168,11 @@ const connect = async (userData: UserData) => {
             };
           }
           state.update((state) => {
-            state.messages.push(message);
+            if (state.messages[message.channel.id]) {
+              state.messages[message.channel.id].push(message);
+            } else {
+              state.messages[message.channel.id] = [message];
+            }
             return state;
           });
         });
