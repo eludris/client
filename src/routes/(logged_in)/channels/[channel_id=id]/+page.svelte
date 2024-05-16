@@ -51,32 +51,31 @@
   }
 
   const populateMessages = () => {
-    console.log('Populating messages');
     let lastAuthorID: number | null = null;
     let lastAuthorData: { name: string; avatar: string | number | undefined } | null = null;
-    messages = [];
-    request('GET', `channels/${channel.id}/messages`).then((data) => {
-      data.forEach((m: Message) => {
-        markdown(m.content ?? '').then((content) => {
-          const authorData = {
-            name: m._disguise?.name ?? m.author.display_name ?? m.author.username,
-            avatar: m._disguise?.avatar ?? m.author.avatar
-          };
-          let sameData =
-            authorData.name == lastAuthorData?.name && authorData.avatar == lastAuthorData.avatar;
-          const message = {
-            renderedContent: content,
-            showAuthor: !sameData || m.author.id != lastAuthorID,
-            mentioned: new RegExp(`(?<!\\\\)<@${$userData?.user.id}>`, 'gm').test(m.content ?? ''),
-            ...m
-          };
-          lastAuthorData = authorData;
-          lastAuthorID = m.author.id;
-          messages.push(message);
-        });
-      });
-      console.log('Populated messages');
-      $state.messages[channel.id] = messages;
+    let fetchedMessages: ClientMessage[] = [];
+    request('GET', `channels/${channel.id}/messages`).then(async (data) => {
+      for (let i = 0; i < data.length; i++) {
+        let m = data[i];
+        let content = await markdown(m.content ?? '');
+        const authorData = {
+          name: m._disguise?.name ?? m.author.display_name ?? m.author.username,
+          avatar: m._disguise?.avatar ?? m.author.avatar
+        };
+        let sameData =
+          authorData.name == lastAuthorData?.name && authorData.avatar == lastAuthorData?.avatar;
+        const message = {
+          renderedContent: content,
+          showAuthor: !sameData || m.author.id != lastAuthorID,
+          mentioned: new RegExp(`(?<!\\\\)<@${$userData?.user.id}>`, 'gm').test(m.content ?? ''),
+          ...m
+        };
+        lastAuthorData = authorData;
+        lastAuthorID = m.author.id;
+        fetchedMessages.push(message);
+        console.log('b');
+      }
+      $state.messages[channel.id] = fetchedMessages;
     });
   };
 
@@ -225,7 +224,7 @@
   <div id="channel-view">
     <div id="message-channel-body" class={$userConfig.userList ? 'users-hidden' : ''}>
       <ul bind:this={messagesUList} id="messages">
-        {#each messages as message, i (i)}
+        {#each messages as message (message.id)}
           <MessageComponent
             {message}
             on:reply={onReply}
