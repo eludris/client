@@ -1,8 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher, onMount, tick } from 'svelte';
   import Popup from '$lib/components/Popup.svelte';
-  import { parseGIF, decompressFrames } from 'gifuct-js';
-  import GIF from 'gif.js';
+  import { consumeSingleEvent } from "$lib/events";
 
   export let cropperFile: Blob | null | undefined;
   export let cropperKind: string;
@@ -111,107 +110,60 @@
     scaleImage();
   };
 
-  const cropGif = async () => {
-    // Actual destination canvas ctx, same size as the crop box.
-    const ctx = canvas.getContext('2d')!;
-    // Intermediary canvas ctx, same size as the gif.
-    const tempCtx = tempCanvas.getContext('2d')!;
+  const cropImpl = async (kind: "GIF" | "image"): Promise<Blob> => {
+    let inEvent: string;
+    let resultEvent: string;
+  
+    if (kind == "GIF") {
+      inEvent = "cropGifInWorker";
+      resultEvent = "cropGifResult";
+    } else {
+      inEvent = "cropImageInWorker";
+      resultEvent = "cropImageResult";
+    }
 
-    // Compensate for any scaling automatically done by css
+    // Compensate for any scaling automatically done by css...
     let cssScale = image.width / image.naturalWidth;
     let effectiveScale = scale * cssScale;
-
-    const GifBuilder = new GIF({
-      workers: 2,
-      quality: 10,
-      workerScript: '/gif.worker.js',
-      transparent: '#0000'
-    });
-
-    // Parse gif and prepare temp canvas
-
-    let inputGif = parseGIF(await cropperFile!.arrayBuffer());
-    let frames = decompressFrames(inputGif, true);
-
-    tempCanvas.width = image.naturalWidth;
-    tempCanvas.height = image.naturalHeight;
-    let imageData = tempCtx.createImageData(image.naturalWidth, image.naturalHeight);
     
-    // Loop over each frame, paste it on the temp canvas, and crop it onto the main canvas.
-    frames.forEach((frame) => {
-      imageData.data.set(frame.patch);
-      tempCtx.putImageData(imageData, 0, 0);
-
-      ctx.reset();
-      // Fill with transparency in case the crop is smaller than the crop box size.
-      ctx.fillStyle = 'transparent';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.drawImage(
-        tempCanvas,
-        (xBoundary - imageX) / cssScale,
-        (yBoundary - imageY) / cssScale,
-        cutout.clientWidth / effectiveScale,
-        cutout.clientHeight / effectiveScale,
-        0,
-        0,
-        canvas.width,
-        canvas.height
-      );
-
-      GifBuilder.addFrame(canvas, { copy: true, delay: frame.delay, dispose: frame.disposalType});
-    });
-
-    let promise = new Promise<Blob>(resolved => {
-      GifBuilder.on('finished', function (blob) {resolved(blob)});
-    });
-
-    GifBuilder.render()
-    return await promise
-
+    // Dispatch event to start cropper worker...
+    document.dispatchEvent(
+      new CustomEvent(
+        inEvent,
+        {
+          detail:
+          {
+            buffer: new Uint8Array(await cropperFile!.arrayBuffer()),
+            imageWidth: image.naturalWidth,
+            imageHeight: image.naturalHeight,
+            windowX: (xBoundary - imageX) / cssScale,
+            windowY: (yBoundary - imageY) / cssScale,
+            windowWidth: cutout.clientWidth / effectiveScale,
+            windowHeight: cutout.clientHeight / effectiveScale
+          }
+        }
+      )
+    )
+  
+    let event: CustomEvent<Blob> = await consumeSingleEvent(resultEvent, ()=>true);
+    
+    return event.detail;
   }
 
-  const cropImage = async () => {
-    const ctx = canvas.getContext('2d')!;
-
-    // Compensate for any scaling automatically done by css
-    let cssScale = image.width / image.naturalWidth;
-    let effectiveScale = scale * cssScale;
-
-    ctx.drawImage(
-      image,
-      (xBoundary - imageX) / cssScale,
-      (yBoundary - imageY) / cssScale,
-      cutout.clientWidth / effectiveScale,
-      cutout.clientHeight / effectiveScale,
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    );
-
-    return (await new Promise<Blob | null>(resolve => {canvas.toBlob(resolve)}))!
-  };
-
   const doCrop = async () => {
+    updateBoundaries();
+
     let imageResponse = await fetch(image.src);
     let contentType = imageResponse.headers.get('content-type');
     let blob: Blob;
-
-    if (cropperKind == "banner") {
-      canvas.height = 512;
-      canvas.width = canvas.height * 6;
-    } else {
-      canvas.height = canvas.width = 256;
-    }
-
+   
     if (contentType == 'image/gif') {
-      blob = await cropGif();
+      blob = await cropImpl("GIF");
     } else {
-      blob = await cropImage();
+      blob = await cropImpl("image");
     }
-
-    dispatcher('success', blob);
+    
+    dispatcher("success", blob);
   }
 
   const cropSkip = () => {

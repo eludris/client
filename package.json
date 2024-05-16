@@ -33,8 +33,7 @@
   "type": "module",
   "dependencies": {
     "@react-native-picker/picker": "^2.4.8",
-    "gif.js": "^0.2.0",
-    "gifuct-js": "^2.1.2",
+    "eludris-wasm-cropper": "github:eludris/wasm-cropper",
     "prismjs": "^1.29.0",
     "rehype-katex": "^6.0.2",
     "rehype-prism": "^2.2.0",
@@ -43,6 +42,7 @@
     "remark-math": "^5.1.1",
     "remark-parse": "^10.0.1",
     "remark-rehype": "^10.1.0",
-    "unist-util-visit": "^4.1.1"
+    "unist-util-visit": "^4.1.1",
+    "vite-plugin-wasm": "^3.3.0"
   }
 }
