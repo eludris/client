@@ -205,7 +205,7 @@ export default async (content: string): Promise<string> => {
       }
       return res.replace(EMOJI_REGEX, (m, emojiName, offset) => {
         let emoji = emojiDictionary[emojiName];
-        if (emoji && res.substring(0, offset).split(/<\\?code>/gm).length % 2 == 1) {
+        if (emoji && res.substring(0, offset).split(/<\/?code>/gm).length % 2 == 1) {
           return `<img class="emoji${big}" draggable="false" alt="${emoji}"
             src="${toUrl(emojiName)}" title="${emoji}"/>`;
         }
