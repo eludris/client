@@ -26,11 +26,24 @@
   let status = $userData!.user.status.text;
   let bio = $userData!.user.bio;
 
-  let bannerFiles: FileList | undefined | null = undefined;
-  let avatarFiles: FileList | undefined | null = undefined;
+  /**
+   * The input banner FileList.
+   * `undefined` if no prior image was provided, or the last provided image was an avatar.
+   */
+  let bannerFiles: FileList | undefined = undefined;
+  /**
+   * The input avatar FileList.
+   * `undefined` if no prior image was provided, or the last provided image was a banner.
+   */
+  let avatarFiles: FileList | undefined = undefined;
+
+  /** The cropped banner file for uploading to Effis.*/
   let bannerFile: Blob | null | undefined = undefined;
+  /** The cropped avatar file for uploading to Effis.*/
   let avatarFile: Blob | null | undefined = undefined;
-  let cropperFile: Blob | null = null; 
+
+  /** The file that is to be passed to the cropper. */
+  let cropperFile: Blob | undefined = undefined; 
   let cropDone: boolean = false;
 
   let popupError = '';
@@ -39,31 +52,33 @@
   let cropperKind = 'avatar'
 
   $: if (bannerFiles) {
+    avatarFiles = undefined;
     if (bannerFiles[0].size > $userData!.instanceInfo.file_size) {
       popupError = `Your banner image cannot be bigger than ${
         $userData!.instanceInfo.file_size / 1000000
       }MB`;
       bannerFiles = bannerFile = undefined;
     } else {
-      cropperFile = bannerFile = bannerFiles![0];
+      cropperFile = bannerFiles![0];
       cropperKind = "banner";
       openCropper();
     }
   }
 
   const resetBanner = () => {
-    banner = null;
-    bannerFiles = null;
+    bannerFile = banner = null;
+    bannerFiles = undefined;
   };
 
   $: if (avatarFiles) {
+    bannerFiles = undefined
     if (avatarFiles[0].size > $userData!.instanceInfo.file_size) {
       popupError = `Your avatar image cannot be bigger than ${
         $userData!.instanceInfo.file_size / 1000000
       }MB`;
       avatarFiles = avatarFile = undefined;
     } else {
-      cropperFile = avatarFile = avatarFiles![0];
+      cropperFile = avatarFiles![0];
       cropperKind = "avatar";
       openCropper();
     }
@@ -71,7 +86,8 @@
 
   const resetAvatar = () => {
     avatar = 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true';
-    avatarFiles = null;
+    avatarFile = null;
+    avatarFiles = undefined;
   };
 
   let cropSuccess = (e: CustomEvent<Blob>) => {
@@ -83,6 +99,7 @@
       banner = URL.createObjectURL(bannerFile);
     }
     cropDone = true;
+    cropperFile = undefined;
     closeCropper();
   }
 
@@ -95,6 +112,8 @@
 
   $: changed =
     cropDone ||
+    bannerFile !== undefined ||
+    avatarFile !== undefined ||
     (display_name || null) != $userData!.user.display_name ||
     status_type != $userData!.user.status.type.toLowerCase() ||
     (status || null) != $userData!.user.status.text ||
@@ -170,14 +189,14 @@
   const updateProfile = async () => {
     saving = true;
     let newProfile: UpdateUserProfile = {};
-    if (bannerFiles !== undefined) {
-      if (bannerFiles) {
-        let data = await uploadFile('banners', bannerFiles[0]);
+    if (bannerFile !== undefined) {
+      if (bannerFile) {
+        let data = await uploadFile('banners', bannerFile);
         newProfile.banner = data.id;
       } else {
         newProfile.banner = null;
       }
-      bannerFiles = undefined;
+      bannerFile = bannerFiles = undefined;
     }
     if (avatarFile !== undefined) {
       if (avatarFile) {
