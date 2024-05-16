@@ -31,6 +31,7 @@
   // TODO: handle channels not existing
   let channel = $state.channels[Number.parseInt($page.params.channel_id)];
   $userConfig.lastChannel = channel.id;
+  let populatingMessages = false;
 
   onMount(() => {
     messagesUList.scroll(0, messagesUList.scrollHeight);
@@ -44,7 +45,8 @@
   }
 
   $: messages = $state.messages[channel.id] ?? [];
-  $: if (!messages.length) {
+  $: if (!messages.length && !populatingMessages) {
+    populatingMessages = true;
     populateMessages();
   }
 
