@@ -516,7 +516,6 @@
     transition: background-color ease-in-out 125ms;
     color: #ccc;
     height: 40px;
-    cursor: pointer;
   }
 
   .edit-button:hover {
@@ -530,7 +529,6 @@
     color: var(--pink-500);
     font-weight: 300;
     padding: 0;
-    cursor: pointer;
     font-size: 14px;
     transition: color ease-in-out 125ms;
   }
@@ -569,7 +567,6 @@
     font-size: 14px;
     background-color: var(--pink-500);
     transition: background-color ease-in-out 125ms;
-    cursor: pointer;
   }
 
   .popup-confirm:hover {
@@ -588,7 +585,6 @@
     color: var(--pink-400);
     font-weight: 300;
     padding: 0;
-    cursor: pointer;
     font-size: 14px;
     text-decoration: underline;
     transition: color ease-in-out 125ms;
@@ -611,7 +607,6 @@
     align-items: center;
     gap: 5px;
     color: #ccc;
-    cursor: pointer;
   }
 
   #logout:hover {

@@ -547,7 +547,6 @@
     border: unset;
     color: var(--pink-700);
     z-index: 2;
-    cursor: pointer;
   }
 
   #image-input-hover button:hover {

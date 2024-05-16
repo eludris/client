@@ -199,11 +199,9 @@
     background: none;
     color: inherit;
     border: none;
-    cursor: pointer;
     margin: 3px 5px 3px 0;
     font-size: inherit;
     transition: color ease-in-out 125ms;
-    cursor: pointer;
     height: 32px;
     padding-top: 6px;
   }
