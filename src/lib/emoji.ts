@@ -1915,7 +1915,6 @@ export const emojiDictionary: { [emoji: string]: string } = {
   ...{
     wdance: 'https://cdn.discordapp.com/emojis/1132989381687382046.gif?quality=lossless',
     amiyapog: 'https://cdn.discordapp.com/emojis/1138532837339971598.webp?quality=lossless',
-    trollface: 'https://cdn.discordapp.com/emojis/980418393482072105.webp?quality=lossless',
     trol: 'https://cdn.discordapp.com/emojis/980418393482072105.webp?quality=lossless',
     bean: 'https://cdn.discordapp.com/emojis/1080551938678083674.webp?quality=lossless',
     lol: 'https://cdn.discordapp.com/emojis/980418824975319040.webp?quality=lossless',
