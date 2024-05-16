@@ -44,15 +44,11 @@
 <svelte:body on:click={bodyClick} />
 
 <div id="options-div">
-  <div id="instance-info">
-    {#if $page.url.pathname == '/'}
-      <span id="instance-name">{$userData?.instanceInfo?.instance_name}</span>
-    {:else}
-      <a id="instance-name" href="/">{$userData?.instanceInfo?.instance_name}</a>
-    {/if}
+  <div id="current-info">
+    <a id="navbar-title" href="/">{$userData?.instanceInfo?.instance_name}</a>
     {#if $userData?.instanceInfo?.description}
-      <span id="instance-description">{$userData.instanceInfo.description}</span>
-      <span id="instance-markdown">
+      <span id="navbar-description">{$userData.instanceInfo.description}</span>
+      <span id="navbar-markdown">
         <Markdown content={$userData.instanceInfo.description} />
       </span>
     {/if}
@@ -124,13 +120,13 @@
     height: 40px;
   }
 
-  #instance-info {
+  #current-info {
     display: flex;
     flex-grow: 1;
     overflow: hidden;
   }
 
-  #instance-name {
+  #navbar-title {
     margin-right: 15px;
     font-size: 24px;
     align-self: baseline;
@@ -139,13 +135,13 @@
     border: unset;
   }
 
-  #instance-description {
+  #navbar-description {
     font-weight: 300;
     align-self: baseline;
     white-space: nowrap;
   }
 
-  #instance-markdown {
+  #navbar-markdown {
     display: none;
     position: absolute;
     top: 35px;
@@ -155,9 +151,10 @@
     padding: 10px;
     border-radius: 10px;
     max-width: 90%;
+    align-self: flex-end;
   }
 
-  #instance-info:hover > #instance-markdown {
+  #current-info:hover > #navbar-markdown {
     display: inline;
   }
 

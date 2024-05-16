@@ -30,6 +30,7 @@
   let authorContextDiv: HTMLDivElement;
   // TODO: handle channels not existing
   let channel = $state.channels[Number.parseInt($page.params.channel_id)];
+  $userConfig.lastChannel = channel.id;
 
   onMount(() => {
     messagesUList.scroll(0, messagesUList.scrollHeight);

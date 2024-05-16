@@ -2,11 +2,13 @@
   import Navbar from '$lib/components/Navbar.svelte';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
+  import userConfig from '$lib/user_config';
 
   let keys: string[] = [];
+  let backUrl = $userConfig.lastChannel ? `/channels/${$userConfig.lastChannel}` : '/';
 
   const onKeyDown = (e: KeyboardEvent) => {
-    if (e.key == 'Escape') goto('/');
+    if (e.key == 'Escape') goto(backUrl);
 
     if (e.key == 'Shift') {
       return;
@@ -43,7 +45,7 @@
       <a href="/settings/appearance" class:current={$page.url.pathname == '/settings/appearance'}
         >Appearance</a
       >
-      <a id="back-link" href="/">
+      <a id="back-link" href={backUrl}>
         <!-- https://icon-sets.iconify.design/mdi/exit-to-app/ -->
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
           ><path
