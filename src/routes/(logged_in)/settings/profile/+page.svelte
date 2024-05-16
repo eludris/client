@@ -31,6 +31,7 @@
   let bannerFile: Blob | null | undefined = undefined;
   let avatarFile: Blob | null | undefined = undefined;
   let cropperFile: Blob | null = null; 
+  let cropDone: boolean = false;
 
   let popupError = '';
 
@@ -81,6 +82,7 @@
       bannerFile = e.detail;
       banner = URL.createObjectURL(bannerFile);
     }
+    cropDone = true;
     closeCropper();
   }
 
@@ -92,8 +94,7 @@
   let errors: { [field: string]: string | undefined } = {};
 
   $: changed =
-    bannerFiles !== undefined ||
-    avatarFiles !== undefined ||
+    cropDone ||
     (display_name || null) != $userData!.user.display_name ||
     status_type != $userData!.user.status.type.toLowerCase() ||
     (status || null) != $userData!.user.status.text ||
@@ -205,7 +206,7 @@
       let err = e as RequestErr;
       popupError = err.message;
     }
-    saving = false;
+     cropDone = saving = false;
   };
 
   const popupDismiss = () => {

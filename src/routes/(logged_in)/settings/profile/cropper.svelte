@@ -6,6 +6,8 @@
   export let cropperFile: Blob | null | undefined;
   export let cropperKind: string;
 
+  let cropping = false;
+
   let image: HTMLImageElement = document.createElement('img');
   let cutout: HTMLDivElement = document.createElement('div');
 
@@ -153,6 +155,8 @@
   const doCrop = async () => {
     updateBoundaries();
 
+    cropping = true;
+
     let imageResponse = await fetch(image.src);
     let contentType = imageResponse.headers.get('content-type');
     let blob: Blob;
@@ -162,7 +166,9 @@
     } else {
       blob = await cropImpl("image");
     }
-    
+
+    cropping = false;
+
     dispatcher("success", blob);
   }
 
@@ -179,7 +185,7 @@
 />
 
 <Popup on:dismiss={cropperDismiss}>
-  <span slot="title">Edit image</span>
+  <span slot="title">Edit Image</span>
   <div id="cropper">
     <div id="cropper-image-preview">
       <img alt="Fucking balls." id="cropper-img" bind:this={image} />
@@ -202,15 +208,19 @@
   </div>
   <span slot="control">
     <div id="cropper-buttons">
-      <button class="cropper-button" id="cropper-skip-button" on:click={cropSkip}>
-        Skip
-      </button>
-      <div id="button-separator" />
-      <button class="cropper-button" id="cropper-cancel-button" on:click={cropperDismiss}>
+      <button class="cropper-button" id="cropper-cancel-button" disabled={cropping} on:click={cropperDismiss}>
         Cancel
       </button>
-      <button class="cropper-button" id="cropper-crop-button" on:click={doCrop}>
-        Crop
+      <div id="button-separator" />
+      <button class="cropper-button" id="cropper-skip-button" disabled={cropping} on:click={cropSkip}>
+        Skip
+      </button>
+      <button class="cropper-button" id="cropper-crop-button" disabled={cropping} on:click={doCrop}>
+        {#if cropping}
+          Cropping...
+        {:else}
+          Crop
+        {/if}
       </button>
     </div>
   </span>
@@ -307,7 +317,7 @@
 
   #cropper-crop-button {
     background-color: var(--gray-300);
-    padding: 10px 40px;
+    width: 120px;
   }
 
   .cropper-button:hover {
@@ -316,6 +326,16 @@
 
   #cropper-crop-button:hover {
     background-color: var(--gray-400);
+    text-decoration: none;
+  }
+
+  .cropper-button:disabled {
+    text-decoration: none;
+    color: #aaa;
+  }
+
+  #cropper-crop-button:disabled {
+    background-color: var(--purple-300);
   }
 
   #cropper-canvas {

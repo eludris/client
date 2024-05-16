@@ -237,7 +237,6 @@
   button:disabled {
     background-color: var(--pink-300);
     box-shadow: 0 2px 2px var(--gray-100);
-    cursor: default;
   }
 
   #success {
