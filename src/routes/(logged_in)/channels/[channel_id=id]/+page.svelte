@@ -51,6 +51,7 @@
   }
 
   const populateMessages = () => {
+    console.log('Populating messages');
     let lastAuthorID: number | null = null;
     let lastAuthorData: { name: string; avatar: string | number | undefined } | null = null;
     messages = [];
@@ -74,6 +75,7 @@
           messages.push(message);
         });
       });
+      console.log('Populated messages');
       $state.messages[channel.id] = messages;
     });
   };
