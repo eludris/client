@@ -51,17 +51,21 @@
   let showCropper = false;
   let cropperKind = 'avatar'
 
-  $: if (bannerFiles) {
-    avatarFiles = undefined;
-    if (bannerFiles[0].size > $userData!.instanceInfo.file_size) {
-      popupError = `Your banner image cannot be bigger than ${
-        $userData!.instanceInfo.file_size / 1000000
-      }MB`;
-      bannerFiles = bannerFile = undefined;
-    } else {
-      cropperFile = bannerFiles![0];
-      cropperKind = "banner";
-      openCropper();
+  const onBannerUpload = async () => {
+    if (bannerFiles) {
+      if (bannerFiles[0].size > $userData!.instanceInfo.file_size) {
+        popupError = `Your banner image cannot be bigger than ${
+          $userData!.instanceInfo.file_size / 1000000
+        }MB`;
+        bannerFiles = bannerFile = undefined;
+
+      } else {
+        avatarFiles = undefined;
+        cropperFile = bannerFiles![0];
+        cropperKind = "banner";
+        await tick();
+        openCropper();
+      }
     }
   }
 
@@ -70,17 +74,22 @@
     bannerFiles = undefined;
   };
 
-  $: if (avatarFiles) {
-    bannerFiles = undefined
-    if (avatarFiles[0].size > $userData!.instanceInfo.file_size) {
-      popupError = `Your avatar image cannot be bigger than ${
-        $userData!.instanceInfo.file_size / 1000000
-      }MB`;
-      avatarFiles = avatarFile = undefined;
-    } else {
-      cropperFile = avatarFiles![0];
-      cropperKind = "avatar";
-      openCropper();
+  const onAvatarUpload = async () => {
+    if (avatarFiles) {
+      if (avatarFiles[0].size > $userData!.instanceInfo.file_size) {
+        popupError = `Your avatar image cannot be bigger than ${
+          $userData!.instanceInfo.file_size / 1000000
+        }MB`;
+        avatarFiles = avatarFile = undefined;
+
+      } else {
+        console.log("got avatar!")
+        bannerFiles = undefined
+        cropperFile = avatarFiles![0];
+        cropperKind = "avatar";
+        await tick();
+        openCropper();
+      }
     }
   }
 
@@ -290,6 +299,7 @@
               type="file"
               accept="image/*"
               bind:files={bannerFiles}
+              on:change={onBannerUpload}
             />
           </span>
         </div>
@@ -313,6 +323,7 @@
                     type="file"
                     accept="image/*"
                     bind:files={avatarFiles}
+                    on:change={onAvatarUpload}
                   />
                   {#if avatar != 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true'}
                     <button on:click={resetAvatar}>Reset</button>
