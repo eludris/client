@@ -188,9 +188,11 @@
   <span slot="title">Edit Image</span>
   <div id="cropper">
     <div id="cropper-image-preview">
-      <img alt="Fucking balls." id="cropper-img" bind:this={image} />
+      <img alt="Cropper preview." id="cropper-img" bind:this={image} />
       <div
         id="overlay"
+        role="button"
+        tabindex="0"
         on:mousedown={mouseStartDrag}
         on:touchstart={touchStartDrag}
         on:wheel={onWheel}
@@ -203,12 +205,12 @@
       </div>
     </div>
     <div id="cropper-slider">
-      <input type="range" min="0.5" max="5" step="0.0001" bind:value={scale} on:input={scaleImage} />
+      <input type="range" min="0.5" max="5" step="0.0001" disabled={cropping} bind:value={scale} on:input={scaleImage} />
     </div>
   </div>
   <span slot="control">
     <div id="cropper-buttons">
-      <button class="cropper-button" id="cropper-cancel-button" disabled={cropping} on:click={cropperDismiss}>
+      <button class="cropper-button" id="cropper-cancel-button" on:click={cropperDismiss}>
         Cancel
       </button>
       <div id="button-separator" />

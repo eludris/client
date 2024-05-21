@@ -83,7 +83,6 @@
         avatarFiles = avatarFile = undefined;
 
       } else {
-        console.log("got avatar!")
         bannerFiles = undefined
         cropperFile = avatarFiles![0];
         cropperKind = "avatar";
