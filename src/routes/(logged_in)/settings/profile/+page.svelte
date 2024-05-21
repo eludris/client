@@ -348,6 +348,8 @@
           <span
             id="status-type"
             class="status-icon status-indicator {status_type.toLowerCase()}"
+            role="button"
+            tabindex="0"
             on:click|stopPropagation={statusIndicatorClick}
           />
           {#if statusIndicatorFocused}
@@ -396,7 +398,7 @@
             />
           {:else}
             <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <div id="bio-md-container" on:click={bioClick}>
+            <div id="bio-md-container" on:click={bioClick} role="button" tabindex="0">
               <Markdown content={bio ?? 'Nothing here yet'} />
             </div>
           {/if}
