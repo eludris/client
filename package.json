@@ -34,7 +34,7 @@
   },
   "type": "module",
   "dependencies": {
-    "eludris-wasm-cropper": "github:eludris/wasm-cropper",
+    "eludris-wasm-cropper": "eludris/wasm-cropper#semver:^0.1.1",
     "prismjs": "^1.29.0",
     "rehype-katex": "^6.0.2",
     "rehype-prism": "^2.2.0",
