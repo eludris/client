@@ -38,12 +38,12 @@
   let avatarFiles: FileList | undefined = undefined;
 
   /** The cropped banner file for uploading to Effis.*/
-  let bannerFile: Blob | null | undefined = undefined;
+  let bannerFile: File | null | undefined = undefined;
   /** The cropped avatar file for uploading to Effis.*/
-  let avatarFile: Blob | null | undefined = undefined;
+  let avatarFile: File | null | undefined = undefined;
 
   /** The file that is to be passed to the cropper. */
-  let cropperFile: Blob | undefined = undefined; 
+  let cropperFile: File | undefined = undefined; 
   let cropDone: boolean = false;
 
   let popupError = '';
@@ -101,10 +101,10 @@
 
   let cropSuccess = (e: CustomEvent<Blob>) => {
     if (cropperKind == "avatar") {
-      avatarFile = e.detail;
+      avatarFile = new File([e.detail], cropperFile!.name);
       avatar = URL.createObjectURL(avatarFile);
     } else {
-      bannerFile = e.detail;
+      bannerFile = new File([e.detail], cropperFile!.name);
       banner = URL.createObjectURL(bannerFile);
     }
     cropDone = true;
@@ -186,7 +186,7 @@
     }
   };
 
-  const uploadFile = async (bucket: string, file: Blob) => {
+  const uploadFile = async (bucket: string, file: File) => {
     let formData = new FormData();
     formData.append('file', file, file.name);
     return await fetch($userData?.instanceInfo.effis_url! + `/${bucket}`, {
