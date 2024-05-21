@@ -371,7 +371,7 @@
   }
 
   #message-input-form {
-    width: calc(100% - 10px);
+    width: calc(100% - 14px);
     display: flex;
     background-color: var(--gray-200);
     color: var(--gray-600);
