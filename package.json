@@ -34,7 +34,6 @@
   },
   "type": "module",
   "dependencies": {
-    "@react-native-picker/picker": "^2.4.8",
     "eludris-wasm-cropper": "github:eludris/wasm-cropper",
     "prismjs": "^1.29.0",
     "rehype-katex": "^6.0.2",
