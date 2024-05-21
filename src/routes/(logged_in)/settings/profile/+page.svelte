@@ -43,13 +43,13 @@
   let avatarFile: File | null | undefined = undefined;
 
   /** The file that is to be passed to the cropper. */
-  let cropperFile: File | undefined = undefined; 
+  let cropperFile: File | undefined = undefined;
   let cropDone: boolean = false;
 
   let popupError = '';
 
   let showCropper = false;
-  let cropperKind = 'avatar'
+  let cropperKind = 'avatar';
 
   const onBannerUpload = async () => {
     if (bannerFiles) {
@@ -58,16 +58,15 @@
           $userData!.instanceInfo.file_size / 1000000
         }MB`;
         bannerFiles = bannerFile = undefined;
-
       } else {
         avatarFiles = undefined;
         cropperFile = bannerFiles![0];
-        cropperKind = "banner";
+        cropperKind = 'banner';
         await tick();
         openCropper();
       }
     }
-  }
+  };
 
   const resetBanner = () => {
     bannerFile = banner = null;
@@ -81,16 +80,15 @@
           $userData!.instanceInfo.file_size / 1000000
         }MB`;
         avatarFiles = avatarFile = undefined;
-
       } else {
-        bannerFiles = undefined
+        bannerFiles = undefined;
         cropperFile = avatarFiles![0];
-        cropperKind = "avatar";
+        cropperKind = 'avatar';
         await tick();
         openCropper();
       }
     }
-  }
+  };
 
   const resetAvatar = () => {
     avatar = 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true';
@@ -99,7 +97,7 @@
   };
 
   let cropSuccess = (e: CustomEvent<Blob>) => {
-    if (cropperKind == "avatar") {
+    if (cropperKind == 'avatar') {
       avatarFile = new File([e.detail], cropperFile!.name);
       avatar = URL.createObjectURL(avatarFile);
     } else {
@@ -109,7 +107,7 @@
     cropDone = true;
     cropperFile = undefined;
     closeCropper();
-  }
+  };
 
   let bioFocused = false;
   let statusIndicatorFocused = false;
@@ -233,7 +231,7 @@
       let err = e as RequestErr;
       popupError = err.message;
     }
-     cropDone = saving = false;
+    cropDone = saving = false;
   };
 
   const popupDismiss = () => {
@@ -721,7 +719,9 @@
     margin-top: 10px;
     font-size: 18px;
     background-color: var(--gray-300);
-    transition: background-color ease-in-out 125ms, color ease-in-out 125ms;
+    transition:
+      background-color ease-in-out 125ms,
+      color ease-in-out 125ms;
     color: var(--color-text);
   }
 

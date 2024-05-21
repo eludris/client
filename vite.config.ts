@@ -14,7 +14,7 @@ const config: UserConfig = {
     {
       // For whatever reason vite places worker assets in a different folder than it
       // tries to import them from, so we help it along (✿◠‿◠).
-      name: "ILOVEWORKERSILOVEWORKERSILOVEWORKERS",
+      name: 'ILOVEWORKERSILOVEWORKERSILOVEWORKERS',
       configResolved: (cfg) => {
         _config = cfg;
       },
@@ -22,17 +22,15 @@ const config: UserConfig = {
       writeBundle: async () => {
         let outDir = _config.build.outDir;
         if (outDir.endsWith('server')) return;
-        fs.cpSync(
-          `${outDir}/_app/immutable/workers/assets/`,
-          `${outDir}/assets/assets`,
-          {recursive: true},
-        )
+        fs.cpSync(`${outDir}/_app/immutable/workers/assets/`, `${outDir}/assets/assets`, {
+          recursive: true
+        });
       }
     }
   ],
   worker: {
-    plugins: () => [wasm(), topLevelAwait()],
-  },
+    plugins: () => [wasm(), topLevelAwait()]
+  }
 };
 
 export default config;

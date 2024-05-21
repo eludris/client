@@ -20,11 +20,17 @@
   const popupDismiss = () => {
     dispatch('dismiss');
   };
-
 </script>
 
 <svelte:body on:keydown|stopPropagation|capture={onKeyDown} />
-<svelte:head><style>#app {overflow: hidden; user-select: none;}</style></svelte:head>
+<svelte:head
+  ><style>
+    #app {
+      overflow: hidden;
+      user-select: none;
+    }
+  </style></svelte:head
+>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div id="popup-container" on:mousedown={containerClick}>
