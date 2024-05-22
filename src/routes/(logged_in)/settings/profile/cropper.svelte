@@ -11,9 +11,6 @@
   let image: HTMLImageElement = document.createElement('img');
   let cutout: HTMLDivElement = document.createElement('div');
 
-  let canvas: HTMLCanvasElement;
-  let tempCanvas: HTMLCanvasElement;
-
   let dragging = false;
   let imageX = 0;
   let imageY = 0;
@@ -22,10 +19,6 @@
   let xBoundary = 0;
   let yBoundary = 0;
   let scale = 1;
-
-  onMount(() => {
-    tempCanvas = document.createElement('canvas');
-  });
 
   const reader = new FileReader();
   reader.addEventListener('load', async () => {
@@ -227,10 +220,6 @@
     </div>
   </span>
 </Popup>
-<canvas
-  id="cropper-canvas"
-  bind:this={canvas}
-/>
 
 <style>
   #cropper {
@@ -338,9 +327,5 @@
 
   #cropper-crop-button:disabled {
     background-color: var(--purple-300);
-  }
-
-  #cropper-canvas {
-    display: none;
   }
 </style>
