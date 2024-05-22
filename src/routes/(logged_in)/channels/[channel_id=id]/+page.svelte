@@ -27,15 +27,21 @@
   let currentContext: number;
   let authorContext: User | undefined;
   let authorContextDiv: HTMLDivElement;
-  // TODO: handle channels not existing
   let populatingMessages = false;
+  let channel_id: number;
+  let firstLoad = true;
 
   onMount(() => {
     messagesUList.scroll(0, messagesUList.scrollHeight);
     input.focus();
   });
 
-  $: channel = $state.channels[Number.parseInt($page.params.channel_id)] as SphereChannel;
+  // TODO: handle channels not existing
+  $: {
+    firstLoad = true;
+    channel_id = Number.parseInt($page.params.channel_id);
+  }
+  $: channel = $state.channels[channel_id] as SphereChannel;
   $: $userConfig.lastChannel = channel.id;
 
   $: users = Object.values($state.users);
@@ -47,7 +53,12 @@
   $: if (!messageHistory.messages.length) {
     populateMessages();
   } else {
-    tick().then(() => messagesUList?.scroll(0, messagesUList.scrollHeight));
+    console.log(firstLoad);
+    if (firstLoad) {
+      tick().then(() => messagesUList?.scroll(0, messagesUList.scrollHeight));
+      firstLoad = false;
+      console.log(firstLoad);
+    }
   }
 
   const populateMessages = (before: Number | null = null) => {

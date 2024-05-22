@@ -169,9 +169,9 @@ const connect = async (userData: UserData) => {
           }
           state.update((state) => {
             if (state.messages[message.channel.id]) {
-              state.messages[message.channel.id].push(message);
+              state.messages[message.channel.id].messages.push(message);
             } else {
-              state.messages[message.channel.id] = [message];
+              state.messages[message.channel.id] = { messages: [message], hasEveryMessage: false };
             }
             return state;
           });
