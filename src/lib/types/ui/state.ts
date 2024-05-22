@@ -8,5 +8,5 @@ export interface State {
   users: { [key: number]: User };
   spheres: { [key: number]: Sphere };
   channels: { [key: number]: Channel };
-  messages: { [key: number]: ClientMessage[] };
+  messages: { [key: number]: { messages: ClientMessage[], hasEveryMessage: boolean } };
 }

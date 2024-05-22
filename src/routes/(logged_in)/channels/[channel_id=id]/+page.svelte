@@ -31,11 +31,11 @@
   let populatingMessages = false;
 
   onMount(() => {
+    messagesUList.scroll(0, messagesUList.scrollHeight);
     input.focus();
   });
 
   $: channel = $state.channels[Number.parseInt($page.params.channel_id)] as SphereChannel;
-  $: hasEveryMessage = false;
   $: $userConfig.lastChannel = channel.id;
 
   $: users = Object.values($state.users);
@@ -43,18 +43,22 @@
     usernames = {};
     users.forEach((u) => (usernames[u.username] = u.id));
   }
-
-  $: messages = $state.messages[channel.id] ?? [];
-  $: if (!messages.length) {
+  $: messageHistory = $state.messages[channel.id] ?? { messages: [], hasEveryMessage: false };
+  $: if (!messageHistory.messages.length) {
     populateMessages();
+  } else {
+    tick().then(() => messagesUList?.scroll(0, messagesUList.scrollHeight));
   }
 
   const populateMessages = (before: Number | null = null) => {
-    if (populatingMessages || hasEveryMessage) return;
+    if (populatingMessages || messageHistory.hasEveryMessage) return;
     populatingMessages = true;
     let lastAuthorID: number | null = null;
     let lastAuthorData: { name: string; avatar: string | number | undefined } | null = null;
     let fetchedMessages: ClientMessage[] = [];
+    if (!$state.messages[channel.id]) {
+      $state.messages[channel.id] = { messages: [], hasEveryMessage: false };
+    }
     request('GET', `channels/${channel.id}/messages?before=${before}`).then(async (data) => {
       for (let i = 0; i < data.length; i++) {
         let m = data[i];
@@ -76,11 +80,34 @@
         fetchedMessages.push(message);
       }
       if (fetchedMessages.length < 50) {
-        hasEveryMessage = true;
+        messageHistory.hasEveryMessage = true;
       }
-      $state.messages[channel.id] = [...fetchedMessages, ...($state.messages[channel.id] ?? [])];
+      $state.messages[channel.id].messages = [
+        ...fetchedMessages,
+        ...($state.messages[channel.id].messages ?? [])
+      ];
       populatingMessages = false;
     });
+  };
+
+  $: if ($state.connected) {
+    let scroll =
+      messagesUList &&
+      messagesUList.scrollHeight - messagesUList.offsetHeight - messagesUList.scrollTop <
+        window.outerHeight / 4;
+    tick().then(() => {
+      if (scroll) messagesUList?.scroll(0, messagesUList.scrollHeight);
+    });
+  }
+
+  const autoScroll = async () => {
+    if (!browser) return;
+    await tick();
+    if (
+      messagesUList.scrollHeight - messagesUList.offsetHeight - messagesUList.scrollTop <
+      window.outerHeight / 4
+    )
+      messagesUList.scroll(0, messagesUList.scrollHeight);
   };
 
   const onReply = async (e: CustomEvent<ClientMessage>) => {
@@ -196,23 +223,14 @@
   };
 
   const messagesScroll = () => {
-    if (messagesUList.scrollTop <= 200) {
-      populateMessages(messages[0].id);
+    if (messagesUList.scrollTop <= 200 && messageHistory.messages.length) {
+      populateMessages(messageHistory.messages[0].id);
     }
-  };
-
-  const scrollToBottom = (node: HTMLUListElement, _: ClientMessage[]) => {
-    const scroll = () =>
-      node.scroll({
-        top: node.scrollHeight
-      });
-    scroll();
-
-    return { update: scroll };
   };
 </script>
 
 <svelte:window
+  on:resize={autoScroll}
   on:keydown={windowKeyDown}
   on:touchstart={windowTouchStart}
   on:touchmove={windowTouchMove}
@@ -221,17 +239,12 @@
 <div id="message-channel">
   <div id="channel-view">
     <div id="message-channel-body" class={$userConfig.userList ? 'users-hidden' : ''}>
-      <ul
-        bind:this={messagesUList}
-        use:scrollToBottom={messages}
-        on:scroll={messagesScroll}
-        id="messages"
-      >
-        {#if hasEveryMessage}
+      <ul bind:this={messagesUList} on:scroll={messagesScroll} id="messages">
+        {#if messageHistory.hasEveryMessage}
           <h2 id="channel-start-header">Welcome to {channel.name}!</h2>
           <hr id="channel-start-separator" />
         {/if}
-        {#each messages as message (message.id)}
+        {#each messageHistory.messages as message (message.id)}
           <MessageComponent
             {message}
             on:reply={onReply}
