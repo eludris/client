@@ -1,5 +1,4 @@
 <script lang="ts">
-  import Navbar from '$lib/components/Navbar.svelte';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
   import userConfig from '$lib/user_config';
@@ -28,8 +27,6 @@
 </script>
 
 <svelte:body on:keydown={onKeyDown} />
-
-<Navbar />
 
 <div id="settings-wrapper-div">
   <div id="settings-div">
@@ -78,7 +75,7 @@
     flex-direction: column;
     margin-top: 30px;
     overflow-y: scroll;
-    min-height: calc(100% - 90px);
+    min-height: calc(100% - 30px);
   }
 
   #settings-div,

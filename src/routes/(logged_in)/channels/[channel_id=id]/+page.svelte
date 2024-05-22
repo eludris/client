@@ -11,7 +11,6 @@
   import MessageComponent from './Message.svelte';
   import type { ClientMessage } from '$lib/types/ui/message';
   import type { User } from '$lib/types/user';
-  import Navbar from '$lib/components/Navbar.svelte';
   import UserProfile from './UserProfile.svelte';
   import type { Unsubscriber } from 'svelte/store';
   import UserContext from './UserContext.svelte';
@@ -29,15 +28,15 @@
   let authorContext: User | undefined;
   let authorContextDiv: HTMLDivElement;
   // TODO: handle channels not existing
-  let channel = $state.channels[Number.parseInt($page.params.channel_id)] as SphereChannel;
-  $userConfig.lastChannel = channel.id;
   let populatingMessages = false;
-  let hasEveryMessage = false;
 
   onMount(() => {
-    messagesUList.scroll(0, messagesUList.scrollHeight);
     input.focus();
   });
+
+  $: channel = $state.channels[Number.parseInt($page.params.channel_id)] as SphereChannel;
+  $: hasEveryMessage = false;
+  $: $userConfig.lastChannel = channel.id;
 
   $: users = Object.values($state.users);
   $: {
@@ -82,26 +81,6 @@
       $state.messages[channel.id] = [...fetchedMessages, ...($state.messages[channel.id] ?? [])];
       populatingMessages = false;
     });
-  };
-
-  $: if ($state.connected) {
-    let scroll =
-      messagesUList &&
-      messagesUList.scrollHeight - messagesUList.offsetHeight - messagesUList.scrollTop <
-        window.outerHeight / 4;
-    tick().then(() => {
-      if (scroll) messagesUList?.scroll(0, messagesUList.scrollHeight);
-    });
-  }
-
-  const autoScroll = async () => {
-    if (!browser) return;
-    await tick();
-    if (
-      messagesUList.scrollHeight - messagesUList.offsetHeight - messagesUList.scrollTop <
-      window.outerHeight / 4
-    )
-      messagesUList.scroll(0, messagesUList.scrollHeight);
   };
 
   const onReply = async (e: CustomEvent<ClientMessage>) => {
@@ -221,22 +200,35 @@
       populateMessages(messages[0].id);
     }
   };
+
+  const scrollToBottom = (node: HTMLUListElement, _: ClientMessage[]) => {
+    const scroll = () =>
+      node.scroll({
+        top: node.scrollHeight
+      });
+    scroll();
+
+    return { update: scroll };
+  };
 </script>
 
 <svelte:window
-  on:resize={autoScroll}
   on:keydown={windowKeyDown}
   on:touchstart={windowTouchStart}
   on:touchmove={windowTouchMove}
 />
 
 <div id="message-channel">
-  <Navbar />
   <div id="channel-view">
     <div id="message-channel-body" class={$userConfig.userList ? 'users-hidden' : ''}>
-      <ul bind:this={messagesUList} on:scroll={messagesScroll} id="messages">
+      <ul
+        bind:this={messagesUList}
+        use:scrollToBottom={messages}
+        on:scroll={messagesScroll}
+        id="messages"
+      >
         {#if hasEveryMessage}
-          <h2 id="channel-start-header">Welcome to {channel.name}</h2>
+          <h2 id="channel-start-header">Welcome to {channel.name}!</h2>
           <hr id="channel-start-separator" />
         {/if}
         {#each messages as message (message.id)}
