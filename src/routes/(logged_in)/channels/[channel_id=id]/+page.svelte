@@ -18,7 +18,7 @@
   import UsersBar from './UsersBar.svelte';
   import { request } from '$lib/request';
   import markdown from '$lib/markdown';
-  import type { Message } from '$lib/types/message';
+  import type { SphereChannel } from '$lib/types/channel';
 
   let messagesUList: HTMLUListElement;
   let value = '';
@@ -29,9 +29,10 @@
   let authorContext: User | undefined;
   let authorContextDiv: HTMLDivElement;
   // TODO: handle channels not existing
-  let channel = $state.channels[Number.parseInt($page.params.channel_id)];
+  let channel = $state.channels[Number.parseInt($page.params.channel_id)] as SphereChannel;
   $userConfig.lastChannel = channel.id;
   let populatingMessages = false;
+  let hasEveryMessage = false;
 
   onMount(() => {
     messagesUList.scroll(0, messagesUList.scrollHeight);
@@ -45,16 +46,17 @@
   }
 
   $: messages = $state.messages[channel.id] ?? [];
-  $: if (!messages.length && !populatingMessages) {
-    populatingMessages = true;
+  $: if (!messages.length) {
     populateMessages();
   }
 
-  const populateMessages = () => {
+  const populateMessages = (before: Number | null = null) => {
+    if (populatingMessages || hasEveryMessage) return;
+    populatingMessages = true;
     let lastAuthorID: number | null = null;
     let lastAuthorData: { name: string; avatar: string | number | undefined } | null = null;
     let fetchedMessages: ClientMessage[] = [];
-    request('GET', `channels/${channel.id}/messages`).then(async (data) => {
+    request('GET', `channels/${channel.id}/messages?before=${before}`).then(async (data) => {
       for (let i = 0; i < data.length; i++) {
         let m = data[i];
         let content = await markdown(m.content ?? '');
@@ -73,9 +75,12 @@
         lastAuthorData = authorData;
         lastAuthorID = m.author.id;
         fetchedMessages.push(message);
-        console.log('b');
       }
-      $state.messages[channel.id] = fetchedMessages;
+      if (fetchedMessages.length < 50) {
+        hasEveryMessage = true;
+      }
+      $state.messages[channel.id] = [...fetchedMessages, ...($state.messages[channel.id] ?? [])];
+      populatingMessages = false;
     });
   };
 
@@ -210,6 +215,12 @@
   const closeProfile = () => {
     currentProfile = undefined;
   };
+
+  const messagesScroll = () => {
+    if (messagesUList.scrollTop <= 200) {
+      populateMessages(messages[0].id);
+    }
+  };
 </script>
 
 <svelte:window
@@ -223,7 +234,11 @@
   <Navbar />
   <div id="channel-view">
     <div id="message-channel-body" class={$userConfig.userList ? 'users-hidden' : ''}>
-      <ul bind:this={messagesUList} id="messages">
+      <ul bind:this={messagesUList} on:scroll={messagesScroll} id="messages">
+        {#if hasEveryMessage}
+          <h2 id="channel-start-header">Welcome to {channel.name}</h2>
+          <hr id="channel-start-separator" />
+        {/if}
         {#each messages as message (message.id)}
           <MessageComponent
             {message}
@@ -290,6 +305,14 @@
     padding: 0;
     margin-top: 0;
     margin-bottom: 0; /* where is react native marginVertical when you need it? */
+  }
+
+  #channel-start-header {
+    margin: 20px;
+  }
+
+  #channel-start-separator {
+    margin: 20px;
   }
 
   @media only screen and (max-width: 1200px) {
