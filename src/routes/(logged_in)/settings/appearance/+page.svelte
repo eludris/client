@@ -130,4 +130,9 @@
   .theme-container:hover {
     background-color: var(--purple-200);
   }
+
+  .theme-cover {
+    height: 100%;
+    aspect-ratio: 1;
+  }
 </style>
