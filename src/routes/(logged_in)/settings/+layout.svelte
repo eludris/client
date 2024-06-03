@@ -131,16 +131,15 @@
     margin-top: 10px;
   }
 
-  :global(.setting) {
+  :global(.setting, details) {
     display: flex;
     flex-direction: column;
     gap: 20px;
     width: 100%;
   }
 
-  :global(.setting > label) {
+  :global(.setting > label, details > summary) {
     font-size: 20px;
-    display: inline-block;
   }
 
   :global(.setting input),

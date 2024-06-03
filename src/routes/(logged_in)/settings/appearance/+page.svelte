@@ -1,9 +1,13 @@
 <script lang="ts">
   import config from '$lib/user_config';
-  import { tick } from 'svelte';
+  import { onMount, tick } from 'svelte';
 
   let styleInput: HTMLTextAreaElement;
   let styles = $config.styles ?? '';
+
+  let themeInfo: ThemeInfo[] = [];
+
+  onMount(() => fetchThemeInfo())
 
   const onStylesKeyDown = async (e: KeyboardEvent) => {
     if (
@@ -24,19 +28,46 @@
   const onStylesInput = () => {
     $config.styles = styles;
   };
+
+  type ThemeInfo = {
+    name: string;
+    'repo-url': string;
+    description: string;
+    'cover-image': string;
+  };
+
+  const fetchThemeInfo = async () => {
+    themeInfo = await fetch("https://raw.githubusercontent.com/eludris/client-themes/main/themes.json").then((response) => response.json());
+  }
 </script>
 
-<div class="setting grow">
-  <label for="styles">Custom styles</label>
-  <textarea
-    name="styles"
-    bind:this={styleInput}
-    bind:value={styles}
-    on:keydown={onStylesKeyDown}
-    on:input={onStylesInput}
-    spellcheck="false"
-  />
-</div>
+<details>
+  <summary>Theme browser</summary>
+  <div class="setting grow">
+    {#each themeInfo as theme}
+      <div class="theme-container">
+        <img class="theme-cover" src={theme['cover-image']} alt="Theme cover">
+        <div class="theme-text-container">
+          <h2 class="theme-name">{theme.name}</h2>        
+          <div class="theme-description">{theme.description}</div>
+        </div>
+      </div>
+    {/each}
+  </div>
+</details>
+<details>
+  <summary>Custom styles</summary>
+  <div class="setting grow">
+    <textarea
+      name="styles"
+      bind:this={styleInput}
+      bind:value={styles}
+      on:keydown={onStylesKeyDown}
+      on:input={onStylesInput}
+      spellcheck="false"
+    />
+  </div>
+</details>
 <div class="setting">
   <label>Spoilers</label>
   <label class="spoiler-toggle" class:checked={$config.showSpoilers} for="spoileron">
@@ -49,10 +80,13 @@
 <style>
   .grow {
     flex-grow: 1;
+    height: 100%;
   }
 
   textarea {
-    flex-grow: 1;
+    height: 40vh;
+    /* display: flex;
+    flex-grow: 1; */
   }
 
   span {
@@ -81,5 +115,19 @@
 
   .spoiler-toggle.checked #spoiler-checkbox {
     background-color: var(--gray-400);
+  }
+
+  .theme-container {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    padding: 10px;
+    height: 15vh;
+    background-color: var(--purple-100);
+    border-radius: 5px;
+  }
+
+  .theme-container:hover {
+    background-color: var(--purple-200);
   }
 </style>
