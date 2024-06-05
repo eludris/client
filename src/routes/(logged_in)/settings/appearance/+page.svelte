@@ -194,6 +194,7 @@
     background-color: var(--purple-100);
     padding: 10px;
     width: calc(100% - 20px);
+    border-radius: 10px;
   }
 
   .theme-container {
@@ -208,7 +209,7 @@
   .theme-container:hover,
   .theme-container:focus {
     background-color: var(--purple-200);
-    box-shadow: 0 0 2px white inset;
+    box-shadow: 0 0 0 2px var(--pink-200);
   }
 
   .theme-cover {
