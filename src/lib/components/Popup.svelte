@@ -1,9 +1,25 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte';
 
   const dispatch = createEventDispatcher();
 
   let popup: HTMLDivElement;
+  let content: HTMLSpanElement;
+
+  onMount(() => {
+    new ResizeObserver(
+      () => {
+        if (!content) return;
+        if (content.scrollHeight > content.clientHeight) {
+          content.style.marginRight = "-20px";
+          content.style.paddingRight = "20px";
+        } else {
+          content.style.marginRight = "10px";
+          content.style.paddingRight = "0";
+        }
+      }
+    ).observe(content)
+  })
 
   const containerClick = (e: MouseEvent) => {
     if (e.target != popup && !popup.contains(e.target as Node)) {
@@ -20,7 +36,7 @@
 <div id="popup-container" on:click={containerClick}>
   <div id="popup" bind:this={popup}>
     <h2 id="popup-title"><slot name="title">Notice</slot></h2>
-    <span id="popup-message"><slot /></span>
+    <span id="popup-message" bind:this={content}><slot /></span>
     <slot name="control">
       <button id="popup-dismiss" on:click={popupDismiss}>Got it</button>
     </slot>
@@ -46,14 +62,18 @@
     flex-direction: column;
     padding: 20px;
     background-color: var(--gray-100);
+    max-width: 80%;
+    max-height: 80%;
   }
 
   #popup-title {
     margin: 10px 5px;
+    display: var(--display-title, unset);
   }
 
   #popup-message {
     margin: 10px;
+    overflow-y: auto;
   }
 
   :global(#popup-dismiss) {
