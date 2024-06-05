@@ -75,7 +75,7 @@
     display: flex;
     flex-direction: column;
     margin-top: 30px;
-    overflow-y: scroll;
+    overflow-y: auto;
     min-height: calc(100% - 90px);
   }
 
