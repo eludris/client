@@ -143,6 +143,11 @@
 {/if}
 
 <style>
+  summary {
+    user-select: none;
+    cursor: pointer;
+  }
+
   .grow {
     flex-grow: 1;
     height: 100%;
@@ -200,6 +205,7 @@
     padding: 10px;
     background-color: var(--gray-100);
     border-radius: 10px;
+    cursor: pointer;
   }
 
   .theme-container:hover,
@@ -247,6 +253,7 @@
     border-radius: 5px;
     font-size: 12pt;
     margin: 0px 20px;
+    cursor: pointer;
   }
 
   .button-separator {
