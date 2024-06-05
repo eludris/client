@@ -1,27 +1,20 @@
 <script lang="ts">
+
   import config from '$lib/user_config';
   import { onMount, tick } from 'svelte';
   import Popup from '$lib/components/Popup.svelte'
   import Markdown from '$lib/components/Markdown.svelte';
 
+  import type { PageData } from './$types'
+
+  export let data: PageData;
+  type ThemeInfo = PageData["theme_info"][0];
+
   let styleInput: HTMLTextAreaElement;
   let styles = $config.styles ?? '';
 
-  let themeInfo: ThemeInfo[] = [];
   let themeDesc: string | undefined;
   let selectedTheme: ThemeInfo | undefined;
-
-  type ThemeInfo = {
-    name: string;
-    author: string;
-    'repo-url': string;
-    description: string;
-    'cover-image': string;
-    'readme-url': string | undefined;
-    'style-url': string | undefined;
-  };
-
-  onMount(() => fetchThemeInfo())
 
   const onStylesKeyDown = async (e: KeyboardEvent) => {
     if (
@@ -43,19 +36,20 @@
     $config.styles = styles;
   };
 
-  const fetchThemeInfo = async () => {
-    themeInfo = await fetch("https://raw.githubusercontent.com/eludris/client-themes/main/themes.json").then((r) => r.json());
-    themeInfo[0].author = "Sharp Eyes"
-    themeInfo = [...themeInfo, ...themeInfo, ...themeInfo, ...themeInfo, ...themeInfo, ...themeInfo];
+  const repoToRaw = (repo: string): string => {
+    return repo.replace(
+      /^(?:https?:\/\/)?github.com\/(.*?)\/(.*?)$/,
+      "https://raw.githubusercontent.com/$1/$2/"
+    );
   }
 
   const fetchTheme = async (theme: ThemeInfo) => {
-    if (!theme['readme-url'] || !theme['style-url']) {
+    if (theme['readme-url']) {
+      themeDesc = await fetch(theme['readme-url']).then((r) => r.text())
+    } else {
+      // Assume github repo with main branch 'main' and readme file 'README.md'.
       themeDesc = await fetch(
-        theme['repo-url']!.replace(
-          /^(?:https?:\/\/)?github.com\/(.*?)\/(.*?)$/,
-          "https://raw.githubusercontent.com/$1/$2/main/README.md"
-        )
+        `${repoToRaw(theme['repo-url'])}/main/README.md`
       ).then((r) => r.text());
     }
 
@@ -73,12 +67,14 @@
   }
 
   const useTheme = async () => {
-    $config.styles = styles = await fetch(
-      selectedTheme!['repo-url']!.replace(
-        /^(?:https?:\/\/)?github.com\/(.*?)\/(.*?)$/,
-        "https://raw.githubusercontent.com/$1/$2/main/style.css"
-      )
-    ).then((r) => r.text());
+    if (selectedTheme!['style-url']) {
+      $config.styles = styles = await fetch(selectedTheme!['style-url']!).then((r) => r.text())
+    } else {
+      // Assume github repo with main branch 'main' and style file 'style.css'.
+      $config.styles = styles = await fetch(
+        `${repoToRaw(selectedTheme!['repo-url'])}/main/style.css`
+      ).then((r) => r.text());
+    }
   } 
 
 </script>
@@ -86,7 +82,7 @@
 <details>
   <summary>Theme browser</summary>
   <div class="setting grid" tabindex="-1">
-    {#each themeInfo as theme}
+    {#each data.theme_info as theme}
       <div
         class="theme-container"
         on:click={() => fetchTheme(theme)}
@@ -133,7 +129,7 @@
     </div>
     <span slot="control">
       <div class="theme-buttons">
-        <a class="theme-button repo" href={selectedTheme?.['repo-url']}>
+        <a class="theme-button repo" href={selectedTheme?.['repo-url']} title="View theme repository">
           <svg viewBox="0 0 24 24" height=24 width=24>
             <path fill="currentColor" fill-rule="evenodd" d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" clip-rule="evenodd"></path>
           </svg>
@@ -184,7 +180,7 @@
     background-color: var(--gray-400);
   }
 
-  .setting.grid {
+  .grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     grid-auto-rows: 350px;
