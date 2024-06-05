@@ -33,22 +33,32 @@
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div id="popup-container" on:click={containerClick}>
-  <div id="popup" bind:this={popup}>
-    <h2 id="popup-title"><slot name="title">Notice</slot></h2>
-    <span id="popup-message" bind:this={content}><slot /></span>
-    <slot name="control">
-      <button id="popup-dismiss" on:click={popupDismiss}>Got it</button>
-    </slot>
+<!-- NOTE: popup-window exists only so that the container can be make sticky. -->
+<div id="popup-window">
+  <div id="popup-container" on:click={containerClick}>
+    <div id="popup" bind:this={popup}>
+      <h2 id="popup-title"><slot name="title">Notice</slot></h2>
+      <span id="popup-message" bind:this={content}><slot /></span>
+      <slot name="control">
+        <button id="popup-dismiss" on:click={popupDismiss}>Got it</button>
+      </slot>
+    </div>
   </div>
 </div>
 
 <style>
-  #popup-container {
-    position: absolute;
-    display: flex;
+  #popup-window {
+    position: fixed;
+    overflow: visible;
     top: 0;
     left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  #popup-container {
+    position: sticky;
+    display: flex;
     width: 100%;
     height: 100%;
     align-items: center;
