@@ -39,7 +39,7 @@
   const repoToRaw = (repo: string): string => {
     return repo.replace(
       /^(?:https?:\/\/)?github.com\/(.*?)\/(.*?)$/,
-      "https://raw.githubusercontent.com/$1/$2/"
+      "https://raw.githubusercontent.com/$1/$2"
     );
   }
 
