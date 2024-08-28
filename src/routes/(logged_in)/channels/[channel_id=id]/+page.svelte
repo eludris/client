@@ -42,9 +42,10 @@
     channel_id = Number.parseInt($page.params.channel_id);
   }
   $: channel = $state.channels[channel_id] as SphereChannel;
+  let sphere = $state.spheres[channel.sphere_id];
   $: $userConfig.lastChannel = channel.id;
 
-  $: users = Object.values($state.users);
+  $: users = Object.values($state.users).filter((u) => sphere.members[u.id] != undefined);
   $: {
     usernames = {};
     users.forEach((u) => (usernames[u.username] = u.id));
