@@ -18,6 +18,7 @@
   import { request } from '$lib/request';
   import markdown from '$lib/markdown';
   import type { SphereChannel } from '$lib/types/channel';
+  import type { Sphere } from '$lib/types/sphere';
 
   let messagesUList: HTMLUListElement;
   let value = '';
@@ -37,15 +38,20 @@
   });
 
   // TODO: handle channels not existing
+  let sphere: Sphere;
   $: {
     firstLoad = true;
     channel_id = Number.parseInt($page.params.channel_id);
   }
   $: channel = $state.channels[channel_id] as SphereChannel;
-  let sphere = $state.spheres[channel.sphere_id];
+  $: if (channel) {
+    sphere = $state.spheres[channel.sphere_id];
+  }
   $: $userConfig.lastChannel = channel.id;
 
-  $: users = Object.values($state.users).filter((u) => sphere.members[u.id] != undefined);
+  $: users = Object.values($state.users).filter((u) =>
+    sphere ? sphere.members.find((m) => m.user.id == u.id) != undefined : false
+  );
   $: {
     usernames = {};
     users.forEach((u) => (usernames[u.username] = u.id));
