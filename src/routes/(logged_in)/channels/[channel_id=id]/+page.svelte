@@ -53,7 +53,6 @@
   $: if (!messageHistory.messages.length) {
     populateMessages();
   } else {
-    console.log(firstLoad);
     if (firstLoad) {
       tick().then(() => messagesUList?.scroll(0, messagesUList.scrollHeight));
       firstLoad = false;

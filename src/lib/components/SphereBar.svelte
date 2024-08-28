@@ -6,17 +6,19 @@
   import { page } from '$app/stores';
   import { SphereChannelType } from '$lib/types/channel';
 
-  let spheres: Sphere[] = Object.values($state.spheres ?? []);
   let currentSphere: Sphere | null = null;
-  let currentChannel = $state.channels[Number.parseInt($page.params.channel_id)];
 
-  if (
-    currentChannel &&
-    (currentChannel.type == SphereChannelType.CATEGORY ||
-      currentChannel.type == SphereChannelType.TEXT ||
-      currentChannel.type == SphereChannelType.VOICE)
-  ) {
-    currentSphere = $state.spheres[currentChannel.sphere_id];
+  let spheres: Sphere[] = Object.values($state.spheres ?? []);
+  $: {
+    let currentChannel = $state.channels[Number.parseInt($page.params.channel_id)];
+    if (
+      currentChannel &&
+      (currentChannel.type == SphereChannelType.CATEGORY ||
+        currentChannel.type == SphereChannelType.TEXT ||
+        currentChannel.type == SphereChannelType.VOICE)
+    ) {
+      currentSphere = $state.spheres[currentChannel.sphere_id];
+    }
   }
 
   const sphereContext = (e: MouseEvent, sphere: Sphere) => {};
@@ -28,7 +30,7 @@
   };
 </script>
 
-<div id="sphere-bar">
+<div id="sphere-bar" style:width={currentSphere ? '300px' : 'auto'}>
   <ul id="spheres" transition:phoneSlide={{ axis: 'x' }}>
     {#each spheres as sphere (sphere.id)}
       <a
@@ -50,9 +52,15 @@
       <h3>{currentSphere.name ?? currentSphere.slug}</h3>
       <hr />
       {#each currentSphere.channels as channel (channel.id)}
-        <a href="/channels/{channel.id}" class="channel">
-          #{channel.name}
-        </a>
+        {#if channel.type == SphereChannelType.CATEGORY}
+          <h4 class="category">
+            > {channel.name}
+          </h4>
+        {:else}
+          <a href="/channels/{channel.id}" class="channel">
+            # {channel.name}
+          </a>
+        {/if}
       {/each}
     </ul>
   {/if}
@@ -60,7 +68,7 @@
 
 <style>
   #sphere-bar {
-    width: 300px;
+    max-width: 300px;
     display: flex;
     flex-shrink: 0;
     margin: 0;
@@ -105,6 +113,15 @@
 
   #sphere-channels h3 {
     margin-bottom: 0;
+  }
+
+  .category {
+    margin: 10px 0;
+  }
+
+  .channel {
+    padding-left: 5px;
+    text-decoration: none;
   }
 
   @media only screen and (max-width: 1200px) {
