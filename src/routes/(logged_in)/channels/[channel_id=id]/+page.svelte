@@ -47,7 +47,9 @@
   $: if (channel) {
     sphere = $state.spheres[channel.sphere_id];
   }
-  $: $userConfig.lastChannel = channel.id;
+  $: if (channel) {
+    $userConfig.lastChannel = channel.id;
+  }
 
   $: users = Object.values($state.users).filter((u) =>
     sphere ? sphere.members.find((m) => m.user.id == u.id) != undefined : false
@@ -56,14 +58,14 @@
     usernames = {};
     users.forEach((u) => (usernames[u.username] = u.id));
   }
-  $: messageHistory = $state.messages[channel.id] ?? { messages: [], hasEveryMessage: false };
+  let defaultHistory = { messages: [], hasEveryMessage: false };
+  $: messageHistory = channel ? $state.messages[channel.id] ?? defaultHistory : defaultHistory;
   $: if (!messageHistory.messages.length) {
     populateMessages();
   } else {
     if (firstLoad) {
       tick().then(() => messagesUList?.scroll(0, messagesUList.scrollHeight));
       firstLoad = false;
-      console.log(firstLoad);
     }
   }
 
