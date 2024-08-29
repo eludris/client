@@ -70,7 +70,7 @@
   }
 
   const populateMessages = (before: Number | null = null) => {
-    if (populatingMessages || messageHistory.hasEveryMessage) return;
+    if (populatingMessages || messageHistory.hasEveryMessage || !channel) return;
     populatingMessages = true;
     let lastAuthorID: number | null = null;
     let lastAuthorData: { name: string; avatar: string | number | undefined } | null = null;
@@ -272,7 +272,7 @@
           />
         {/each}
       </ul>
-      <MessageInput channel_id={channel.id} bind:input bind:value bind:usernames {messagesUList} />
+      <MessageInput channel_id={channel?.id} bind:input bind:value bind:usernames {messagesUList} />
     </div>
     {#if !$userConfig.userList}
       <UsersBar {users} on:showProfile={showContextProfile} on:userContext={userContextFromEvent} />
