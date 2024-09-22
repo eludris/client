@@ -12,9 +12,9 @@ import type { InstanceInfo } from './types/instance';
 const state = writable<State>({ connected: false, messages: [], users: [], spheres: [], channels: [] });
 
 let ws: WebSocket | null = null;
-let pingInterval: NodeJS.Timer | null = null;
-let lastAuthorID: number | null = null;
-let lastAuthorData: { name: string, avatar: string | number | undefined } | null = null;
+let pingInterval: NodeJS.Timeout | null = null;
+let lastAuthorID: { [name: number]: number } = {};
+let lastAuthorData: { [name: number]: { name: string, avatar: string | number | undefined } } = {};
 let notification: Notification;
 let notification_opt: number;
 let connected = false;
@@ -123,6 +123,7 @@ const connect = async (userData: UserData) => {
         }
       } else if (payload.op == PayloadOP.MESSAGE_CREATE)
         markdown(payload.d.content ?? '').then((content) => {
+          let channelID = payload.d.channel.id;
           const authorData = {
             name:
               payload.d._disguise?.name ??
@@ -131,15 +132,15 @@ const connect = async (userData: UserData) => {
               payload.d._disguise?.avatar ??
               payload.d.author.avatar
           };
-          let sameData = authorData.name == lastAuthorData?.name && authorData.avatar == lastAuthorData.avatar;
+          let sameData = authorData?.name == lastAuthorData[channelID]?.name && authorData?.avatar == lastAuthorData[channelID].avatar;
           const message = {
             renderedContent: content,
-            showAuthor: !sameData || payload.d.author.id != lastAuthorID,
+            showAuthor: !sameData || payload.d.author.id != lastAuthorID[channelID],
             mentioned: new RegExp(`(?<!\\\\)<@${userData.user.id}>`, 'gm').test(payload.d.content ?? ''),
             ...payload.d
           };
-          lastAuthorData = authorData;
-          lastAuthorID = payload.d.author.id;
+          lastAuthorData[channelID] = authorData;
+          lastAuthorID[channelID] = payload.d.author.id;
           if (
             'Notification' in window &&
             Notification.permission == 'granted' &&
@@ -155,12 +156,12 @@ const connect = async (userData: UserData) => {
                   : 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true';
               notification = new Notification(
                 message.mentioned
-                  ? `New mention from ${lastAuthorData.name}`
-                  : `New message from ${lastAuthorData.name}`,
+                  ? `New mention from ${authorData.name}`
+                  : `New message from ${authorData.name}`,
                 {
                   body: message.content,
                   icon,
-                  renotify: true,
+                  silent: false,
                   tag: 'NewMessage'
                 }
               );
