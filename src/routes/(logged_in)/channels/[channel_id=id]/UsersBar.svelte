@@ -4,6 +4,8 @@
   import { slide, type SlideParams } from 'svelte/transition';
   import { createEventDispatcher } from 'svelte';
 
+  // TODO: reduce code repeating
+
   export let users: User[];
 
   const dispatch = createEventDispatcher();
@@ -24,6 +26,34 @@
       <!-- svelte-ignore a11y-click-events-have-key-events -->
       <div
         class="user"
+        on:click={() => showProfile(user.id)}
+        on:contextmenu|preventDefault|stopPropagation={async (e) => userContext(e, user)}
+      >
+        <span class="user-avatar-container">
+          <img
+            class="user-avatar"
+            src={user.avatar
+              ? `${$userData?.instanceInfo.effis_url}/avatars/${user.avatar}`
+              : 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true'}
+            alt="{user.username}'s avatar"
+          />
+          <span class="user-status-indicator">
+            <span class="status-indicator {user.status.type.toLowerCase()}" />
+          </span>
+        </span>
+        <div class="user-info">
+          <span>{user.display_name ?? user.username}</span>
+          {#if user.status.text}
+            <span class="user-status">{user.status.text}</span>
+          {/if}
+        </div>
+      </div>
+    {/if}
+  {/each}
+  {#each users as user (user.id)}
+    {#if user.status.type == StatusType.OFFLINE}
+      <div
+        class="user offline"
         on:click={() => showProfile(user.id)}
         on:contextmenu|preventDefault|stopPropagation={async (e) => userContext(e, user)}
       >
@@ -75,6 +105,10 @@
 
   .user:hover {
     background-color: var(--gray-300);
+  }
+
+  .offline {
+    opacity: 50%;
   }
 
   @media only screen and (max-width: 1200px) {
