@@ -3,10 +3,12 @@
   import userData from '$lib/user_data';
   import { slide, type SlideParams } from 'svelte/transition';
   import { createEventDispatcher } from 'svelte';
+  import type { TextChannel } from '$lib/types/channel';
 
   // TODO: reduce code repeating
 
   export let users: User[];
+  export let channel: TextChannel;
 
   const dispatch = createEventDispatcher();
 
@@ -21,6 +23,15 @@
 </script>
 
 <ul id="users" transition:phoneSlide={{ axis: 'x' }}>
+  <div id="channel-info">
+    <p id="channel-info-header">
+      <span id="channel-hashtag">#</span><span id="channel-name">{channel.name}</span>
+    </p>
+    {#if channel.topic}
+      <p id="channel-topic">{channel.topic}</p>
+    {/if}
+    <hr id="channel-info-split" />
+  </div>
   {#each users as user (user.id)}
     {#if user.status.type != StatusType.OFFLINE}
       <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -90,6 +101,29 @@
     margin: 0;
     background-color: var(--purple-200);
     overflow-y: auto;
+  }
+
+  #channel-info-header {
+    display: flex;
+    align-items: center;
+  }
+
+  #channel-hashtag {
+    font-size: 32px;
+    color: var(--gray-600);
+    margin-right: 5px;
+  }
+
+  #channel-name {
+    font-size: 24px;
+  }
+
+  #channel-topic {
+    font-weight: 200;
+  }
+
+  #channel-info-split {
+    opacity: 70%;
   }
 
   #users .user-status-indicator {

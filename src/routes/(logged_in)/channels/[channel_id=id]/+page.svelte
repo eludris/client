@@ -17,7 +17,7 @@
   import UsersBar from './UsersBar.svelte';
   import { request } from '$lib/request';
   import markdown from '$lib/markdown';
-  import type { SphereChannel } from '$lib/types/channel';
+  import type { TextChannel } from '$lib/types/channel';
   import type { Sphere } from '$lib/types/sphere';
   import Thang from '$lib/components/Thang.svelte';
 
@@ -44,7 +44,7 @@
     firstLoad = true;
     channel_id = Number.parseInt($page.params.channel_id);
   }
-  $: channel = $state.channels[channel_id] as SphereChannel;
+  $: channel = $state.channels[channel_id] as TextChannel;
   $: if (channel) {
     sphere = $state.spheres[channel.sphere_id];
   }
@@ -283,7 +283,12 @@
       <MessageInput channel_id={channel?.id} bind:input bind:value bind:usernames {messagesUList} />
     </div>
     {#if !$userConfig.userList}
-      <UsersBar {users} on:showProfile={showContextProfile} on:userContext={userContextFromEvent} />
+      <UsersBar
+        {users}
+        {channel}
+        on:showProfile={showContextProfile}
+        on:userContext={userContextFromEvent}
+      />
     {/if}
     {#if authorContext}
       <UserContext
