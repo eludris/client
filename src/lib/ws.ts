@@ -132,6 +132,17 @@ const connect = async (userData: UserData) => {
               payload.d._disguise?.avatar ??
               payload.d.author.avatar
           };
+          if (!lastAuthorData[channelID]) {
+            let lastMessage = get(state).messages[channelID].messages.at(-1);
+            if (lastMessage) {
+              lastAuthorData[channelID] = {
+                name: lastMessage?._disguise?.name ??
+                  lastMessage.author.display_name ?? lastMessage.author.username,
+                avatar: lastMessage?._disguise?.avatar ?? lastMessage?.author.avatar
+              };
+              lastAuthorID[channelID] = lastMessage?.author.id;
+            }
+          }
           let sameData = authorData?.name == lastAuthorData[channelID]?.name && authorData?.avatar == lastAuthorData[channelID].avatar;
           const message = {
             renderedContent: content,
