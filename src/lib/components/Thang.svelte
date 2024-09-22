@@ -1,6 +1,5 @@
 <script lang="ts">
   export var animate: boolean = false;
-  console.log(animate);
 </script>
 
 <div id="outer-wrapper">

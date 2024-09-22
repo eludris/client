@@ -18,6 +18,8 @@
         currentChannel.type == SphereChannelType.VOICE)
     ) {
       currentSphere = $state.spheres[currentChannel.sphere_id];
+    } else {
+      currentSphere = null;
     }
   }
 
