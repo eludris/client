@@ -19,6 +19,7 @@
   import markdown from '$lib/markdown';
   import type { SphereChannel } from '$lib/types/channel';
   import type { Sphere } from '$lib/types/sphere';
+  import Thang from '$lib/components/Thang.svelte';
 
   let messagesUList: HTMLUListElement;
   let value = '';
@@ -59,7 +60,7 @@
     users.forEach((u) => (usernames[u.username] = u.id));
   }
   let defaultHistory = { messages: [], hasEveryMessage: false };
-  $: messageHistory = channel ? $state.messages[channel.id] ?? defaultHistory : defaultHistory;
+  $: messageHistory = channel ? ($state.messages[channel.id] ?? defaultHistory) : defaultHistory;
   $: if (!messageHistory.messages.length) {
     populateMessages();
   } else {
@@ -259,18 +260,25 @@
   <div id="channel-view">
     <div id="message-channel-body" class={$userConfig.userList ? 'users-hidden' : ''}>
       <ul bind:this={messagesUList} on:scroll={messagesScroll} id="messages">
-        {#if messageHistory.hasEveryMessage}
-          <h2 id="channel-start-header">Welcome to {channel.name}!</h2>
-          <hr id="channel-start-separator" />
+        {#if messageHistory.messages.length}
+          {#if messageHistory.hasEveryMessage}
+            <h2 id="channel-start-header">Welcome to {channel.name}!</h2>
+            <hr id="channel-start-separator" />
+          {/if}
+          {#each messageHistory.messages as message (message.id)}
+            <MessageComponent
+              {message}
+              on:reply={onReply}
+              on:showProfile={showContextProfile}
+              on:mention={onMention}
+            />
+          {/each}
+        {:else}
+          <div id="loading">
+            <Thang animate={true} />
+            <p id="loading-text">Loading messages...</p>
+          </div>
         {/if}
-        {#each messageHistory.messages as message (message.id)}
-          <MessageComponent
-            {message}
-            on:reply={onReply}
-            on:showProfile={showContextProfile}
-            on:mention={onMention}
-          />
-        {/each}
       </ul>
       <MessageInput channel_id={channel?.id} bind:input bind:value bind:usernames {messagesUList} />
     </div>
@@ -337,6 +345,21 @@
 
   #channel-start-separator {
     margin: 20px;
+  }
+
+  #loading {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #loading-text {
+    font-size: 42px;
+    font-weight: 500;
+    color: var(--gray-600);
   }
 
   @media only screen and (max-width: 1200px) {

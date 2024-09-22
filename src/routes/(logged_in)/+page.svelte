@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import Thang from '$lib/components/Thang.svelte';
   import { request, type RequestErr } from '$lib/request';
   import type { Channel } from '$lib/types/channel';
   import state from '$lib/ws';
@@ -34,11 +35,7 @@
 <div id="content">
   <h1>Not much going on here...</h1>
   <p>Hopefully this gets populated by more interesting things soon!</p>
-  <img
-    id="thang"
-    src="https://raw.githubusercontent.com/eludris/.github/main/assets/thang-big.png"
-    alt="Thang"
-  />
+  <Thang />
   <p>Why don't you go check some spheres for now?</p>
   <form on:submit|preventDefault={joinSphere} id="sphere-form">
     <input id="sphere-input" type="text" placeholder="Sphere Name" bind:value={sphereInput} />
@@ -57,13 +54,6 @@
 
   h1 {
     margin: 10px;
-  }
-
-  #thang {
-    width: 10%;
-    margin-bottom: 30px;
-    margin-top: -60px;
-    opacity: 0.7;
   }
 
   #sphere-input,
