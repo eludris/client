@@ -50,21 +50,30 @@
     {/each}
   </ul>
   {#if currentSphere}
-    <ul id="sphere-channels" transition:phoneSlide={{ axis: 'x' }}>
-      <h3>{currentSphere.name ?? currentSphere.slug}</h3>
+    <div id="sphere-channels">
+      {#if currentSphere.banner}
+        <img
+          id="sphere-banner"
+          src="{$userData?.instanceInfo.effis_url}/sphere-banners/{currentSphere.banner}"
+          alt="{currentSphere.slug}'s banner"
+        />
+      {/if}
+      <h3 id="sphere-name">{currentSphere.name ?? currentSphere.slug}</h3>
       <hr />
-      {#each currentSphere.channels as channel (channel.id)}
-        {#if channel.type == SphereChannelType.CATEGORY}
-          <h4 class="category">
-            > {channel.name}
-          </h4>
-        {:else}
-          <a href="/channels/{channel.id}" class="channel">
-            # {channel.name}
-          </a>
-        {/if}
-      {/each}
-    </ul>
+      <ul id="sphere-channel-list">
+        {#each currentSphere.channels as channel (channel.id)}
+          {#if channel.type == SphereChannelType.CATEGORY}
+            <h4 class="category">
+              > {channel.name}
+            </h4>
+          {:else}
+            <a href="/channels/{channel.id}" class="channel">
+              # {channel.name}
+            </a>
+          {/if}
+        {/each}
+      </ul>
+    </div>
   {/if}
 </div>
 
@@ -79,7 +88,7 @@
   }
 
   hr {
-    width: 100%;
+    width: calc(100% - 5px);
   }
 
   #sphere-bar ul {
@@ -113,6 +122,11 @@
     flex-grow: 1;
   }
 
+  #sphere-channel-list,
+  #sphere-name {
+    margin: 5px;
+  }
+
   #sphere-channels h3 {
     margin-bottom: 0;
   }
@@ -124,6 +138,12 @@
   .channel {
     padding-left: 5px;
     text-decoration: none;
+  }
+
+  #sphere-banner {
+    width: 100%;
+    height: 15%;
+    object-fit: cover;
   }
 
   @media only screen and (max-width: 1200px) {

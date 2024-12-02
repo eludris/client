@@ -14,6 +14,7 @@
       $state.spheres[res.id] = res;
       let channelId = 0;
       state.update((state) => {
+        state.spheres[res.id] = res;
         res.channels.forEach((channel: Channel) => {
           if (!channelId) channelId = channel.id;
           state.channels[channel.id] = channel;
@@ -72,5 +73,10 @@
     border: unset;
     background-color: var(--pink-500);
     padding: 5px 20px;
+    cursor: pointer;
+  }
+
+  #join-button:hover {
+    background-color: var(--pink-600);
   }
 </style>
