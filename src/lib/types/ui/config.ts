@@ -3,4 +3,6 @@ export interface UserConfig {
   notifications?: number;
   showSpoilers?: boolean;
   userList?: boolean;
+  recentEmojis?: string[];
+  lastChannel?: number;
 }

@@ -11,7 +11,7 @@
 
   let username = '';
   let password = '';
-  let instanceURL = env.PUBLIC_INSTANCE_URL ?? 'https://eludris.tooty.xyz';
+  let instanceURL = env.PUBLIC_INSTANCE_URL ?? 'https://eludris.tooty.xyz/next';
   let error = '';
   let requesting = false;
 

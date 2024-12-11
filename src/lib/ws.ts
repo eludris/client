@@ -9,12 +9,12 @@ import type { State } from './types/ui/state';
 import { request } from './request';
 import type { InstanceInfo } from './types/instance';
 
-const state = writable<State>({ connected: false, messages: [], users: [] });
+const state = writable<State>({ connected: false, messages: [], users: [], spheres: [], channels: [] });
 
 let ws: WebSocket | null = null;
-let pingInterval: NodeJS.Timer | null = null;
-let lastAuthorID = 0;
-let lastAuthorData: { name: string, avatar: string | number | undefined } | null = null;
+let pingInterval: NodeJS.Timeout | null = null;
+let lastAuthorID: { [name: number]: number } = {};
+let lastAuthorData: { [name: number]: { name: string, avatar: string | number | undefined } } = {};
 let notification: Notification;
 let notification_opt: number;
 let connected = false;
@@ -65,7 +65,15 @@ const connect = async (userData: UserData) => {
         state.update((state) => {
           state.connected = true;
           state.users = [];
-          payload.d.users.forEach((u) => (state.users[u.id] = u));
+          payload.d.spheres.forEach((u) => {
+            u.members.forEach((m) => {
+              state.users[m.user.id] = m.user;
+            });
+            u.channels.forEach((c) => {
+              state.channels[c.id] = c;
+            });
+            state.spheres[u.id] = u;
+          });
           state.users[payload.d.user.id] = payload.d.user;
           return state;
         });
@@ -114,7 +122,8 @@ const connect = async (userData: UserData) => {
           });
         }
       } else if (payload.op == PayloadOP.MESSAGE_CREATE)
-        markdown(payload.d.content).then((content) => {
+        markdown(payload.d.content ?? '').then((content) => {
+          let channelID = payload.d.channel.id;
           const authorData = {
             name:
               payload.d._disguise?.name ??
@@ -123,15 +132,26 @@ const connect = async (userData: UserData) => {
               payload.d._disguise?.avatar ??
               payload.d.author.avatar
           };
-          let sameData = authorData.name == lastAuthorData?.name && authorData.avatar == lastAuthorData.avatar;
+          if (!lastAuthorData[channelID]) {
+            let lastMessage = get(state).messages[channelID].messages.at(-1);
+            if (lastMessage) {
+              lastAuthorData[channelID] = {
+                name: lastMessage?._disguise?.name ??
+                  lastMessage.author.display_name ?? lastMessage.author.username,
+                avatar: lastMessage?._disguise?.avatar ?? lastMessage?.author.avatar
+              };
+              lastAuthorID[channelID] = lastMessage?.author.id;
+            }
+          }
+          let sameData = authorData?.name == lastAuthorData[channelID]?.name && authorData?.avatar == lastAuthorData[channelID].avatar;
           const message = {
             renderedContent: content,
-            showAuthor: !sameData || payload.d.author.id != lastAuthorID,
-            mentioned: new RegExp(`(?<!\\\\)<@${userData.user.id}>`, 'gm').test(payload.d.content),
+            showAuthor: !sameData || payload.d.author.id != lastAuthorID[channelID],
+            mentioned: new RegExp(`(?<!\\\\)<@${userData.user.id}>`, 'gm').test(payload.d.content ?? ''),
             ...payload.d
           };
-          lastAuthorData = authorData;
-          lastAuthorID = payload.d.author.id;
+          lastAuthorData[channelID] = authorData;
+          lastAuthorID[channelID] = payload.d.author.id;
           if (
             'Notification' in window &&
             Notification.permission == 'granted' &&
@@ -147,12 +167,12 @@ const connect = async (userData: UserData) => {
                   : 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true';
               notification = new Notification(
                 message.mentioned
-                  ? `New mention from ${lastAuthorData.name}`
-                  : `New message from ${lastAuthorData.name}`,
+                  ? `New mention from ${authorData.name}`
+                  : `New message from ${authorData.name}`,
                 {
                   body: message.content,
                   icon,
-                  renotify: true,
+                  silent: false,
                   tag: 'NewMessage'
                 }
               );
@@ -160,7 +180,11 @@ const connect = async (userData: UserData) => {
             };
           }
           state.update((state) => {
-            state.messages.push(message);
+            if (state.messages[message.channel.id]) {
+              state.messages[message.channel.id].messages.push(message);
+            } else {
+              state.messages[message.channel.id] = { messages: [message], hasEveryMessage: false };
+            }
             return state;
           });
         });

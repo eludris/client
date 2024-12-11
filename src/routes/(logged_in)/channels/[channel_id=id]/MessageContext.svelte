@@ -43,6 +43,7 @@
     padding: 10px 0;
     width: 150px;
     background-color: var(--purple-200);
+    z-index: 999;
   }
 
   button {
