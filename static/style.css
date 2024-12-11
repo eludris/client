@@ -55,3 +55,7 @@ a:hover {
   color: var(--gray-400);
   /* border-bottom: 2px solid var(--purple-400); */
 }
+
+button:not([disabled]) {
+  cursor: pointer;
+}

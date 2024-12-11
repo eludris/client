@@ -1,17 +1,15 @@
 <script lang="ts">
   import { createEventDispatcher, onMount, tick } from 'svelte';
   import Popup from '$lib/components/Popup.svelte';
-  import { parseGIF, decompressFrames } from 'gifuct-js';
-  import GIF from 'gif.js';
+  import { consumeSingleEvent } from "$lib/events";
 
   export let cropperFile: Blob | null | undefined;
   export let cropperKind: string;
 
+  let cropping = false;
+
   let image: HTMLImageElement = document.createElement('img');
   let cutout: HTMLDivElement = document.createElement('div');
-
-  let canvas: HTMLCanvasElement;
-  let tempCanvas: HTMLCanvasElement;
 
   let dragging = false;
   let imageX = 0;
@@ -21,10 +19,6 @@
   let xBoundary = 0;
   let yBoundary = 0;
   let scale = 1;
-
-  onMount(() => {
-    tempCanvas = document.createElement('canvas');
-  });
 
   const reader = new FileReader();
   reader.addEventListener('load', async () => {
@@ -111,107 +105,64 @@
     scaleImage();
   };
 
-  const cropGif = async () => {
-    // Actual destination canvas ctx, same size as the crop box.
-    const ctx = canvas.getContext('2d')!;
-    // Intermediary canvas ctx, same size as the gif.
-    const tempCtx = tempCanvas.getContext('2d')!;
+  const cropImpl = async (kind: "GIF" | "image"): Promise<Blob> => {
+    let inEvent: string;
+    let resultEvent: string;
+  
+    if (kind == "GIF") {
+      inEvent = "cropGifInWorker";
+      resultEvent = "cropGifResult";
+    } else {
+      inEvent = "cropImageInWorker";
+      resultEvent = "cropImageResult";
+    }
 
-    // Compensate for any scaling automatically done by css
+    // Compensate for any scaling automatically done by css...
     let cssScale = image.width / image.naturalWidth;
     let effectiveScale = scale * cssScale;
-
-    const GifBuilder = new GIF({
-      workers: 2,
-      quality: 10,
-      workerScript: '/gif.worker.js',
-      transparent: '#0000'
-    });
-
-    // Parse gif and prepare temp canvas
-
-    let inputGif = parseGIF(await cropperFile!.arrayBuffer());
-    let frames = decompressFrames(inputGif, true);
-
-    tempCanvas.width = image.naturalWidth;
-    tempCanvas.height = image.naturalHeight;
-    let imageData = tempCtx.createImageData(image.naturalWidth, image.naturalHeight);
     
-    // Loop over each frame, paste it on the temp canvas, and crop it onto the main canvas.
-    frames.forEach((frame) => {
-      imageData.data.set(frame.patch);
-      tempCtx.putImageData(imageData, 0, 0);
-
-      ctx.reset();
-      // Fill with transparency in case the crop is smaller than the crop box size.
-      ctx.fillStyle = 'transparent';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.drawImage(
-        tempCanvas,
-        (xBoundary - imageX) / cssScale,
-        (yBoundary - imageY) / cssScale,
-        cutout.clientWidth / effectiveScale,
-        cutout.clientHeight / effectiveScale,
-        0,
-        0,
-        canvas.width,
-        canvas.height
-      );
-
-      GifBuilder.addFrame(canvas, { copy: true, delay: frame.delay, dispose: frame.disposalType});
-    });
-
-    let promise = new Promise<Blob>(resolved => {
-      GifBuilder.on('finished', function (blob) {resolved(blob)});
-    });
-
-    GifBuilder.render()
-    return await promise
-
+    // Dispatch event to start cropper worker...
+    document.dispatchEvent(
+      new CustomEvent(
+        inEvent,
+        {
+          detail:
+          {
+            buffer: new Uint8Array(await cropperFile!.arrayBuffer()),
+            imageWidth: image.naturalWidth,
+            imageHeight: image.naturalHeight,
+            windowX: (xBoundary - imageX) / cssScale,
+            windowY: (yBoundary - imageY) / cssScale,
+            windowWidth: cutout.clientWidth / effectiveScale,
+            windowHeight: cutout.clientHeight / effectiveScale
+          }
+        }
+      )
+    )
+  
+    let event: CustomEvent<Blob> = await consumeSingleEvent(resultEvent, ()=>true);
+    
+    return event.detail;
   }
 
-  const cropImage = async () => {
-    const ctx = canvas.getContext('2d')!;
-
-    // Compensate for any scaling automatically done by css
-    let cssScale = image.width / image.naturalWidth;
-    let effectiveScale = scale * cssScale;
-
-    ctx.drawImage(
-      image,
-      (xBoundary - imageX) / cssScale,
-      (yBoundary - imageY) / cssScale,
-      cutout.clientWidth / effectiveScale,
-      cutout.clientHeight / effectiveScale,
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    );
-
-    return (await new Promise<Blob | null>(resolve => {canvas.toBlob(resolve)}))!
-  };
-
   const doCrop = async () => {
+    updateBoundaries();
+
+    cropping = true;
+
     let imageResponse = await fetch(image.src);
     let contentType = imageResponse.headers.get('content-type');
     let blob: Blob;
-
-    if (cropperKind == "banner") {
-      canvas.height = 512;
-      canvas.width = canvas.height * 6;
-    } else {
-      canvas.height = canvas.width = 256;
-    }
-
+   
     if (contentType == 'image/gif') {
-      blob = await cropGif();
+      blob = await cropImpl("GIF");
     } else {
-      blob = await cropImage();
+      blob = await cropImpl("image");
     }
 
-    dispatcher('success', blob);
+    cropping = false;
+
+    dispatcher("success", blob);
   }
 
   const cropSkip = () => {
@@ -227,12 +178,14 @@
 />
 
 <Popup on:dismiss={cropperDismiss}>
-  <span slot="title">Edit image</span>
+  <span slot="title">Edit Image</span>
   <div id="cropper">
     <div id="cropper-image-preview">
-      <img alt="Fucking balls." id="cropper-img" bind:this={image} />
+      <img alt="Cropper preview." id="cropper-img" bind:this={image} />
       <div
         id="overlay"
+        role="button"
+        tabindex="0"
         on:mousedown={mouseStartDrag}
         on:touchstart={touchStartDrag}
         on:wheel={onWheel}
@@ -245,28 +198,28 @@
       </div>
     </div>
     <div id="cropper-slider">
-      <input type="range" min="0.5" max="5" step="0.0001" bind:value={scale} on:input={scaleImage} />
+      <input type="range" min="0.5" max="5" step="0.0001" disabled={cropping} bind:value={scale} on:input={scaleImage} />
     </div>
   </div>
   <span slot="control">
     <div id="cropper-buttons">
-      <button class="cropper-button" id="cropper-skip-button" on:click={cropSkip}>
-        Skip
-      </button>
-      <div id="button-separator" />
       <button class="cropper-button" id="cropper-cancel-button" on:click={cropperDismiss}>
         Cancel
       </button>
-      <button class="cropper-button" id="cropper-crop-button" on:click={doCrop}>
-        Crop
+      <div id="button-separator" />
+      <button class="cropper-button" id="cropper-skip-button" disabled={cropping} on:click={cropSkip}>
+        Skip
+      </button>
+      <button class="cropper-button" id="cropper-crop-button" disabled={cropping} on:click={doCrop}>
+        {#if cropping}
+          Cropping...
+        {:else}
+          Crop
+        {/if}
       </button>
     </div>
   </span>
 </Popup>
-<canvas
-  id="cropper-canvas"
-  bind:this={canvas}
-/>
 
 <style>
   #cropper {
@@ -355,7 +308,7 @@
 
   #cropper-crop-button {
     background-color: var(--gray-300);
-    padding: 10px 40px;
+    width: 120px;
   }
 
   .cropper-button:hover {
@@ -364,9 +317,15 @@
 
   #cropper-crop-button:hover {
     background-color: var(--gray-400);
+    text-decoration: none;
   }
 
-  #cropper-canvas {
-    display: none;
+  .cropper-button:disabled {
+    text-decoration: none;
+    color: #aaa;
+  }
+
+  #cropper-crop-button:disabled {
+    background-color: var(--purple-300);
   }
 </style>

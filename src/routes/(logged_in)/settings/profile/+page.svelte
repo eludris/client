@@ -26,63 +26,88 @@
   let status = $userData!.user.status.text;
   let bio = $userData!.user.bio;
 
-  let bannerFiles: FileList | undefined | null = undefined;
-  let avatarFiles: FileList | undefined | null = undefined;
-  let bannerFile: Blob | null | undefined = undefined;
-  let avatarFile: Blob | null | undefined = undefined;
-  let cropperFile: Blob | null = null; 
+  /**
+   * The input banner FileList.
+   * `undefined` if no prior image was provided, or the last provided image was an avatar.
+   */
+  let bannerFiles: FileList | undefined = undefined;
+  /**
+   * The input avatar FileList.
+   * `undefined` if no prior image was provided, or the last provided image was a banner.
+   */
+  let avatarFiles: FileList | undefined = undefined;
+
+  /** The cropped banner file for uploading to Effis.*/
+  let bannerFile: File | null | undefined = undefined;
+  /** The cropped avatar file for uploading to Effis.*/
+  let avatarFile: File | null | undefined = undefined;
+
+  /** The file that is to be passed to the cropper. */
+  let cropperFile: File | undefined = undefined;
+  let cropDone: boolean = false;
 
   let popupError = '';
 
   let showCropper = false;
-  let cropperKind = 'avatar'
+  let cropperKind = 'avatar';
 
-  $: if (bannerFiles) {
-    if (bannerFiles[0].size > $userData!.instanceInfo.file_size) {
-      popupError = `Your banner image cannot be bigger than ${
-        $userData!.instanceInfo.file_size / 1000000
-      }MB`;
-      bannerFiles = bannerFile = undefined;
-    } else {
-      cropperFile = bannerFile = bannerFiles![0];
-      cropperKind = "banner";
-      openCropper();
+  const onBannerUpload = async () => {
+    if (bannerFiles) {
+      if (bannerFiles[0].size > $userData!.instanceInfo.file_size) {
+        popupError = `Your banner image cannot be bigger than ${
+          $userData!.instanceInfo.file_size / 1000000
+        }MB`;
+        bannerFiles = bannerFile = undefined;
+      } else {
+        avatarFiles = undefined;
+        cropperFile = bannerFiles![0];
+        cropperKind = 'banner';
+        await tick();
+        openCropper();
+      }
     }
-  }
-
-  const resetBanner = () => {
-    banner = null;
-    bannerFiles = null;
   };
 
-  $: if (avatarFiles) {
-    if (avatarFiles[0].size > $userData!.instanceInfo.file_size) {
-      popupError = `Your avatar image cannot be bigger than ${
-        $userData!.instanceInfo.file_size / 1000000
-      }MB`;
-      avatarFiles = avatarFile = undefined;
-    } else {
-      cropperFile = avatarFile = avatarFiles![0];
-      cropperKind = "avatar";
-      openCropper();
+  const resetBanner = () => {
+    bannerFile = banner = null;
+    bannerFiles = undefined;
+  };
+
+  const onAvatarUpload = async () => {
+    if (avatarFiles) {
+      if (avatarFiles[0].size > $userData!.instanceInfo.file_size) {
+        popupError = `Your avatar image cannot be bigger than ${
+          $userData!.instanceInfo.file_size / 1000000
+        }MB`;
+        avatarFiles = avatarFile = undefined;
+      } else {
+        bannerFiles = undefined;
+        cropperFile = avatarFiles![0];
+        cropperKind = 'avatar';
+        await tick();
+        openCropper();
+      }
     }
-  }
+  };
 
   const resetAvatar = () => {
     avatar = 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true';
-    avatarFiles = null;
+    avatarFile = null;
+    avatarFiles = undefined;
   };
 
   let cropSuccess = (e: CustomEvent<Blob>) => {
-    if (cropperKind == "avatar") {
-      avatarFile = e.detail;
+    if (cropperKind == 'avatar') {
+      avatarFile = new File([e.detail], cropperFile!.name);
       avatar = URL.createObjectURL(avatarFile);
     } else {
-      bannerFile = e.detail;
+      bannerFile = new File([e.detail], cropperFile!.name);
       banner = URL.createObjectURL(bannerFile);
     }
+    cropDone = true;
+    cropperFile = undefined;
     closeCropper();
-  }
+  };
 
   let bioFocused = false;
   let statusIndicatorFocused = false;
@@ -92,8 +117,9 @@
   let errors: { [field: string]: string | undefined } = {};
 
   $: changed =
-    bannerFiles !== undefined ||
-    avatarFiles !== undefined ||
+    cropDone ||
+    bannerFile !== undefined ||
+    avatarFile !== undefined ||
     (display_name || null) != $userData!.user.display_name ||
     status_type != $userData!.user.status.type.toLowerCase() ||
     (status || null) != $userData!.user.status.text ||
@@ -157,7 +183,7 @@
     }
   };
 
-  const uploadFile = async (bucket: string, file: Blob) => {
+  const uploadFile = async (bucket: string, file: File) => {
     let formData = new FormData();
     formData.append('file', file, file.name);
     return await fetch($userData?.instanceInfo.effis_url! + `/${bucket}`, {
@@ -169,14 +195,14 @@
   const updateProfile = async () => {
     saving = true;
     let newProfile: UpdateUserProfile = {};
-    if (bannerFiles !== undefined) {
-      if (bannerFiles) {
-        let data = await uploadFile('banners', bannerFiles[0]);
+    if (bannerFile !== undefined) {
+      if (bannerFile) {
+        let data = await uploadFile('banners', bannerFile);
         newProfile.banner = data.id;
       } else {
         newProfile.banner = null;
       }
-      bannerFiles = undefined;
+      bannerFile = bannerFiles = undefined;
     }
     if (avatarFile !== undefined) {
       if (avatarFile) {
@@ -205,7 +231,7 @@
       let err = e as RequestErr;
       popupError = err.message;
     }
-    saving = false;
+    cropDone = saving = false;
   };
 
   const popupDismiss = () => {
@@ -270,6 +296,7 @@
               type="file"
               accept="image/*"
               bind:files={bannerFiles}
+              on:change={onBannerUpload}
             />
           </span>
         </div>
@@ -293,6 +320,7 @@
                     type="file"
                     accept="image/*"
                     bind:files={avatarFiles}
+                    on:change={onAvatarUpload}
                   />
                   {#if avatar != 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true'}
                     <button on:click={resetAvatar}>Reset</button>
@@ -317,6 +345,8 @@
           <span
             id="status-type"
             class="status-icon status-indicator {status_type.toLowerCase()}"
+            role="button"
+            tabindex="0"
             on:click|stopPropagation={statusIndicatorClick}
           />
           {#if statusIndicatorFocused}
@@ -365,7 +395,7 @@
             />
           {:else}
             <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <div id="bio-md-container" on:click={bioClick}>
+            <div id="bio-md-container" on:click={bioClick} role="button" tabindex="0">
               <Markdown content={bio ?? 'Nothing here yet'} />
             </div>
           {/if}
@@ -547,7 +577,6 @@
     border: unset;
     color: var(--pink-700);
     z-index: 2;
-    cursor: pointer;
   }
 
   #image-input-hover button:hover {
@@ -690,7 +719,9 @@
     margin-top: 10px;
     font-size: 18px;
     background-color: var(--gray-300);
-    transition: background-color ease-in-out 125ms, color ease-in-out 125ms;
+    transition:
+      background-color ease-in-out 125ms,
+      color ease-in-out 125ms;
     color: var(--color-text);
   }
 

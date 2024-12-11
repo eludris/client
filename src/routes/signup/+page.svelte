@@ -190,7 +190,6 @@
     transition: box-shadow ease-in-out 200ms, color ease-in-out 200ms,
       background-color ease-in-out 200ms;
     width: 200px;
-    cursor: pointer;
   }
 
   #signup-form > button:hover {
