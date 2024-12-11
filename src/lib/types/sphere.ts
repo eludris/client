@@ -1,4 +1,5 @@
-import type { SphereChannel } from './channel';
+import type { Category } from './category';
+// import type { SphereChannel } from './channel';
 import type { Member } from './member';
 
 export enum SphereType {
@@ -17,6 +18,7 @@ export interface Sphere {
   icon?: number;
   banner?: number;
   badges: number;
-  channels: SphereChannel[];
+  // channels: SphereChannel[];
+  categories: Category[];
   members: Member[];
 };

@@ -2,7 +2,7 @@
   import { goto } from '$app/navigation';
   import Thang from '$lib/components/Thang.svelte';
   import { request, type RequestErr } from '$lib/request';
-  import type { Channel } from '$lib/types/channel';
+  import type { Sphere } from '$lib/types/sphere';
   import state from '$lib/ws';
 
   let sphereInput = '';
@@ -10,14 +10,17 @@
 
   const joinSphere = async () => {
     try {
-      let res = await request('GET', `/spheres/${sphereInput}/join`);
+      let res: Sphere = await request('GET', `/spheres/${sphereInput}/join`);
       $state.spheres[res.id] = res;
       let channelId = 0;
       state.update((state) => {
         state.spheres[res.id] = res;
-        res.channels.forEach((channel: Channel) => {
-          if (!channelId) channelId = channel.id;
-          state.channels[channel.id] = channel;
+        res.categories.forEach((category) => {
+          state.categories[category.id] = category;
+          category.channels.forEach((channel) => {
+            if (!channelId) channelId = channel.id;
+            state.channels[channel.id] = channel;
+          })
         });
         return state;
       });
