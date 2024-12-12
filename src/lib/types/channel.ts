@@ -1,7 +1,7 @@
 import type { User } from "./user";
 
 export enum SphereChannelType {
-  CATEGORY = "CATEGORY",
+  // CATEGORY = "CATEGORY",
   TEXT = "TEXT",
   VOICE = "VOICE"
 };
@@ -21,9 +21,9 @@ interface SphereChannelBase {
   position: number;
 }
 
-export interface Category extends SphereChannelBase {
-  type: SphereChannelType.CATEGORY;
-};
+// export interface Category extends SphereChannelBase {
+//   type: SphereChannelType.CATEGORY;
+// };
 
 export interface TextChannel extends SphereChannelBase {
   type: SphereChannelType.TEXT;
@@ -51,5 +51,5 @@ export interface DirectMessageChannel {
   recipient: User;
 };
 
-export type SphereChannel = Category | TextChannel | VoiceChannel;
+export type SphereChannel = TextChannel | VoiceChannel;  // | Category
 export type Channel = SphereChannel | GroupChannel | DirectMessageChannel;
