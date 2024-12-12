@@ -414,6 +414,11 @@
     width: min(900px, 95%);
   }
 
+  form input,
+  form textarea {
+    border-radius: 0;
+  }
+
   #user {
     display: flex;
     flex-direction: column;
@@ -659,7 +664,9 @@
     margin-top: 10px;
     font-size: 18px;
     background-color: var(--gray-300);
-    transition: background-color ease-in-out 125ms, color ease-in-out 125ms;
+    transition:
+      background-color ease-in-out 125ms,
+      color ease-in-out 125ms;
     color: var(--color-text);
   }
 
