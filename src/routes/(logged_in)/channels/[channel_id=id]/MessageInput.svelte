@@ -382,6 +382,7 @@
     height: auto;
     border-radius: 10px;
     position: relative;
+    box-sizing: border-box;
   }
 
   #markdown-wrapper {
