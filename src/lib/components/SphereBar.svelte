@@ -5,7 +5,7 @@
   import type { Sphere } from '$lib/types/sphere';
   import { page } from '$app/stores';
   import { SphereChannelType } from '$lib/types/channel';
-    import { Category } from '$lib/types/category';
+  import { Category } from '$lib/types/category';
 
   let currentSphere: Sphere | null = null;
 
@@ -110,6 +110,8 @@
 
   .sphere-icon {
     width: 50px;
+    height: 50px;
+    object-fit: cover;
     border-radius: 100%;
     transition: border-radius ease-in-out 125ms;
   }
