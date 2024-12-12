@@ -29,6 +29,7 @@ const config: UserConfig = {
     }
   ],
   worker: {
+    format: "es",
     plugins: () => [wasm(), topLevelAwait()]
   }
 };
