@@ -243,7 +243,7 @@
       </div>
     </div>
     <div id="cropper-slider">
-      <input type="range" min="{minZoom}" max="{maxZoom}" step="0.0001" disabled={cropping} bind:this={slider} bind:value={scale} on:input={scaleImage} />
+      <input type="range" min="{minZoom}" max="{maxZoom}" step="0.0001" title="" disabled={cropping} bind:this={slider} bind:value={scale} on:input={scaleImage}/>
     </div>
   </div>
   <span slot="control">
