@@ -354,4 +354,46 @@
   #cropper-crop-button:disabled {
     background-color: var(--purple-300);
   }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+    width: 400px;
+  }
+  
+  input[type="range"]::-moz-range-track,
+  input[type="range"]::-webkit-slider-runnable-track {
+    background-color: var(--purple-100);
+    height: 0.75rem;
+    border-radius: 0.25rem;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    border: none;
+    border-radius: 0;
+  }
+
+  input[type="range"]::-webkit-slider-thumb,
+  input[type="range"]::-moz-range-thumb {
+    background-color: var(--gray-300);
+    height: 1rem;
+    width: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0 0 5px var(--gray-300);
+  }
+
+  input[type="range"]:hover::-webkit-slider-thumb,
+  input[type="range"]:hover::-moz-range-thumb {
+    box-shadow: 0 0 0 2px white, 0 0 0 5px var(--gray-300);
+    transition: ease-in-out 0.2s;
+  }
+
+
 </style>
