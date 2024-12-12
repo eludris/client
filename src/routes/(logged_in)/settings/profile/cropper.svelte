@@ -8,6 +8,7 @@
 
   let cropping = false;
 
+  let slider: HTMLInputElement = document.createElement("input");
   let image: HTMLImageElement = document.createElement('img');
   let cutout: HTMLDivElement = document.createElement('div');
 
@@ -31,6 +32,7 @@
       // Wait for image to be loaded so that width/height are properly populated.
       updateBoundaries();
       updateZoomBoundaries();
+      updateSliderDisplay();
     }
     image.src = reader.result as string;
   });
@@ -65,6 +67,23 @@
 
     updateImagePosition();
   }
+  
+  const updateSliderDisplay = () => {
+    let style = "linear-gradient(90deg, var(--cropper-slider-bg-color)"
+    let range = maxZoom - minZoom;
+
+    scaleSnap.forEach((tick) => {
+      let tickPercentage = (tick - minZoom) / range * 100;
+      style += (
+        `, var(--cropper-slider-bg-color) ${tickPercentage}%`
+        + `, var(--cropper-slider-tick-color) ${tickPercentage}%`
+        + `, var(--cropper-slider-tick-color) calc(${tickPercentage}% + 2px)`
+        + `, var(--cropper-slider-bg-color) calc(${tickPercentage}% + 2px)`
+      )
+    })
+
+    slider.style.setProperty("--cropper-slider-bg", style)
+  } 
 
   const updateBoundaries = () => {
     xBoundary = (image.width - cutout.clientWidth / scale) / 2;
@@ -224,7 +243,7 @@
       </div>
     </div>
     <div id="cropper-slider">
-      <input type="range" min="{minZoom}" max="{maxZoom}" step="0.0001" disabled={cropping} bind:value={scale} on:input={scaleImage} />
+      <input type="range" min="{minZoom}" max="{maxZoom}" step="0.0001" disabled={cropping} bind:this={slider} bind:value={scale} on:input={scaleImage} />
     </div>
   </div>
   <span slot="control">
@@ -356,6 +375,9 @@
   }
 
   input[type="range"] {
+    --cropper-slider-bg-color: var(--purple-100);
+    --cropper-slider-tick-color: var(--pink-100);
+    --cropper-slider-bg: var(--cropper-slider-bg-color);  /* override with js to set tickmarks */
     -webkit-appearance: none;
     appearance: none;
     background: transparent;
@@ -365,7 +387,7 @@
   
   input[type="range"]::-moz-range-track,
   input[type="range"]::-webkit-slider-runnable-track {
-    background-color: var(--purple-100);
+    background: var(--cropper-slider-bg);
     height: 0.75rem;
     border-radius: 0.25rem;
   }
@@ -386,7 +408,8 @@
     height: 1rem;
     width: 1rem;
     border-radius: 0.5rem;
-    box-shadow: 0 0 0 5px var(--gray-300);
+    box-shadow: 0 0 0 0px white, 0 0 0 5px var(--gray-300);
+    transition: ease-in-out 0.2s;
   }
 
   input[type="range"]:hover::-webkit-slider-thumb,
