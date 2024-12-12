@@ -19,12 +19,17 @@
   let xBoundary = 0;
   let yBoundary = 0;
   let scale = 1;
+  let minZoom = 0.5;
+  let maxZoom = 5;
 
   const reader = new FileReader();
   reader.addEventListener('load', async () => {
     image.src = reader.result as string;
-    await tick();
-    updateBoundaries();
+    image.onload = (_ev) => {
+      // Wait for image to be loaded so that width/height are properly populated.
+      updateBoundaries();
+      updateZoomBoundaries();
+    }
   });
   reader.readAsDataURL(cropperFile!);
 
@@ -46,6 +51,17 @@
     }
     image.style.transform = `translate(${imageX * scale}px, ${imageY * scale}px) scale(${scale})`;
   };
+
+  const updateZoomBoundaries = () => {
+    // Zoom factors to match smallest/largest dimension
+    let [min, max] = [cutout.clientWidth / image.width, cutout.clientHeight / image.height].sort();
+
+    scale = min  // Start with smallest dimension matched to cutout frame
+    minZoom = min * 0.5;  // Min zoom makes the largest dimension fit in the cutout twice
+    maxZoom = max * 2;  // Max zoom makes the smallest dimension twice as large as the cutout 
+
+    updateImagePosition();
+  }
 
   const updateBoundaries = () => {
     xBoundary = (image.width - cutout.clientWidth / scale) / 2;
@@ -98,9 +114,9 @@
 
   const onWheel = (e: WheelEvent) => {
     if (e.deltaY < 0) {
-      scale = Math.min(scale + 0.1, 5);
+      scale = Math.min(scale + 0.1, maxZoom);
     } else {
-      scale = Math.max(scale - 0.1, 0.5);
+      scale = Math.max(scale - 0.1, minZoom);
     }
     scaleImage();
   };
@@ -198,7 +214,7 @@
       </div>
     </div>
     <div id="cropper-slider">
-      <input type="range" min="0.5" max="5" step="0.0001" disabled={cropping} bind:value={scale} on:input={scaleImage} />
+      <input type="range" min="{minZoom}" max="{maxZoom}" step="0.0001" disabled={cropping} bind:value={scale} on:input={scaleImage} />
     </div>
   </div>
   <span slot="control">
