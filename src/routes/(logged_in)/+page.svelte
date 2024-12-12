@@ -39,7 +39,13 @@
   <Thang />
   <p>Why don't you go check some spheres for now?</p>
   <form on:submit|preventDefault={joinSphere} id="sphere-form">
-    <input id="sphere-input" type="text" placeholder="Sphere Name" bind:value={sphereInput} />
+    <input
+      id="sphere-input"
+      type="text"
+      placeholder="Sphere Slug"
+      autocomplete="off"
+      bind:value={sphereInput}
+    />
     <button id="join-button">Join</button>
   </form>
 </div>
