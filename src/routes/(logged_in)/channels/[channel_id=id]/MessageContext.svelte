@@ -12,11 +12,9 @@
   };
 
   const copyButton = () => {
-    if (message.content) {
-      navigator.clipboard.writeText(message.content).then(() => {
-        dispatch('close');
-      });
-    }
+    navigator.clipboard.writeText(message.content).then(() => {
+      dispatch('close');
+    });
   };
 
   const replyButton = () => {
@@ -34,9 +32,7 @@
 <svelte:window on:mousedown={onClick} on:keydown={onKeyDown} />
 
 <div id="context" bind:this={contextDiv}>
-  {#if message.content}
-    <button on:click={copyButton}>Copy</button>
-  {/if}
+  <button on:click={copyButton}>Copy</button>
   <button on:click={replyButton}>Reply</button>
 </div>
 

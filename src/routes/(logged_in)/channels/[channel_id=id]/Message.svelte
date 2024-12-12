@@ -1,14 +1,12 @@
 <script lang="ts">
   import Markdown from '$lib/components/Markdown.svelte';
   import MessageContext from './MessageContext.svelte';
-  import { createEventDispatcher, tick } from 'svelte';
+  import { tick } from 'svelte';
   import userData from '$lib/user_data';
   import activeContext from '$lib/context';
   import type { ClientMessage } from '$lib/types/ui/message';
   import UserContext from './UserContext.svelte';
   import type { Unsubscriber } from 'svelte/store';
-
-  const dispatch = createEventDispatcher();
 
   export let message: ClientMessage;
   let currentContext: number;
@@ -71,10 +69,6 @@
       div.style.left = `auto`;
     }
   };
-
-  const showProfile = () => {
-    dispatch('showProfile', message.author.id);
-  };
 </script>
 
 <div
@@ -93,11 +87,10 @@
               message._disguise?.avatar
             )}`
           : message.author.avatar
-            ? `${$userData?.instanceInfo.effis_url}/avatars/${message.author.avatar}`
-            : 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true'}
+          ? `${$userData?.instanceInfo.effis_url}/avatars/${message.author.avatar}`
+          : 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true'}
         alt=""
         class="author-avatar"
-        on:click={showProfile}
       />
     {/if}
   </div>
@@ -112,9 +105,7 @@
         <span class="author-name-text">
           {message._disguise?.name ?? message.author.display_name ?? message.author.username}
         </span>
-        {#if message._disguise}
-          <span class="bridge-indicator">BRIDGE</span>
-        {/if}
+        {#if message._disguise} <span class="bridge-indicator">BRIDGE</span> {/if}
       </span>
     {/if}
     <div class="content"><Markdown content={message.renderedContent} preRendered /></div>
