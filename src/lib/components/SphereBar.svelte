@@ -145,7 +145,7 @@
 
   #sphere-banner {
     width: 100%;
-    height: 15%;
+    height: 115px;
     object-fit: cover;
   }
 
