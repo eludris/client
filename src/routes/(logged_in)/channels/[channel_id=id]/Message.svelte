@@ -97,7 +97,7 @@
             : 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true'}
         alt=""
         class="author-avatar"
-        on:click={showProfile}
+        on:click|stopPropagation={showProfile}
       />
     {/if}
   </div>
