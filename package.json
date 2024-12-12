@@ -27,11 +27,14 @@
     "svelte-check": "^4.0.2",
     "tslib": "^2.7.0",
     "typescript": "^5.6.2",
-    "vite": "^5.4.7"
+    "vite": "^5.4.7",
+    "vite-plugin-static-copy": "^1.0.4",
+    "vite-plugin-top-level-await": "^1.4.1",
+    "vite-plugin-wasm": "^3.3.0"
   },
   "type": "module",
   "dependencies": {
-    "@react-native-picker/picker": "^2.8.1",
+    "eludris-wasm-cropper": "eludris/wasm-cropper#semver:^0.1.1",
     "prismjs": "^1.29.0",
     "rehype-katex": "^7.0.1",
     "rehype-prism": "^2.3.2",
@@ -40,6 +43,7 @@
     "remark-math": "^6.0.0",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.1",
-    "unist-util-visit": "^5.0.0"
+    "unist-util-visit": "^5.0.0",
+    "vite-plugin-wasm-pack": "^0.1.12"
   }
 }

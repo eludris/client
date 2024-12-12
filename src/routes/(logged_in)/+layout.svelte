@@ -109,7 +109,6 @@
     background-color: transparent;
     color: var(--gray-500);
     font-size: inherit;
-    cursor: pointer;
     align-self: baseline;
     transition: color ease-in-out 125ms;
     text-decoration: underline;

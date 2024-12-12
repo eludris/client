@@ -5,6 +5,7 @@
   import type { Sphere } from '$lib/types/sphere';
   import { page } from '$app/stores';
   import { SphereChannelType } from '$lib/types/channel';
+    import { Category } from '$lib/types/category';
 
   let currentSphere: Sphere | null = null;
 
@@ -13,8 +14,7 @@
     let currentChannel = $state.channels[Number.parseInt($page.params.channel_id)];
     if (
       currentChannel &&
-      (currentChannel.type == SphereChannelType.CATEGORY ||
-        currentChannel.type == SphereChannelType.TEXT ||
+      (currentChannel.type == SphereChannelType.TEXT ||
         currentChannel.type == SphereChannelType.VOICE)
     ) {
       currentSphere = $state.spheres[currentChannel.sphere_id];
@@ -36,7 +36,7 @@
   <ul id="spheres" transition:phoneSlide={{ axis: 'x' }}>
     {#each spheres as sphere (sphere.id)}
       <a
-        href="/channels/{sphere.channels[0].id}"
+        href="/channels/{sphere.categories[0].channels[0].id}"
         class="sphere {currentSphere?.id == sphere.id ? 'current' : ''}"
       >
         <img
@@ -61,16 +61,17 @@
       <h3 id="sphere-name">{currentSphere.name ?? currentSphere.slug}</h3>
       <hr />
       <ul id="sphere-channel-list">
-        {#each currentSphere.channels as channel (channel.id)}
-          {#if channel.type == SphereChannelType.CATEGORY}
+        {#each currentSphere.categories as category (category.id)}
+          {#if category.id != currentSphere.id}
             <h4 class="category">
-              > {channel.name}
+              > {category.name}
             </h4>
-          {:else}
+          {/if}
+          {#each category.channels as channel (channel.id)}
             <a href="/channels/{channel.id}" class="channel">
               # {channel.name}
             </a>
-          {/if}
+          {/each}
         {/each}
       </ul>
     </div>

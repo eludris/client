@@ -227,7 +227,6 @@
     transition: box-shadow ease-in-out 200ms, color ease-in-out 200ms,
       background-color ease-in-out 200ms;
     width: 200px;
-    cursor: pointer;
   }
 
   button:hover {
@@ -238,7 +237,6 @@
   button:disabled {
     background-color: var(--pink-300);
     box-shadow: 0 2px 2px var(--gray-100);
-    cursor: default;
   }
 
   #success {
@@ -246,7 +244,7 @@
   }
 
   #error {
-    color: var(--pink-700);
+    color: var(--pink-600);
     text-align: center;
   }
 </style>

@@ -9,7 +9,14 @@ import type { State } from './types/ui/state';
 import { request } from './request';
 import type { InstanceInfo } from './types/instance';
 
-const state = writable<State>({ connected: false, messages: [], users: [], spheres: [], channels: [] });
+const state = writable<State>({
+  connected: false,
+  messages: [],
+  users: [],
+  spheres: [],
+  categories: [],
+  channels: [],
+});
 
 let ws: WebSocket | null = null;
 let pingInterval: NodeJS.Timeout | null = null;
@@ -69,9 +76,15 @@ const connect = async (userData: UserData) => {
             u.members.forEach((m) => {
               state.users[m.user.id] = m.user;
             });
-            u.channels.forEach((c) => {
-              state.channels[c.id] = c;
-            });
+            // u.channels.forEach((c) => {
+            //   state.channels[c.id] = c;
+            // });
+            u.categories.forEach((c) => {
+              state.categories[c.id] = c;
+              c.channels.forEach((c) => {
+                state.channels[c.id] = c;
+              })
+            })
             state.spheres[u.id] = u;
           });
           state.users[payload.d.user.id] = payload.d.user;
