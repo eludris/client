@@ -101,7 +101,7 @@
   }
 
   :global(.md .katex *) {
-    white-space: unset;
+    white-space: pre;
   }
 
   :global(.md:has(.math)) {
