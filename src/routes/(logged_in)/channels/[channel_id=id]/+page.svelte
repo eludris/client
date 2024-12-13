@@ -47,11 +47,8 @@
   $: channel = $state.channels[channel_id] as TextChannel;
   $: if (channel) {
     sphere = $state.spheres[channel.sphere_id];
-  }
-  $: if (channel) {
     $userConfig.lastChannel = channel.id;
   }
-
   $: users = Object.values($state.users).filter((u) =>
     sphere ? sphere.members.find((m) => m.user.id == u.id) != undefined : false
   );
@@ -59,8 +56,9 @@
     usernames = {};
     users.forEach((u) => (usernames[u.username] = u.id));
   }
-  let defaultHistory = { messages: [], hasEveryMessage: false };
-  $: messageHistory = channel ? ($state.messages[channel.id] ?? defaultHistory) : defaultHistory;
+  $: messageHistory = channel
+    ? ($state.messages[channel.id] ?? { messages: [], hasEveryMessage: false })
+    : { messages: [], hasEveryMessage: false }; // assigning it to a variable makes it break (idk why)
   $: if (!messageHistory.messages.length) {
     populateMessages();
   } else {
@@ -102,10 +100,40 @@
       if (fetchedMessages.length < 50) {
         messageHistory.hasEveryMessage = true;
       }
-      $state.messages[channel.id].messages = [
-        ...fetchedMessages,
-        ...($state.messages[channel.id].messages ?? [])
-      ];
+      if (fetchedMessages.length) {
+        state.update((s) => {
+          if (s.messages[channel_id]?.messages.length) {
+            let lastMessage = s.messages[channel_id].messages[0]!;
+            lastAuthorID = lastMessage.id;
+            lastAuthorData = {
+              name:
+                lastMessage._disguise?.name ??
+                lastMessage.author.display_name ??
+                lastMessage.author.username,
+              avatar: lastMessage._disguise?.avatar ?? lastMessage.author.avatar
+            };
+            let firstFetchedMessage = fetchedMessages.at(-1)!;
+            if (
+              lastMessage.author.id == firstFetchedMessage.author.id &&
+              (lastMessage._disguise?.name ??
+                lastMessage.author.display_name ??
+                lastMessage.author.username) ==
+                (firstFetchedMessage._disguise?.name ??
+                  firstFetchedMessage.author.display_name ??
+                  firstFetchedMessage.author.username) &&
+              (lastMessage._disguise?.avatar ?? lastMessage.author.avatar) ==
+                (firstFetchedMessage._disguise?.avatar ?? firstFetchedMessage.author.avatar)
+            )
+              lastMessage.showAuthor = false;
+          }
+          s.messages[channel.id].messages = [
+            ...fetchedMessages,
+            ...($state.messages[channel.id].messages ?? [])
+          ];
+          s.messages[channel.id].hasEveryMessage = messageHistory.hasEveryMessage;
+          return s;
+        });
+      }
       populatingMessages = false;
     });
   };
@@ -260,11 +288,11 @@
   <div id="channel-view">
     <div id="message-channel-body" class={$userConfig.userList ? 'users-hidden' : ''}>
       <ul bind:this={messagesUList} on:scroll={messagesScroll} id="messages">
+        {#if messageHistory.hasEveryMessage}
+          <h2 id="channel-start-header">Welcome to {channel.name}!</h2>
+          <hr id="channel-start-separator" />
+        {/if}
         {#if messageHistory.messages.length}
-          {#if messageHistory.hasEveryMessage}
-            <h2 id="channel-start-header">Welcome to {channel.name}!</h2>
-            <hr id="channel-start-separator" />
-          {/if}
           {#each messageHistory.messages as message (message.id)}
             <MessageComponent
               {message}
