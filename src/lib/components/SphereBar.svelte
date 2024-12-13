@@ -5,7 +5,6 @@
   import type { Sphere } from '$lib/types/sphere';
   import { page } from '$app/stores';
   import { SphereChannelType } from '$lib/types/channel';
-  import { Category } from '$lib/types/category';
 
   let currentSphere: Sphere | null = null;
 

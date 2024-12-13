@@ -87,7 +87,6 @@
       <!-- svelte-ignore a11y-click-events-have-key-events -->
       <img
         on:contextmenu|preventDefault|stopPropagation={onAuthorContextMenu}
-        on:click|preventDefault|stopPropagation={onAuthorContextMenu}
         src={message._disguise?.avatar
           ? `${$userData?.instanceInfo.effis_url}/proxy?url=${encodeURIComponent(
               message._disguise?.avatar
