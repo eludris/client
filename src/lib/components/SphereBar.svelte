@@ -3,6 +3,7 @@
   import state from '$lib/ws';
   import userData from '$lib/user_data';
   import type { Sphere } from '$lib/types/sphere';
+  import type { Category } from '$lib/types/category';
   import { page } from '$app/stores';
   import { SphereChannelType } from '$lib/types/channel';
 
@@ -29,6 +30,11 @@
     if (window.screen.width > 1000) return { duration: 0 };
     return slide(node, params);
   };
+
+  const toggleCategory = (e: MouseEvent, c: Category) => {
+    console.log(c)
+    $state.categories[c.id].collapsed = !c.collapsed;
+  }
 </script>
 
 <div id="sphere-bar" style:width={currentSphere ? '300px' : 'auto'}>
@@ -61,16 +67,30 @@
       <hr />
       <ul id="sphere-channel-list">
         {#each currentSphere.categories as category (category.id)}
-          {#if category.id != currentSphere.id}
-            <h4 class="category">
-              > {category.name}
-            </h4>
-          {/if}
-          {#each category.channels as channel (channel.id)}
-            <a href="/channels/{channel.id}" class="channel">
-              # {channel.name}
-            </a>
-          {/each}
+          <div class="category">
+            {#if category.id != currentSphere.id}
+              <span tabindex=0 role="button" on:click={(e) => toggleCategory(e, category)}>
+                <h4 class="category-name">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="24" height="24" viewBox="4 4 16 16">
+                    {#if !category.collapsed}
+                      <path d="M12 15l-4.243-4.243 1.415-1.414L12 12.172l2.828-2.829 1.415 1.414z"/>
+                    {:else}
+                      <path d="M12.172 12L9.343 9.172l1.414-1.415L15 12l-4.243 4.243-1.414-1.415z"/>
+                    {/if}
+                  </svg>
+                  {category.name}
+                </h4>
+              </span>
+              {/if}
+              {#if !category.collapsed}
+                {#each category.channels as channel (channel.id)}
+                  <a href="/channels/{channel.id}" class="channel">
+                    # {channel.name}
+                  </a>
+                  <br/>
+                {/each}
+              {/if}
+            </div>
         {/each}
       </ul>
     </div>
@@ -135,11 +155,37 @@
 
   .category {
     margin: 10px 0;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .category h4 {
+    margin: 0;
+  }
+  
+  .category-name {
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 5px;
+  }
+
+  .category-name:hover {
+    background-color: var(--purple-300);
   }
 
   .channel {
-    padding-left: 5px;
+    padding: 5px;
+    border-radius: 5px;
     text-decoration: none;
+  }
+  
+  .channel:hover {
+    color: var(--gray-600);
+    background-color: var(--purple-300);
   }
 
   #sphere-banner {

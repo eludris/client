@@ -76,10 +76,8 @@ const connect = async (userData: UserData) => {
             u.members.forEach((m) => {
               state.users[m.user.id] = m.user;
             });
-            // u.channels.forEach((c) => {
-            //   state.channels[c.id] = c;
-            // });
             u.categories.forEach((c) => {
+              c.collapsed = false;  // TODO: Maybe remember this between sessions?
               state.categories[c.id] = c;
               c.channels.forEach((c) => {
                 state.channels[c.id] = c;
