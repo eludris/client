@@ -5,13 +5,14 @@
   import type { Sphere } from '$lib/types/sphere';
   import type { Category } from '$lib/types/category';
   import { page } from '$app/stores';
-  import { SphereChannelType } from '$lib/types/channel';
+  import { SphereChannelType, type Channel } from '$lib/types/channel';
 
   let currentSphere: Sphere | null = null;
+  let currentChannel: Channel | null = null;
 
   let spheres: Sphere[] = Object.values($state.spheres ?? []);
   $: {
-    let currentChannel = $state.channels[Number.parseInt($page.params.channel_id)];
+    currentChannel = $state.channels[Number.parseInt($page.params.channel_id)];
     if (
       currentChannel &&
       (currentChannel.type == SphereChannelType.TEXT ||
@@ -84,7 +85,7 @@
               {/if}
               {#if !category.collapsed}
                 {#each category.channels as channel (channel.id)}
-                  <a href="/channels/{channel.id}" class="channel">
+                  <a href="/channels/{channel.id}" class={`channel${channel == currentChannel ? " current" : ""}`}>
                     # {channel.name}
                   </a>
                   <br/>
@@ -179,6 +180,7 @@
 
   .channel {
     padding: 5px;
+    margin: 2px;
     border-radius: 5px;
     text-decoration: none;
   }
@@ -186,6 +188,11 @@
   .channel:hover {
     color: var(--gray-600);
     background-color: var(--purple-300);
+  }
+
+  .channel.current {
+    color: var(--gray-600);
+    background-color: var(--purple-400);
   }
 
   #sphere-banner {
