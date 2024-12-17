@@ -23,7 +23,12 @@
   let currentPreviewIndex: number | undefined;
   let previewMatch: string = '';
   let previewResolver: { regex: RegExp, delimiter: string }; 
-  let previewItems: { name: string; value: string, image: string | null }[] = new Array();
+  let previewItems: {
+    name: string;
+    value: string;
+    image: string | null;
+    style: string | null;
+  }[] = new Array();
   const maxSuggestions = 10;
 
   let currentSphere: Sphere | null = null;
@@ -58,14 +63,24 @@
         for (let i = 0; i < ($userConfig.recentEmojis?.length ?? 0); i++) {
           let emoji = $userConfig.recentEmojis![i];
           if (emojiSearchRegex.test(emoji)) {
-            previewItems.push({ name: emoji, value: emoji, image: toUrl(emoji) });
+            previewItems.push({
+              name: emoji,
+              value: emoji,
+              image: toUrl(emoji),
+              style: null,
+            });
           }
         }
         for (let emojiName of Object.keys(emojiDictionary)) {
           if (previewItems.find((e) => e.name == emojiName)) continue;
           if (previewItems.length >= maxSuggestions) break;
           if (emojiSearchRegex.test(emojiName)) {
-            previewItems.push({ name: emojiName, value: emojiName, image: toUrl(emojiName) });
+            previewItems.push({
+              name: emojiName,
+              value: emojiName,
+              image: toUrl(emojiName),
+              style: null,
+            });
           }
         }
 
@@ -105,7 +120,14 @@
             || (member && memberRegex.test(member.user.username))
           ) {
             let name = member.nickname ?? member.user.display_name ?? member.user.username;
-            previewItems.push({ name: `@${name}`, value: member.user.username, image: null });  // TODO: get avatar url
+            previewItems.push({
+              name: `@${name}`,
+              value: member.user.username,
+              image: member.user.avatar
+                ? `${$userData?.instanceInfo.effis_url}/avatars/${member.user.avatar}`
+                : 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true',
+              style: "border-radius: 50%;"
+            });
           }
         }
 
@@ -390,7 +412,7 @@
           on:click={() => autocomplete(item.value)}
           on:mouseenter={() => previewEntryHover(i)}
         >
-          <img id="preview-display" src={item.image} alt={item.name} />
+          <img id="preview-display" src={item.image} alt={item.name} style={item.style}/>
           <div id="preview-name">{item.name}</div>
           <div id="preview-spacer" />
           <div id="preview-sphere" />
@@ -504,13 +526,14 @@
     flex-direction: row;
     width: 30px;
     object-fit: contain;
-    padding-right: 1em;
+    margin-right: 1em;
   }
 
   #preview-name {
     display: flex;
     align-items: center;
     font-size: 14px;
+    white-space: nowrap;
   }
 
   #preview-spacer {
