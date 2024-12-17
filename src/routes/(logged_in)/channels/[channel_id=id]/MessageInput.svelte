@@ -134,6 +134,31 @@
     }
   )
 
+  const channelAutocompleter = new Autocompleter(
+    /(?<=#)([a-zA-Z0-9_-]{2,})$/,
+    " ",
+    null,
+    (optionMatcher: RegExp) => {
+      let options: AutocompleteItem[] = new Array;
+
+      for (let category of sphere.categories) {
+        for (let channel of category.channels) {
+          if (optionMatcher.test(channel.name)) {
+            options.push({
+              name: `#${channel.name}`,
+              value: channel.name,
+              image: "",  // TODO: how tf
+            });
+  
+            if (options.length >= MAX_SUGGESTIONS) return options;
+          }
+        }
+      }
+
+      return options;
+    }
+  )
+
   const preprocess = (message: string): string => {
     if (message.startsWith('/shrug')) {
       message = message.substring(7) + ' ¯\\\\\\_(ツ)_/¯';
@@ -337,6 +362,9 @@
       return
     };
     if (await memberAutocompleter.autocomplete(value.slice(0, input.selectionStart))) {
+      return
+    };
+    if (await channelAutocompleter.autocomplete(value.slice(0, input.selectionStart))) {
       return
     };
   };
