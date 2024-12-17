@@ -145,19 +145,27 @@
     }
   };
 
+  const preprocess = (message: string): string => {
+    if (message.startsWith('/shrug')) {
+      message = message.substring(7) + ' ¯\\\\\\_(ツ)_/¯';
+    }
+
+    return message.replace(/@([a-z0-9_-]+)/gm, (m, username) => {
+      let id = usernames[username];
+      if (id != undefined) {
+        return `<@${id}>`;
+      } else {
+        return m;
+      }
+    });
+  }
+
   const onSubmit = async () => {
     if (value.trim()) {
+      value = preprocess(value);
+
       let headers = new Headers();
       headers.set('Authorization', $userData!.session.token);
-      if (value.startsWith('/shrug')) value = value.substring(7) + ' ¯\\\\\\_(ツ)_/¯';
-      value = value.replace(/@([a-z0-9_-]+)/gm, (m, username) => {
-        let id = usernames[username];
-        if (id != undefined) {
-          return `<@${id}>`;
-        } else {
-          return m;
-        }
-      });
       request('POST', `/channels/${channel_id}/messages`, { content: value }).then((_) =>
         messagesUList.scroll(0, messagesUList.scrollHeight)
       );
@@ -366,7 +374,7 @@
 <form id="message-input-form" on:submit|preventDefault={onSubmit}>
   {#if previewMessage}
     <span id="markdown-wrapper">
-      <Markdown content={value} />
+      <Markdown content={preprocess(value)} />
     </span>
   {:else}
     <textarea
