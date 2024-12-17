@@ -37,16 +37,16 @@
       value: string;
       image: string | null;
     }[];
-    style: string | null;
+    html_class: string;
     selectedIndex: number | null = null;
     selectedElement: HTMLButtonElement | null = null;
     optionProvider: (optionMatcher: RegExp) => AutocompleteItem[];
 
-    constructor(matcher: RegExp, delimiter: string, style: string | null, optionProvider: (optionMatcher: RegExp) => AutocompleteItem[]) {
+    constructor(matcher: RegExp, delimiter: string, html_class: string, optionProvider: (optionMatcher: RegExp) => AutocompleteItem[]) {
       this.matcher = matcher;
       this.delimiter = delimiter;
       this.options = new Array;
-      this.style = style
+      this.html_class = html_class
       this.optionProvider = optionProvider;
     }
 
@@ -73,7 +73,7 @@
   const emojiAutocompleter = new Autocompleter(
     /(?<=:)([a-zA-Z0-9_-]{2,})$/,
     ":",
-    null,
+    "emoji-autocomplete",
     (optionMatcher: RegExp) => {
       let options: AutocompleteItem[] = new Array;
   
@@ -108,7 +108,7 @@
   const memberAutocompleter = new Autocompleter(
     /(?<=@)([a-zA-Z0-9_-]{2,})$/,
     " ",
-    "border-radius: 50%;",
+    "member-autocomplete",
     (optionMatcher: RegExp) => {
       let options: AutocompleteItem[] = new Array;
 
@@ -137,7 +137,7 @@
   const channelAutocompleter = new Autocompleter(
     /(?<=#)([a-zA-Z0-9_-]{2,})$/,
     " ",
-    null,
+    "channel-autocomplete",
     (optionMatcher: RegExp) => {
       let options: AutocompleteItem[] = new Array;
 
@@ -442,18 +442,17 @@
     >
   </button>
   {#if activeAutocompleter?.options.length && activeAutocompleter?.options.length > 0}
-    <div class="preview" bind:this={autocompleteWindow}>
+    <div class="autocomplete-window" bind:this={autocompleteWindow}>
       {#each activeAutocompleter.options as item, i}
         <button
-          class={`preview-entry${activeAutocompleter?.selectedIndex == i ? ' highlight' : ''}`}
+          class={`autocomplete-entry${activeAutocompleter?.selectedIndex == i ? ' highlight' : ''}`}
           type="button"
           on:click={() => autocomplete(item.value)}
           on:mouseenter={() => previewEntryHover(i)}
         >
-          <img id="preview-display" src={item.image} alt={item.name} style={activeAutocompleter.style}/>
-          <div id="preview-name">{item.name}</div>
-          <div id="preview-spacer" />
-          <div id="preview-sphere" />
+          <img class="autocomplete-image {activeAutocompleter.html_class}" src={item.image} alt={item.name}/>
+          <div class="autocomplete-name {activeAutocompleter.html_class}">{item.name}</div>
+          <div class="autocomplete-spacer {activeAutocompleter.html_class}"/>
         </button>
       {/each}
     </div>
@@ -524,7 +523,7 @@
     display: inline-block;
   }
 
-  .preview {
+  .autocomplete-window {
     position: absolute;
     display: flex;
     flex-direction: column;
@@ -543,7 +542,7 @@
     box-sizing: border-box;
   }
 
-  .preview-entry {
+  .autocomplete-entry {
     color: var(--gray-600);
     display: flex;
     flex-direction: row;
@@ -553,13 +552,12 @@
     border: none;
   }
 
-  .preview-entry.highlight,
-  .preview-entry.highlight {
+  .autocomplee-entry.highlight {
     background-color: var(--purple-400);
     border-radius: 5px;
   }
 
-  #preview-display {
+  .autocomplete-image {
     display: flex;
     flex-direction: row;
     width: 30px;
@@ -567,14 +565,18 @@
     margin-right: 1em;
   }
 
-  #preview-name {
+  .autocomplete-image.member-autocomplete{
+    border-radius: 100%;
+  }
+
+  .autocomplete-name {
     display: flex;
     align-items: center;
     font-size: 14px;
     white-space: nowrap;
   }
 
-  #preview-spacer {
+  .autocomplete-spacer {
     flex-grow: 1;
     width: 100%;
   }
