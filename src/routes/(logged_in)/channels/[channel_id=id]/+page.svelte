@@ -317,7 +317,7 @@
           </div>
         {/if}
       </ul>
-      <MessageInput channel_id={channel?.id} bind:input bind:value bind:usernames bind:channel_names {messagesUList} />
+      <MessageInput channel_id={channel?.id} bind:input bind:value bind:usernames bind:channel_names sphere={sphere} {messagesUList} />
     </div>
     {#if !$userConfig.userList}
       <UsersBar
