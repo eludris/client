@@ -61,9 +61,9 @@
     channel_names = {};
     sphere.categories.forEach((cat) => {
       cat.channels.forEach((chan) => {
-        channel_names[chan.name] = chan.id
-      })
-    })
+        channel_names[chan.name] = chan.id;
+      });
+    });
   }
   $: messageHistory = channel
     ? ($state.messages[channel.id] ?? { messages: [], hasEveryMessage: false })
@@ -317,7 +317,15 @@
           </div>
         {/if}
       </ul>
-      <MessageInput channel_id={channel?.id} bind:input bind:value bind:usernames bind:channel_names sphere={sphere} {messagesUList} />
+      <MessageInput
+        channel_id={channel?.id}
+        bind:input
+        bind:value
+        bind:usernames
+        bind:channel_names
+        {sphere}
+        {messagesUList}
+      />
     </div>
     {#if !$userConfig.userList}
       <UsersBar
