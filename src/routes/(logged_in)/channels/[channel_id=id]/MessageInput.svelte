@@ -18,12 +18,12 @@
   let mobile = false;
   let previewMessage = false;
 
-  let previewWindow: HTMLDivElement;
-  let currentPreviewElement: HTMLButtonElement | undefined;
-  let currentPreviewIndex: number | undefined;
-  let previewMatch: string = '';
-  let previewResolver: { regex: RegExp, delimiter: string }; 
-  let previewItems: {
+  let autocompleteWindow: HTMLDivElement;
+  let currentAutocompleteElement: HTMLButtonElement | undefined;
+  let currentAutocompleteIndex: number | undefined;
+  let autocompleteMatch: string = '';
+  let autocompleteResolver: { regex: RegExp, delimiter: string }; 
+  let autocompleteItems: {
     name: string;
     value: string;
     image: string | null;
@@ -52,18 +52,18 @@
     let matches = searchString.match(emojiRegex);
 
     if (matches) {
-      previewResolver = { "regex": emojiRegex, delimiter: ":" };
+      autocompleteResolver = { "regex": emojiRegex, delimiter: ":" };
 
-      if (previewMatch != matches[1]) {
-        previewItems.length = 0;
+      if (autocompleteMatch != matches[1]) {
+        autocompleteItems.length = 0;
 
-        previewMatch = matches[1];
-        let emojiSearchRegex = new RegExp(`^${previewMatch}`, 'i');
+        autocompleteMatch = matches[1];
+        let emojiSearchRegex = new RegExp(`^${autocompleteMatch}`, 'i');
 
         for (let i = 0; i < ($userConfig.recentEmojis?.length ?? 0); i++) {
           let emoji = $userConfig.recentEmojis![i];
           if (emojiSearchRegex.test(emoji)) {
-            previewItems.push({
+            autocompleteItems.push({
               name: emoji,
               value: emoji,
               image: toUrl(emoji),
@@ -72,10 +72,10 @@
           }
         }
         for (let emojiName of Object.keys(emojiDictionary)) {
-          if (previewItems.find((e) => e.name == emojiName)) continue;
-          if (previewItems.length >= maxSuggestions) break;
+          if (autocompleteItems.find((e) => e.name == emojiName)) continue;
+          if (autocompleteItems.length >= maxSuggestions) break;
           if (emojiSearchRegex.test(emojiName)) {
-            previewItems.push({
+            autocompleteItems.push({
               name: emojiName,
               value: emojiName,
               image: toUrl(emojiName),
@@ -85,15 +85,15 @@
         }
 
         await tick();
-        currentPreviewElement = previewWindow?.firstElementChild! as HTMLButtonElement;
-        currentPreviewIndex = 0;
+        currentAutocompleteElement = autocompleteWindow?.firstElementChild! as HTMLButtonElement;
+        currentAutocompleteIndex = 0;
       }
       return true;
 
     } else {
-      previewItems.length = 0;
-      previewMatch = '';
-      currentPreviewElement = undefined;
+      autocompleteItems.length = 0;
+      autocompleteMatch = '';
+      currentAutocompleteElement = undefined;
       return false;
     }
   };
@@ -104,23 +104,23 @@
   
     if (matches) {
       // Delimiter required here so that suggestions don't restart after autocompleting.
-      previewResolver = { "regex": userRegex, delimiter: " " };
+      autocompleteResolver = { "regex": userRegex, delimiter: " " };
 
-      if (previewMatch != matches[1]) {
-        previewItems.length = 0;
+      if (autocompleteMatch != matches[1]) {
+        autocompleteItems.length = 0;
 
-        previewMatch = matches[1];
-        let memberRegex = new RegExp(`^${previewMatch}`, 'i');        
+        autocompleteMatch = matches[1];
+        let memberRegex = new RegExp(`^${autocompleteMatch}`, 'i');        
 
         for (let member of currentSphere!.members) {
-          if (previewItems.length >= maxSuggestions) break;
+          if (autocompleteItems.length >= maxSuggestions) break;
           if (
             (member.nickname && memberRegex.test(member.nickname))
             || (member.user.display_name && memberRegex.test(member.user.display_name))
             || (member && memberRegex.test(member.user.username))
           ) {
             let name = member.nickname ?? member.user.display_name ?? member.user.username;
-            previewItems.push({
+            autocompleteItems.push({
               name: `@${name}`,
               value: member.user.username,
               image: member.user.avatar
@@ -132,15 +132,15 @@
         }
 
         await tick();
-        currentPreviewElement = previewWindow?.firstElementChild! as HTMLButtonElement;
-        currentPreviewIndex = 0;
+        currentAutocompleteElement = autocompleteWindow?.firstElementChild! as HTMLButtonElement;
+        currentAutocompleteIndex = 0;
       }
       return true;
 
     } else {
-      previewItems.length = 0;
-      previewMatch = '';
-      currentPreviewElement = undefined;
+      autocompleteItems.length = 0;
+      autocompleteMatch = '';
+      currentAutocompleteElement = undefined;
       return false;
     }
   };
@@ -175,7 +175,7 @@
     }
     value = '';
     previewMessage = false;
-    currentPreviewElement = undefined;
+    currentAutocompleteElement = undefined;
     await tick();
     input?.focus(); // for mobiles
   };
@@ -267,7 +267,7 @@
       await tick();
       input.selectionStart = input.selectionEnd = start + 1;
     }
-    if ((e.key == 'ArrowDown' || e.key == 'ArrowUp') && currentPreviewElement) {
+    if ((e.key == 'ArrowDown' || e.key == 'ArrowUp') && currentAutocompleteElement) {
       e.preventDefault();
     }
   };
@@ -287,28 +287,28 @@
       await tick();
       input?.focus();
     }
-    if ((e.key == 'Tab' || e.key == 'Enter') && currentPreviewElement) {
+    if ((e.key == 'Tab' || e.key == 'Enter') && currentAutocompleteElement) {
       e.preventDefault();
-      currentPreviewElement.click();
+      currentAutocompleteElement.click();
       await tick();
       input?.focus();
     }
-    if (e.key == 'ArrowDown' && currentPreviewElement) {
-      if (currentPreviewElement.nextElementSibling) {
-        currentPreviewIndex!++;
-        currentPreviewElement = currentPreviewElement.nextElementSibling as HTMLButtonElement;
+    if (e.key == 'ArrowDown' && currentAutocompleteElement) {
+      if (currentAutocompleteElement.nextElementSibling) {
+        currentAutocompleteIndex!++;
+        currentAutocompleteElement = currentAutocompleteElement.nextElementSibling as HTMLButtonElement;
       } else {
-        currentPreviewIndex = 0;
-        currentPreviewElement = previewWindow.firstElementChild as HTMLButtonElement;
+        currentAutocompleteIndex = 0;
+        currentAutocompleteElement = autocompleteWindow.firstElementChild as HTMLButtonElement;
       }
     }
-    if (e.key == 'ArrowUp' && currentPreviewElement) {
-      if (currentPreviewElement.previousElementSibling) {
-        currentPreviewIndex!--;
-        currentPreviewElement = currentPreviewElement.previousElementSibling as HTMLButtonElement;
+    if (e.key == 'ArrowUp' && currentAutocompleteElement) {
+      if (currentAutocompleteElement.previousElementSibling) {
+        currentAutocompleteIndex!--;
+        currentAutocompleteElement = currentAutocompleteElement.previousElementSibling as HTMLButtonElement;
       } else {
-        currentPreviewIndex = previewItems.length - 1;
-        currentPreviewElement = previewWindow.lastElementChild as HTMLButtonElement;
+        currentAutocompleteIndex = autocompleteItems.length - 1;
+        currentAutocompleteElement = autocompleteWindow.lastElementChild as HTMLButtonElement;
       }
     }
   };
@@ -337,7 +337,7 @@
   const autocomplete = async (itemName: string) => {
     let cursorPos = input.selectionStart;
 
-    let previewPart = value.slice(0, cursorPos).replace(previewResolver.regex, `${itemName}${previewResolver.delimiter}`);
+    let previewPart = value.slice(0, cursorPos).replace(autocompleteResolver.regex, `${itemName}${autocompleteResolver.delimiter}`);
     let remainder = value.slice(cursorPos);
     if (remainder && !/^\s+/.test(remainder)) {
       value = previewPart + ' ' + remainder;
@@ -345,19 +345,19 @@
       value = previewPart + remainder;
     }
 
-    currentPreviewElement = undefined;
-    previewItems.length = 0;
-    previewMatch = '';
+    currentAutocompleteElement = undefined;
+    autocompleteItems.length = 0;
+    autocompleteMatch = '';
     await tick();
     input.selectionStart = input.selectionEnd = previewPart.length;
     input.focus();
   };
 
   const previewEntryHover = (i: number) => {
-    currentPreviewElement?.classList.remove('highlight');
-    currentPreviewElement = previewWindow.children[i] as HTMLButtonElement;
-    currentPreviewElement.classList.add('highlight');
-    currentPreviewIndex = i;
+    currentAutocompleteElement?.classList.remove('highlight');
+    currentAutocompleteElement = autocompleteWindow.children[i] as HTMLButtonElement;
+    currentAutocompleteElement.classList.add('highlight');
+    currentAutocompleteIndex = i;
   };
 </script>
 
@@ -403,11 +403,11 @@
       ><path fill="currentColor" d="m2 21l21-9L2 3v7l15 2l-15 2v7Z" /></svg
     >
   </button>
-  {#if previewItems.length > 0}
-    <div class="preview" bind:this={previewWindow}>
-      {#each previewItems as item, i}
+  {#if autocompleteItems.length > 0}
+    <div class="preview" bind:this={autocompleteWindow}>
+      {#each autocompleteItems as item, i}
         <button
-          class={`preview-entry${currentPreviewIndex == i ? ' highlight' : ''}`}
+          class={`preview-entry${currentAutocompleteIndex == i ? ' highlight' : ''}`}
           type="button"
           on:click={() => autocomplete(item.value)}
           on:mouseenter={() => previewEntryHover(i)}
