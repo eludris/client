@@ -1,10 +1,10 @@
 <script lang="ts">
   import { slide, type SlideParams } from 'svelte/transition';
+  import { page } from '$app/stores';
   import state from '$lib/ws';
   import userData from '$lib/user_data';
   import type { Sphere } from '$lib/types/sphere';
   import type { Category } from '$lib/types/category';
-  import { page } from '$app/stores';
   import { SphereChannelType, type Channel } from '$lib/types/channel';
 
   let currentSphere: Sphere | null = null;
@@ -33,9 +33,8 @@
   };
 
   const toggleCategory = (e: MouseEvent, c: Category) => {
-    console.log(c)
     $state.categories[c.id].collapsed = !c.collapsed;
-  }
+  };
 </script>
 
 <div id="sphere-bar" style:width={currentSphere ? '300px' : 'auto'}>
@@ -70,28 +69,41 @@
         {#each currentSphere.categories as category (category.id)}
           <div class="category">
             {#if category.id != currentSphere.id}
-              <span tabindex=0 role="button" on:click={(e) => toggleCategory(e, category)}>
+              <span tabindex="0" role="button" on:click={(e) => toggleCategory(e, category)}>
                 <h4 class="category-name">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="24" height="24" viewBox="4 4 16 16">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    width="24"
+                    height="24"
+                    viewBox="4 4 16 16"
+                  >
                     {#if !category.collapsed}
-                      <path d="M12 15l-4.243-4.243 1.415-1.414L12 12.172l2.828-2.829 1.415 1.414z"/>
+                      <path
+                        d="M12 15l-4.243-4.243 1.415-1.414L12 12.172l2.828-2.829 1.415 1.414z"
+                      />
                     {:else}
-                      <path d="M12.172 12L9.343 9.172l1.414-1.415L15 12l-4.243 4.243-1.414-1.415z"/>
+                      <path
+                        d="M12.172 12L9.343 9.172l1.414-1.415L15 12l-4.243 4.243-1.414-1.415z"
+                      />
                     {/if}
                   </svg>
                   {category.name}
                 </h4>
               </span>
-              {/if}
-              {#if !category.collapsed}
-                {#each category.channels as channel (channel.id)}
-                  <a href="/channels/{channel.id}" class={`channel${channel == currentChannel ? " current" : ""}`}>
-                    # {channel.name}
-                  </a>
-                  <br/>
-                {/each}
-              {/if}
-            </div>
+            {/if}
+            {#if !category.collapsed}
+              {#each category.channels as channel (channel.id)}
+                <a
+                  href="/channels/{channel.id}"
+                  class={`channel${channel == currentChannel ? ' current' : ''}`}
+                >
+                  # {channel.name}
+                </a>
+                <br />
+              {/each}
+            {/if}
+          </div>
         {/each}
       </ul>
     </div>
@@ -164,7 +176,7 @@
   .category h4 {
     margin: 0;
   }
-  
+
   .category-name {
     color: var(--color-text);
     display: flex;
@@ -184,7 +196,7 @@
     border-radius: 5px;
     text-decoration: none;
   }
-  
+
   .channel:hover {
     color: var(--gray-600);
     background-color: var(--purple-300);
