@@ -15,6 +15,7 @@
   export let input: HTMLTextAreaElement;
   export let messagesUList: HTMLElement;
   export let usernames: { [key: string]: number };
+  export let channel_names: { [key: string]: number };
   let mobile = false;
   let previewMessage = false;
 
@@ -45,7 +46,6 @@
       currentSphere = null;
     }
   }
-
 
   const getMatchingEmoji = async (searchString: string) => {
     const emojiRegex = /(?<=:)([a-zA-Z0-9_-]{2,})$/;
@@ -157,7 +157,15 @@
       } else {
         return m;
       }
+    }).replace(/#([a-z0-9_-]+)/gm, (m, channel) => {
+      let id = channel_names[channel];
+      if (id != undefined) {
+        return `<#${id}>`;
+      } else {
+        return m;
+      }
     });
+
   }
 
   const onSubmit = async () => {

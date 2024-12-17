@@ -9,6 +9,7 @@ import rehypeStringify from 'rehype-stringify';
 
 import { visit } from 'unist-util-visit';
 import data from '$lib/user_data';
+import type { SphereChannel } from './types/channel';
 import state from './ws';
 import { get } from 'svelte/store';
 import { emojiDictionary, EMOJI_REGEX, toUrl } from './emoji';
@@ -191,7 +192,17 @@ export default async (content: string): Promise<string> => {
       return res.replace(/(?<!\\)&#x3C;@(\d+)>/gm, (m, id, offset) => {
         let user = get(state).users[id];
         if (user && res.substring(0, offset).split(/<\\?code>/gm).length % 2 == 1) {
-          return `<span class="mention">@${user.display_name ?? user.username}</span>`;
+          return `<span class="mention user-mention">@${user.display_name ?? user.username}</span>`;
+        }
+        return m;
+      });
+    })
+    .then((res) => {
+      // Parse channel mentions (<#id>)
+      return res.replace(/(?<!\\)&#x3C;#(\d+)>/gm, (m, id, offset) => {
+        let channel = get(state).channels[id];
+        if (channel && res.substring(0, offset).split(/<\\?code>/gm).length % 2 == 1) {
+          return `<span class="mention channel-mention">#${channel.hasOwnProperty("name") ? (channel as SphereChannel).name : "Unknown Channel"}</span>`;
         }
         return m;
       });
