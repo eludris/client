@@ -7,7 +7,7 @@
   const EMAIL_REGEX = new RegExp(
     /^(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/
   );
-  const INSTANCE_URL = env.PUBLIC_INSTANCE_URL ?? 'https://eludris.tooty.xyz';
+  const INSTANCE_URL = env.PUBLIC_INSTANCE_URL ?? 'https://eludris.tooty.xyz/next';
 
   let codeSent = false;
   let passwordReset = false;
@@ -227,7 +227,6 @@
     transition: box-shadow ease-in-out 200ms, color ease-in-out 200ms,
       background-color ease-in-out 200ms;
     width: 200px;
-    cursor: pointer;
   }
 
   button:hover {
@@ -238,7 +237,6 @@
   button:disabled {
     background-color: var(--pink-300);
     box-shadow: 0 2px 2px var(--gray-100);
-    cursor: default;
   }
 
   #success {
@@ -246,7 +244,7 @@
   }
 
   #error {
-    color: var(--pink-700);
+    color: var(--pink-600);
     text-align: center;
   }
 </style>

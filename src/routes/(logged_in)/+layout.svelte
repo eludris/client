@@ -4,6 +4,9 @@
   import { goto } from '$app/navigation';
   import state from '$lib/ws';
   import type { PageData } from './$types';
+  import Navbar from '$lib/components/Navbar.svelte';
+  import { page } from '$app/stores';
+  import SphereBar from '$lib/components/SphereBar.svelte';
 
   onMount(() => {
     if (!$userData) goto('/login');
@@ -23,7 +26,15 @@
 </script>
 
 {#if $userData && $state.connected}
-  <slot />
+  <Navbar />
+  <div id="page">
+    {#if !$page.url.pathname.startsWith('/settings')}
+      <SphereBar />
+    {/if}
+    <span id="page-content">
+      <slot />
+    </span>
+  </div>
 {:else}
   <div id="fact">
     <h1>Fun Fact</h1>
@@ -43,6 +54,16 @@
 {/if}
 
 <style>
+  #page {
+    display: flex;
+    height: calc(100% - 60px);
+  }
+
+  #page-content {
+    flex-grow: 1;
+    min-width: 0;
+  }
+
   #fact {
     width: 100%;
     height: 100%;
@@ -89,7 +110,6 @@
     background-color: transparent;
     color: var(--gray-500);
     font-size: inherit;
-    cursor: pointer;
     align-self: baseline;
     transition: color ease-in-out 125ms;
     text-decoration: underline;

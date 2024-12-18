@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Navbar from '$lib/components/Navbar.svelte';
   import config from '$lib/user_config';
 </script>
 

@@ -27,13 +27,29 @@
     }
   };
 
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.key == 'Escape') {
+      popupDismiss();
+    }
+  };
+
   const popupDismiss = () => {
     dispatch('dismiss');
   };
 </script>
 
+<svelte:body on:keydown|stopPropagation|capture={onKeyDown} />
+<svelte:head
+  ><style>
+    #app {
+      overflow: hidden;
+      user-select: none;
+    }
+  </style></svelte:head
+>
+
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<!-- NOTE: popup-window exists only so that the container can be make sticky. -->
+<!-- NOTE: popup-window exists only so that the container can be made sticky. -->
 <div id="popup-window">
   <div id="popup-container" on:click={containerClick}>
     <div id="popup" bind:this={popup}>
@@ -64,6 +80,7 @@
     align-items: center;
     justify-content: center;
     background-color: #0008;
+    z-index: 999;
   }
 
   #popup {

@@ -11,7 +11,7 @@
 
   let username = '';
   let password = '';
-  let instanceURL = env.PUBLIC_INSTANCE_URL ?? 'https://eludris.tooty.xyz';
+  let instanceURL = env.PUBLIC_INSTANCE_URL ?? 'https://eludris.tooty.xyz/next';
   let error = '';
   let requesting = false;
 
@@ -163,7 +163,6 @@
     transition: box-shadow ease-in-out 200ms, color ease-in-out 200ms,
       background-color ease-in-out 200ms;
     width: 200px;
-    cursor: pointer;
   }
 
   #login-form > button:hover {
@@ -178,7 +177,7 @@
   }
 
   .error {
-    color: var(--pink-700);
+    color: var(--pink-600);
     text-align: center;
   }
 
