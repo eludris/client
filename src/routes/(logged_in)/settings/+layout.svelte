@@ -74,9 +74,8 @@
     display: flex;
     flex-direction: column;
     flex-grow: 1;
-    margin-top: 30px;
+    padding-top: 30px;
     overflow-y: auto;
-    min-height: calc(100% - 90px);
   }
 
   #settings-div,

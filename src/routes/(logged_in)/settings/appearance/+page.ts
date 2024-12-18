@@ -13,8 +13,5 @@ type ThemeInfo = {
 export const load: PageLoad = async ({ fetch, params }): Promise<{theme_info: ThemeInfo[]}> => {
   let themeInfo: ThemeInfo[] = await fetch("https://raw.githubusercontent.com/eludris/client-themes/main/themes.json").then((r) => r.json());
 
-  // NOTE: these are temporary, for testing.
-  themeInfo = [...themeInfo, ...themeInfo, ...themeInfo, ...themeInfo, ...themeInfo, ...themeInfo];
-
 	return {theme_info: themeInfo};
 };

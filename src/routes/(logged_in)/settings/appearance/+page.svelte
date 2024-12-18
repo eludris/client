@@ -189,12 +189,13 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     grid-auto-rows: 350px;
-    grid-gap: 15px;
+    grid-gap: 5px;  /* Most of the gap will be handled by grid items' margin. */
+    width: 100%;
     height: 50vh;
+    min-height: 340px;  /* Grid items are 300px, plus padding plus grid item margin. */
     overflow-y: scroll;
     background-color: var(--purple-100);
     padding: 10px;
-    width: calc(100% - 20px);
     border-radius: 10px;
   }
 
@@ -203,9 +204,11 @@
     flex-direction: column;
     gap: 20px;
     padding: 10px;
+    margin: 10px;
     background-color: var(--gray-100);
     border-radius: 10px;
     cursor: pointer;
+    height: 300px;
   }
 
   .theme-container:hover,
@@ -215,10 +218,13 @@
   }
 
   .theme-cover {
-    width: 100%;
+    /* width: 100%; */
     aspect-ratio: 16 / 9;
     object-fit: cover;
     border-radius: 2px;
+    align-self: center;
+    min-height: 0;
+    max-width: 100%;
   }
 
   .theme-description {
