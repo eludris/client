@@ -568,7 +568,7 @@
     border: none;
   }
 
-  .autocomplee-entry.highlight {
+  .autocomplete-entry.highlight {
     background-color: var(--purple-400);
     border-radius: 5px;
   }
