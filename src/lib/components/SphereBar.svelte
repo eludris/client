@@ -2,6 +2,7 @@
   import { slide, type SlideParams } from 'svelte/transition';
   import { page } from '$app/stores';
   import state from '$lib/ws';
+  import userConfig from '$lib/user_config';
   import userData from '$lib/user_data';
   import type { Sphere } from '$lib/types/sphere';
   import type { Category } from '$lib/types/category';
@@ -32,8 +33,19 @@
     return slide(node, params);
   };
 
-  const toggleCategory = (e: MouseEvent, c: Category) => {
-    $state.categories[c.id].collapsed = !c.collapsed;
+  const toggleCategory = (e: Event, c: Category) => {
+    if ((e as ToggleEvent).newState == 'closed') {
+      if ($userConfig.hiddenCategories) {
+        $userConfig.hiddenCategories?.push(c.id);
+      } else {
+        $userConfig.hiddenCategories = [c.id];
+      }
+    } else {
+      let index = $userConfig.hiddenCategories?.indexOf(c.id) ?? -1;
+      if (index >= 0) $userConfig.hiddenCategories!.splice(index, 1);
+    }
+
+    $userConfig = $userConfig;
   };
 </script>
 
@@ -66,32 +78,21 @@
       <h3 id="sphere-name">{currentSphere.name ?? currentSphere.slug}</h3>
       <hr />
       <ul id="sphere-channel-list">
-        {#each currentSphere.categories as category (category.id)}
-          <div class="category">
-            {#if category.id != currentSphere.id}
-              <span tabindex="0" role="button" on:click={(e) => toggleCategory(e, category)}>
-                <h4 class="category-name">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    width="24"
-                    height="24"
-                    viewBox="4 4 16 16"
-                  >
-                    {#if !category.collapsed}
-                      <path
-                        d="M12 15l-4.243-4.243 1.415-1.414L12 12.172l2.828-2.829 1.415 1.414z"
-                      />
-                    {:else}
-                      <path
-                        d="M12.172 12L9.343 9.172l1.414-1.415L15 12l-4.243 4.243-1.414-1.415z"
-                      />
-                    {/if}
-                  </svg>
-                  {category.name}
-                </h4>
-              </span>
-            {/if}
+        {#each currentSphere.categories[0].channels as channel (channel.id)}
+          <a
+            href="/channels/{channel.id}"
+            class={`channel${channel == currentChannel ? ' current' : ''}`}
+          >
+            # {channel.name}
+          </a>
+        {/each}
+        {#each currentSphere.categories.slice(1) as category (category.id)}
+          <details
+            class="category"
+            open={$userConfig.hiddenCategories?.includes(category.id) ? false : true}
+            on:toggle={(e) => toggleCategory(e, category)}
+          >
+            <summary class="category-name">{category.name}</summary>
             {#if !category.collapsed}
               {#each category.channels as channel (channel.id)}
                 <a
@@ -100,10 +101,9 @@
                 >
                   # {channel.name}
                 </a>
-                <br />
               {/each}
             {/if}
-          </div>
+          </details>
         {/each}
       </ul>
     </div>
@@ -173,14 +173,12 @@
     flex-direction: column;
   }
 
-  .category h4 {
+  .category summary {
     margin: 0;
   }
 
   .category-name {
     color: var(--color-text);
-    display: flex;
-    align-items: center;
     cursor: pointer;
     padding: 5px;
     border-radius: 5px;
