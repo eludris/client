@@ -89,7 +89,7 @@
         {#each currentSphere.categories.slice(1) as category (category.id)}
           <details
             class="category"
-            open={$userConfig.hiddenCategories?.includes(category.id) ? false : true}
+            open={!$userConfig.hiddenCategories?.includes(category.id)}
             on:toggle={(e) => toggleCategory(e, category)}
           >
             <summary class="category-name">{category.name}</summary>
