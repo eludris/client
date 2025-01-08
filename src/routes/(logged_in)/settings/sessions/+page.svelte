@@ -21,43 +21,92 @@
     const fetch_sessions = async (): Promise<Session[]> => {
         return await request("GET", "sessions");
     }
+
+    const to_timestamp = (id: number) => {
+        // TODO: fix
+        const ELUDRIS_EPOCH = 1_650_000_000;
+        console.log(id)
+        return new Date((id >>> 16) + ELUDRIS_EPOCH);
+    }
 </script>
 
 
 {#await fetch_sessions()}
     <h4>Doodoo</h4>
 {:then sessions}
-    <table>
+    <!-- <table>
         <tr>
             <td>IP Address</td>
             <td>Platform</td>
             <td>Client</td>
-        </tr>
+        </tr> -->
+    <div class="sessions">
         {#each sessions as session (session.id)}
-            <tr>
-                <td>{session.ip}</td>
-                <td>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+            <div class="session-container">
+                <div class="session-icon-wrapper">
+                    <svg class="platform-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                         <path fill="currentColor" d={PLATFORM_ICONS[session.platform] ?? UNKNOWN_ICON}/>
                     </svg>
-                    {session.platform}
-                </td>
-                <td>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                    <svg class="client-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                         <path fill="currentColor" d={CLIENT_ICONS[session.client] ?? UNKNOWN_ICON}/>
                     </svg>
-                    {session.client}
-                </td>
-            </tr>
+                </div>
+                <div class="session-data">
+                    <h3>{`${session.client} on ${session.platform}`}</h3>
+                    <div class="session-ip">{`IP: 69.420.13.37:84115`}</div>
+                    <div class="session-timestamp">{`Created At: ${to_timestamp(session.id).toLocaleString()}`}</div>
+                </div>
+            </div>
         {/each}
-    </table>    
+    </div>
+    <!-- </table>     -->
 {/await}
 
 
 <style>
+    .sessions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 60%
+    }
 
-    td > svg{
-        vertical-align: middle;
+    .session-container {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 5px;
+        background-color: var(--gray-200);
+        border-radius: 10px;
+        gap: 5px;
+    }
+
+    .session-icon-container {
+        position: relative;
+    }
+
+    .session-icon-wrapper {
+        position: relative;
+        height: 60px;
+        width: 60px;
+    }
+
+    .platform-icon {
+        position: absolute;
+        clip-path: polygon(0 0, calc(66% - 2px) 0, calc(33% - 2px) 100%, 0 100%);
+        height: 100%;
+        width: 100%;
+    }
+
+    .client-icon {
+        position: absolute;
+        clip-path: polygon(calc(66% + 2px) 0, 100% 0, 100% 100%, calc(33% + 2px) 100%);
+        height: 100%;
+        width: 100%;
+    }
+
+    h3 {
+        margin-top: 0;
     }
 
 </style>
