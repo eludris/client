@@ -32,6 +32,7 @@
   <div id="settings-div">
     <div id="settings-nav">
       <a href="/settings" class:current={$page.url.pathname == '/settings'}>Account</a>
+      <a href="/settings/sessions" class:current={$page.url.pathname == '/settings/sessions'}>Sessions</a>
       <a href="/settings/profile" class:current={$page.url.pathname == '/settings/profile'}
         >Profile</a
       >
