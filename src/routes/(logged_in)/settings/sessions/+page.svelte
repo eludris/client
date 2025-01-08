@@ -53,13 +53,12 @@
                 </div>
                 <div class="session-data">
                     <h3>{`${session.client} on ${session.platform}`}</h3>
-                    <div class="session-ip">{`IP: 69.420.13.37:84115`}</div>
+                    <div class="session-ip">{`IP: ${session.ip}`}</div>
                     <div class="session-timestamp">{`Created At: ${to_timestamp(session.id).toLocaleString()}`}</div>
                 </div>
             </div>
         {/each}
     </div>
-    <!-- </table>     -->
 {/await}
 
 
