@@ -24,11 +24,14 @@
         return await request("GET", "sessions");
     }
 
+    const ELUDRIS_EPOCH = 1_650_000_000;
+    const SHIFT = BigInt(16);
+    const MASK = BigInt("0xFFFFFFFFFFFF");
+
     const to_timestamp = (id: number) => {
-        // TODO: fix
-        const ELUDRIS_EPOCH = 1_650_000_000;
-        console.log(id)
-        return new Date((id >>> 16) + ELUDRIS_EPOCH);
+        // NOTE: We have to cast to BigInt here so that bitshifts are safe for numbers >= 2^32.
+        let timestamp = Number((BigInt(id) >> SHIFT) & MASK) + ELUDRIS_EPOCH;
+        return new Date(timestamp * 1000);
     }
 
     const hoverThing = (e: MouseEvent, expand: boolean) => {
