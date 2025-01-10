@@ -1,9 +1,12 @@
 <script lang='ts'>
-    import { request } from "$lib/request";
+    import Popup from "$lib/components/Popup.svelte";
+import { request } from "$lib/request";
     import type { Session } from "$lib/types/session";
     import userData from "$lib/user_data";
 
     let currentSession = $userData!.session.session;
+    let selectedSession: Session | undefined = undefined;
+    let password: string | undefined = undefined;
 
     const PLATFORM_ICONS: Record<string, string | undefined> = {
         windows: "M3 12V6.75l6-1.32v6.48zm17-9v8.75l-10 .15V5.21zM3 13l6 .09v6.81l-6-1.15zm17 .25V22l-10-1.91V13.1z",
@@ -12,7 +15,6 @@
         android: "M16.61 15.15c-.46 0-.84-.37-.84-.83s.38-.82.84-.82s.84.36.84.82s-.38.83-.84.83m-9.2 0c-.46 0-.84-.37-.84-.83s.38-.82.84-.82s.83.36.83.82s-.37.83-.83.83m9.5-5.01l1.67-2.88c.09-.17.03-.38-.13-.47c-.17-.1-.38-.04-.45.13l-1.71 2.91A10.15 10.15 0 0 0 12 8.91c-1.53 0-3 .33-4.27.91L6.04 6.91a.334.334 0 0 0-.47-.13c-.17.09-.22.3-.13.47l1.66 2.88C4.25 11.69 2.29 14.58 2 18h20c-.28-3.41-2.23-6.3-5.09-7.86",
         ios: "M2.09 16.8h1.66V9.76H2.09m.83-.92a.9.9 0 0 0 .92-.9c0-.5-.4-.9-.92-.9a.9.9 0 0 0-.92.9c0 .5.4.9.92.9m6.33-1.78C6.46 7.06 4.7 8.96 4.7 12c0 3.06 1.76 4.96 4.55 4.96s4.55-1.9 4.55-4.96c0-3.04-1.76-4.94-4.55-4.94m0 1.44c1.71 0 2.8 1.37 2.8 3.5c0 2.15-1.09 3.5-2.8 3.5S6.46 14.15 6.46 12c0-2.13 1.08-3.5 2.79-3.5m5.25 5.61c.07 1.76 1.5 2.85 3.72 2.85c2.32 0 3.78-1.14 3.78-2.96c0-1.43-.82-2.23-2.77-2.68l-1.1-.25c-1.18-.28-1.66-.65-1.66-1.29c0-.78.73-1.33 1.81-1.33c1.1 0 1.85.55 1.93 1.44h1.63c-.04-1.69-1.43-2.83-3.55-2.83c-2.08 0-3.56 1.15-3.56 2.85c0 1.37.83 2.22 2.6 2.62l1.24.29c1.21.29 1.7.68 1.7 1.38c0 .8-.8 1.37-1.96 1.37s-2.05-.57-2.15-1.46z",
     }
-    
     const CLIENT_ICONS: Record<string, string | undefined> = {
         // TODO: replace
         pengin: "M19 16c0 1.72-.63 3.3-1.66 4.5c.41.39.66.91.66 1.5H6c0-.59.25-1.11.66-1.5A6.9 6.9 0 0 1 5 16H3c0-1.25.57-2.36 1.46-3.09l.01-.02A6 6 0 0 0 7 8V7a5 5 0 0 1 5-5a5 5 0 0 1 5 5v1c0 2 1 3.81 2.53 4.89l.01.02c.89.73 1.46 1.84 1.46 3.09zm-3 0a4 4 0 0 0-4-4a4 4 0 0 0-4 4a4 4 0 0 0 4 4a4 4 0 0 0 4-4m-6-7l2 1.5L14 9l-2-1.5zm0-4a1 1 0 0 0-1 1a1 1 0 0 0 1 1a1 1 0 0 0 1-1a1 1 0 0 0-1-1m4 0a1 1 0 0 0-1 1a1 1 0 0 0 1 1a1 1 0 0 0 1-1a1 1 0 0 0-1-1",
@@ -20,10 +22,19 @@
     }
     
     const UNKNOWN_ICON = "M11 18h2v-2h-2zm1-16A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8m0-14a4 4 0 0 0-4 4h2a2 2 0 0 1 2-2a2 2 0 0 1 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5a4 4 0 0 0-4-4"
+    
+    let sessions: Session[];
+    
+    const fetch_sessions = async () => {
+        // This and the {:then _} svelte block are a workaround to get the
+        // returned sessions array to be available globally.
+        sessions = (await request("GET", "sessions"));
+    }
 
-    const fetch_sessions = async (): Promise<Session[]> => {
-        let sessions: Session[] = await request("GET", "sessions");
-        return sessions.filter((s) => s.id != currentSession.id);
+    const closeSession = async (e: MouseEvent) => {
+        await request("DELETE", `sessions/${selectedSession?.id}`, {"password": password})
+            .then(() => sessions = sessions.filter((s) => s.id != selectedSession?.id))
+            .finally(() => password = selectedSession = undefined);
     }
 
     const ELUDRIS_EPOCH = 1_650_000_000;
@@ -54,7 +65,7 @@
 
 {#await fetch_sessions()}
     <h4>Doodoo</h4>
-{:then sessions}
+{:then _}
     <div class="sessions">
         <h3>Current Session</h3>
         <div class="session-container current-session">
@@ -77,7 +88,7 @@
             </div>
         </div>
         <h3>Active Sessions</h3>
-        {#each sessions as session (session.id)}
+        {#each sessions.filter((s) => s.id != currentSession.id) as session (session.id)}
             <div class="session-container">
                 <div class="session-icon-wrapper">
                     <div class={"platform-icon"} role="tooltip" on:mouseover={expandIcon} on:mouseout={retractIcon} on:focus={expandIcon} on:blur={retractIcon}>
@@ -97,7 +108,7 @@
                     <div class="session-timestamp">{`Created At: ${toTimestamp(session.id).toLocaleString()}`}</div>
                 </div>
                 <div class="spacer"/>
-                <button class="session-close-button" title="Close this session">
+                <button class="session-close-button" title="Close this session" on:click={(e) => selectedSession = session}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                         <path fill="currentColor" d="m17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5M4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4z"/>
                     </svg>
@@ -106,6 +117,42 @@
         {/each}
     </div>
 {/await}
+{#if selectedSession}
+    <Popup on:dismiss={(e) => selectedSession = undefined}>
+        <span slot=title>Close Session</span>
+        <div class="popup-body setting">
+            <table>
+                <tr>
+                    <td>Client:</td>
+                    <td>{selectedSession.client}</td>
+                </tr>
+                <tr>
+                    <td>Platform:</td>
+                    <td>{selectedSession.platform}</td>
+                </tr>
+                <tr>
+                    <td>IP address:</td>
+                    <td>{selectedSession.ip}</td>
+                </tr>
+                <tr>
+                    <td>Created at:</td>
+                    <td>{toTimestamp(selectedSession.id).toLocaleString()}</td>
+                </tr>
+            </table>
+            <hr/>
+            <section>Since this action logs you out on the device/platform you opened this session with, we need to make sure that it's actually you.</section>
+            <input name="confirm-password" type="password" bind:value={password}>
+        </div>
+        <span class="popup-control" slot="control">
+            <button class="popup-dismiss" on:click={(e) => password = selectedSession = undefined}>Nevermind</button>
+            <button
+              class="popup-confirm"
+              on:click={closeSession}
+              disabled={!password}>Confirm</button
+            >
+          </span>
+    </Popup>
+{/if}
 
 
 <style>
@@ -203,6 +250,58 @@
         border: none;
         color: var(--pink-500);
         transition: color 0.2s;
+    }
+
+    .popup-body {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 10px;
+        width: 600px;
+    }
+
+    .popup-control {
+        margin: 5px 10px;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .popup-confirm {
+        width: fit-content;
+        align-self: flex-end;
+        border: unset;
+        border-radius: 5px;
+        padding: 5px 7px;
+        font-size: 14px;
+        background-color: var(--pink-500);
+        transition: background-color ease-in-out 125ms;
+    }
+
+    .popup-confirm:hover {
+        background-color: var(--pink-600);
+    }
+
+    .popup-confirm:disabled {
+        background-color: var(--pink-300);
+        cursor: default;
+    }
+
+    .popup-dismiss {
+        background-color: inherit;
+        border: unset;
+        font-size: inherit;
+        color: var(--pink-400);
+        font-weight: 300;
+        padding: 0;
+        font-size: 14px;
+        text-decoration: underline;
+        transition: color ease-in-out 125ms;
+    }
+
+    .popup-dismiss:hover {
+        color: var(--pink-500);
     }
 
 </style>
