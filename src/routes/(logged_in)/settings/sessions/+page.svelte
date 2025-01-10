@@ -1,8 +1,9 @@
 <script lang='ts'>
     import { request } from "$lib/request";
     import type { Session } from "$lib/types/session";
+    import userData from "$lib/user_data";
 
-    let hoverClass = "";
+    let currentSession = $userData!.session.session;
 
     const PLATFORM_ICONS: Record<string, string | undefined> = {
         windows: "M3 12V6.75l6-1.32v6.48zm17-9v8.75l-10 .15V5.21zM3 13l6 .09v6.81l-6-1.15zm17 .25V22l-10-1.91V13.1z",
@@ -21,7 +22,8 @@
     const UNKNOWN_ICON = "M11 18h2v-2h-2zm1-16A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8m0-14a4 4 0 0 0-4 4h2a2 2 0 0 1 2-2a2 2 0 0 1 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5a4 4 0 0 0-4-4"
 
     const fetch_sessions = async (): Promise<Session[]> => {
-        return await request("GET", "sessions");
+        let sessions: Session[] = await request("GET", "sessions");
+        return sessions.filter((s) => s.id != currentSession.id);
     }
 
     const ELUDRIS_EPOCH = 1_650_000_000;
@@ -54,6 +56,27 @@
     <h4>Doodoo</h4>
 {:then sessions}
     <div class="sessions">
+        <h3>Current Session</h3>
+        <div class="session-container current-session">
+            <div class="session-icon-wrapper">
+                <div class={"platform-icon"} role="tooltip" on:mouseover={expandIcon} on:mouseout={retractIcon} on:focus={expandIcon} on:blur={retractIcon}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path fill="currentColor" d={PLATFORM_ICONS[currentSession.platform] ?? UNKNOWN_ICON}/>
+                    </svg>
+                </div>
+                <div class={"client-icon"} role="tooltip" on:mouseover={expandIcon} on:mouseout={retractIcon} on:focus={expandIcon} on:blur={retractIcon}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path fill="currentColor" d={CLIENT_ICONS[currentSession.client] ?? UNKNOWN_ICON}/>
+                    </svg>
+                </div>
+            </div>
+            <div class="session-data">
+                <h3>{`${currentSession.client} on ${currentSession.platform}`}</h3>
+                <div class="session-ip">{`IP: ${currentSession.ip}`}</div>
+                <div class="session-timestamp">{`Created At: ${toTimestamp(currentSession.id).toLocaleString()}`}</div>
+            </div>
+        </div>
+        <h3>Active Sessions</h3>
         {#each sessions as session (session.id)}
             <div class="session-container">
                 <div class="session-icon-wrapper">
