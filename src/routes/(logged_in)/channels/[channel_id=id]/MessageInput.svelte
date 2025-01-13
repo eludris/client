@@ -111,7 +111,7 @@
   );
 
   const memberAutocompleter = new Autocompleter(
-    /(?<=@)([a-zA-Z0-9_-]{2,})$/,
+    /(?<=@)([a-zA-Z0-9_-]*)$/,
     ' ',
     'member-autocomplete',
     (optionMatcher: RegExp) => {
@@ -140,7 +140,7 @@
   );
 
   const channelAutocompleter = new Autocompleter(
-    /(?<=#)([a-zA-Z0-9_-]{2,})$/,
+    /(?<=#)([a-zA-Z0-9_-]*)$/,
     ' ',
     'channel-autocomplete',
     (optionMatcher: RegExp) => {
