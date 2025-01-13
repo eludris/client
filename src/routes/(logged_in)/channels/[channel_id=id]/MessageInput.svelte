@@ -152,7 +152,7 @@
             options.push({
               name: `#${channel.name}`,
               value: channel.name,
-              image: '' // TODO: how tf
+              image: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Im01LjQxIDIxbC43MS00aC00bC4zNS0yaDRsMS4wNi02aC00bC4zNS0yaDRsLjcxLTRoMmwtLjcxIDRoNmwuNzEtNGgybC0uNzEgNGg0bC0uMzUgMmgtNGwtMS4wNiA2aDRsLS4zNSAyaC00bC0uNzEgNGgtMmwuNzEtNGgtNmwtLjcxIDR6TTkuNTMgOWwtMS4wNiA2aDZsMS4wNi02eiIvPjwvc3ZnPg=='
             });
 
             if (options.length >= MAX_SUGGESTIONS) return options;
