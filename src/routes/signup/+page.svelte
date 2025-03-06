@@ -38,7 +38,7 @@
         let session: SessionCreated = await request(
           'POST',
           'sessions',
-          { identifier: username, password, platform: getPlatform(), client: 'pengin' },
+          { identifier: username, password, platform: getPlatform(), client: 'eludris' },
           { apiUrl: instanceURL }
         );
         let user: User = await request('GET', 'users/@me', null, {
@@ -187,7 +187,9 @@
     background-color: var(--pink-500);
     color: var(--purple-100);
     box-shadow: 0 2px 4px var(--purple-200);
-    transition: box-shadow ease-in-out 200ms, color ease-in-out 200ms,
+    transition:
+      box-shadow ease-in-out 200ms,
+      color ease-in-out 200ms,
       background-color ease-in-out 200ms;
     width: 200px;
   }
