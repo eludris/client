@@ -6,6 +6,7 @@
   import { request } from '$lib/request';
   import { emojiDictionary, toUrl, EMOJI_REGEX } from '$lib/emoji';
 
+  export let channel_id: number;
   export let value = '';
   export let input: HTMLTextAreaElement;
   export let messagesUList: HTMLElement;
@@ -68,7 +69,7 @@
           return m;
         }
       });
-      request('POST', 'messages', { content: value }).then((_) =>
+      request('POST', `/channels/${channel_id}/messages`, { content: value }).then((_) =>
         messagesUList.scroll(0, messagesUList.scrollHeight)
       );
     }
@@ -104,10 +105,12 @@
         fileDatas.push(data);
       }
     }
-    request('POST', 'messages', {
-      content: fileDatas
-        .map((d) => `![${d.name}](${$userData?.instanceInfo.effis_url}${d.id})`)
-        .join('\n')
+    let effisUrl = $userData?.instanceInfo.effis_url;
+    if (!effisUrl?.endsWith('/')) {
+      effisUrl += '/';
+    }
+    request('POST', `/channels/${channel_id}/messages`, {
+      content: fileDatas.map((d) => `![${d.name}](${effisUrl}${d.id})`).join('\n')
     }).then((_) => messagesUList.scroll(0, messagesUList.scrollHeight));
     await tick();
     input?.focus(); // for mobiles
@@ -331,11 +334,9 @@
     background: none;
     color: inherit;
     border: none;
-    cursor: pointer;
     margin: 3px 5px 3px 0;
     font-size: inherit;
     transition: color ease-in-out 125ms;
-    cursor: pointer;
     height: 32px;
     padding-top: 6px;
   }
@@ -381,6 +382,7 @@
     height: auto;
     border-radius: 10px;
     position: relative;
+    box-sizing: border-box;
   }
 
   #markdown-wrapper {

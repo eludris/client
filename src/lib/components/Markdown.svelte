@@ -100,6 +100,10 @@
     border-radius: 5px;
   }
 
+  :global(.md .katex *) {
+    white-space: pre;
+  }
+
   :global(.md:has(.math)) {
     overflow-x: auto;
   }

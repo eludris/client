@@ -6,6 +6,7 @@
   import { tick } from 'svelte';
   import type { StatusType } from '$lib/types/user';
   import Popup from '$lib/components/Popup.svelte';
+  import CropperComponent from './cropper.svelte';
 
   let statuses = [
     ['Online', ''],
@@ -25,49 +26,87 @@
   let status = $userData!.user.status.text;
   let bio = $userData!.user.bio;
 
-  let bannerFile: FileList | undefined | null = undefined;
-  let avatarFile: FileList | undefined | null = undefined;
+  /**
+   * The input banner FileList.
+   * `undefined` if no prior image was provided, or the last provided image was an avatar.
+   */
+  let bannerFiles: FileList | undefined = undefined;
+  /**
+   * The input avatar FileList.
+   * `undefined` if no prior image was provided, or the last provided image was a banner.
+   */
+  let avatarFiles: FileList | undefined = undefined;
+
+  /** The cropped banner file for uploading to Effis.*/
+  let bannerFile: File | null | undefined = undefined;
+  /** The cropped avatar file for uploading to Effis.*/
+  let avatarFile: File | null | undefined = undefined;
+
+  /** The file that is to be passed to the cropper. */
+  let cropperFile: File | undefined = undefined;
+  let cropDone: boolean = false;
 
   let popupError = '';
 
-  $: if (bannerFile) {
-    if (bannerFile[0].size > $userData!.instanceInfo.file_size) {
-      popupError = `Your banner image cannot be bigger than ${
-        $userData!.instanceInfo.file_size / 1000000
-      }MB`;
-      bannerFile = undefined;
-    } else {
-      let reader = new FileReader();
-      reader.addEventListener('load', () => {
-        banner = reader.result! as string;
-      });
-      reader.readAsDataURL(bannerFile[0]);
-    }
-  }
+  let showCropper = false;
+  let cropperKind = 'avatar';
 
-  const resetBanner = () => {
-    banner = null;
-    bannerFile = null;
+  const onBannerUpload = async () => {
+    if (bannerFiles) {
+      if (bannerFiles[0].size > $userData!.instanceInfo.file_size) {
+        popupError = `Your banner image cannot be bigger than ${
+          $userData!.instanceInfo.file_size / 1000000
+        }MB`;
+        bannerFiles = bannerFile = undefined;
+      } else {
+        avatarFiles = undefined;
+        cropperFile = bannerFiles![0];
+        cropperKind = 'banner';
+        await tick();
+        openCropper();
+      }
+    }
   };
 
-  $: if (avatarFile) {
-    if (avatarFile[0].size > $userData!.instanceInfo.file_size) {
-      popupError = `Your avatar image cannot be bigger than ${
-        $userData!.instanceInfo.file_size / 1000000
-      }MB`;
-      avatarFile = undefined;
-    } else {
-      let reader = new FileReader();
-      reader.addEventListener('load', () => {
-        avatar = reader.result! as string;
-      });
-      reader.readAsDataURL(avatarFile[0]);
+  const resetBanner = () => {
+    bannerFile = banner = null;
+    bannerFiles = undefined;
+  };
+
+  const onAvatarUpload = async () => {
+    if (avatarFiles) {
+      if (avatarFiles[0].size > $userData!.instanceInfo.file_size) {
+        popupError = `Your avatar image cannot be bigger than ${
+          $userData!.instanceInfo.file_size / 1000000
+        }MB`;
+        avatarFiles = avatarFile = undefined;
+      } else {
+        bannerFiles = undefined;
+        cropperFile = avatarFiles![0];
+        cropperKind = 'avatar';
+        await tick();
+        openCropper();
+      }
     }
-  }
+  };
 
   const resetAvatar = () => {
     avatar = 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true';
     avatarFile = null;
+    avatarFiles = undefined;
+  };
+
+  let cropSuccess = (e: CustomEvent<Blob>) => {
+    if (cropperKind == 'avatar') {
+      avatarFile = new File([e.detail], cropperFile!.name);
+      avatar = URL.createObjectURL(avatarFile);
+    } else {
+      bannerFile = new File([e.detail], cropperFile!.name);
+      banner = URL.createObjectURL(bannerFile);
+    }
+    cropDone = true;
+    cropperFile = undefined;
+    closeCropper();
   };
 
   let bioFocused = false;
@@ -78,6 +117,7 @@
   let errors: { [field: string]: string | undefined } = {};
 
   $: changed =
+    cropDone ||
     bannerFile !== undefined ||
     avatarFile !== undefined ||
     (display_name || null) != $userData!.user.display_name ||
@@ -157,21 +197,21 @@
     let newProfile: UpdateUserProfile = {};
     if (bannerFile !== undefined) {
       if (bannerFile) {
-        let data = await uploadFile('banners', bannerFile[0]);
+        let data = await uploadFile('banners', bannerFile);
         newProfile.banner = data.id;
       } else {
         newProfile.banner = null;
       }
-      bannerFile = undefined;
+      bannerFile = bannerFiles = undefined;
     }
     if (avatarFile !== undefined) {
       if (avatarFile) {
-        let data = await uploadFile('avatars', avatarFile[0]);
+        let data = await uploadFile('avatars', avatarFile);
         newProfile.avatar = data.id;
       } else {
         newProfile.avatar = null;
       }
-      avatarFile = undefined;
+      avatarFile = avatarFiles = undefined;
     }
     if (display_name != $userData?.user.display_name) {
       newProfile.display_name = display_name?.trim() || null;
@@ -191,11 +231,19 @@
       let err = e as RequestErr;
       popupError = err.message;
     }
-    saving = false;
+    cropDone = saving = false;
   };
 
   const popupDismiss = () => {
     popupError = '';
+  };
+
+  const openCropper = () => {
+    showCropper = true;
+  };
+
+  const closeCropper = () => {
+    showCropper = false;
   };
 </script>
 
@@ -247,7 +295,8 @@
               name="banner"
               type="file"
               accept="image/*"
-              bind:files={bannerFile}
+              bind:files={bannerFiles}
+              on:change={onBannerUpload}
             />
           </span>
         </div>
@@ -270,7 +319,8 @@
                     name="avatar"
                     type="file"
                     accept="image/*"
-                    bind:files={avatarFile}
+                    bind:files={avatarFiles}
+                    on:change={onAvatarUpload}
                   />
                   {#if avatar != 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true'}
                     <button on:click={resetAvatar}>Reset</button>
@@ -295,6 +345,8 @@
           <span
             id="status-type"
             class="status-icon status-indicator {status_type.toLowerCase()}"
+            role="button"
+            tabindex="0"
             on:click|stopPropagation={statusIndicatorClick}
           />
           {#if statusIndicatorFocused}
@@ -343,7 +395,7 @@
             />
           {:else}
             <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <div id="bio-md-container" on:click={bioClick}>
+            <div id="bio-md-container" on:click={bioClick} role="button" tabindex="0">
               <Markdown content={bio ?? 'Nothing here yet'} />
             </div>
           {/if}
@@ -371,6 +423,15 @@
       <span slot="title">Error</span>
       {popupError}
     </Popup>
+  {/if}
+
+  {#if showCropper}
+    <CropperComponent
+      on:dismiss={closeCropper}
+      on:success={cropSuccess}
+      {cropperFile}
+      {cropperKind}
+    />
   {/if}
 {/if}
 
@@ -412,6 +473,11 @@
     display: flex;
     flex-direction: column;
     width: min(900px, 95%);
+  }
+
+  form input,
+  form textarea {
+    border-radius: 0;
   }
 
   #user {
@@ -516,7 +582,6 @@
     border: unset;
     color: var(--pink-700);
     z-index: 2;
-    cursor: pointer;
   }
 
   #image-input-hover button:hover {
@@ -659,7 +724,9 @@
     margin-top: 10px;
     font-size: 18px;
     background-color: var(--gray-300);
-    transition: background-color ease-in-out 125ms, color ease-in-out 125ms;
+    transition:
+      background-color ease-in-out 125ms,
+      color ease-in-out 125ms;
     color: var(--color-text);
   }
 

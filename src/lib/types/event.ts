@@ -1,5 +1,6 @@
 import type { InstanceInfo } from './instance';
 import type { Message } from './message';
+import type { Sphere } from './sphere';
 import type { Status, User } from './user';
 
 export enum PayloadOP {
@@ -11,7 +12,9 @@ export enum PayloadOP {
   AUTHENTICATED = 'AUTHENTICATED',
   USER_UPDATE = 'USER_UPDATE',
   PRESENCE_UPDATE = 'PRESENCE_UPDATE',
-  MESSAGE_CREATE = 'MESSAGE_CREATE'
+  MESSAGE_CREATE = 'MESSAGE_CREATE',
+  SPHERE_JOIN = 'SPHERE_JOIN',
+  SPHERE_MEMBER_JOIN = 'SPHERE_MEMBER_JOIN',
 }
 
 export interface PingPayload {
@@ -20,6 +23,7 @@ export interface PingPayload {
 
 export interface AuthenticatePayload {
   op: PayloadOP.AUTHENTICATE;
+  d: string;
 }
 
 export interface PongPayload {
@@ -49,7 +53,7 @@ export interface AuthenticatedPayload {
   op: PayloadOP.AUTHENTICATED;
   d: {
     user: User;
-    users: User[];
+    spheres: Sphere[];
   };
 }
 
@@ -71,6 +75,19 @@ export interface MessageCreatePayload {
   d: Message;
 }
 
+export interface SphereJoin {
+  op: PayloadOP.SPHERE_JOIN;
+  d: Sphere;
+}
+
+export interface SphereMemberJoin {
+  op: PayloadOP.SPHERE_MEMBER_JOIN;
+  d: {
+    user: User;
+    sphere_id: number;
+  };
+}
+
 export type IncomingPayload =
   | PongPayload
   | HelloPayload
@@ -78,5 +95,7 @@ export type IncomingPayload =
   | AuthenticatedPayload
   | UserUpdatePayload
   | PresenceUpdatePayload
-  | MessageCreatePayload;
+  | MessageCreatePayload
+  | SphereJoin
+  | SphereMemberJoin;
 export type OutgoingPayload = PingPayload | AuthenticatePayload;

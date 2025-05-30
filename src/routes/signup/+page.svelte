@@ -9,6 +9,7 @@
   import { env } from '$env/dynamic/public';
   import getPlatform from '$lib/platform';
 
+  const INSTANCE_URL = env.PUBLIC_INSTANCE_URL ?? 'https://api.eludris.com/';
   const EMAIL_REGEX = new RegExp(
     /^(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/
   );
@@ -17,7 +18,6 @@
   let email = '';
   let password = '';
   let passwordConfirm = '';
-  let instanceURL = env.PUBLIC_INSTANCE_URL ?? 'https://eludris.tooty.xyz';
   let error = '';
   let requesting = false;
 
@@ -33,16 +33,16 @@
       error = 'Loading...';
       requesting = true;
       try {
-        let instanceInfo: InstanceInfo = await request('GET', '', null, { apiUrl: instanceURL });
-        await request('POST', 'users', { username, email, password }, { apiUrl: instanceURL });
+        let instanceInfo: InstanceInfo = await request('GET', '', null, { apiUrl: INSTANCE_URL });
+        await request('POST', 'users', { username, email, password }, { apiUrl: INSTANCE_URL });
         let session: SessionCreated = await request(
           'POST',
           'sessions',
-          { identifier: username, password, platform: getPlatform(), client: 'pengin' },
-          { apiUrl: instanceURL }
+          { identifier: username, password, platform: getPlatform(), client: 'eludris' },
+          { apiUrl: INSTANCE_URL }
         );
         let user: User = await request('GET', 'users/@me', null, {
-          apiUrl: instanceURL,
+          apiUrl: INSTANCE_URL,
           token: session.token
         });
         userData.set({
@@ -187,10 +187,11 @@
     background-color: var(--pink-500);
     color: var(--purple-100);
     box-shadow: 0 2px 4px var(--purple-200);
-    transition: box-shadow ease-in-out 200ms, color ease-in-out 200ms,
+    transition:
+      box-shadow ease-in-out 200ms,
+      color ease-in-out 200ms,
       background-color ease-in-out 200ms;
     width: 200px;
-    cursor: pointer;
   }
 
   #signup-form > button:hover {
@@ -205,7 +206,7 @@
   }
 
   .error {
-    color: var(--pink-700);
+    color: var(--pink-600);
     text-align: center;
   }
 
