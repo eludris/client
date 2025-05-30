@@ -1,217 +1,91 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
-  import userData from '$lib/user_data';
-  import messages from '$lib/ws';
-  import { tick } from 'svelte';
-  import { browser } from '$app/environment';
-  import MessageInput from './MessageInput.svelte';
-  import MessageComponent from './Message.svelte';
-  import Markdown from '$lib/components/Markdown.svelte';
-  import type { PenginMessage } from '$lib/types/ui/message';
+  import Thang from '$lib/components/Thang.svelte';
+  import { request, type RequestErr } from '$lib/request';
+  import type { Sphere } from '$lib/types/sphere';
+  import state from '$lib/ws';
 
-  let messagesUList: HTMLUListElement;
-  let value = '';
-  let input: HTMLTextAreaElement;
+  let sphereInput = '';
+  let error = '';
 
-  onMount(() => {
-    messagesUList.scroll(0, messagesUList.scrollHeight);
-    input.focus();
-  });
-
-  $: {
-    if ($messages) {
-      let scroll =
-        messagesUList &&
-        messagesUList.scrollHeight - messagesUList.offsetHeight - messagesUList.scrollTop <
-          window.outerHeight / 4;
-      tick().then(() => {
-        if (scroll) messagesUList?.scroll(0, messagesUList.scrollHeight);
+  const joinSphere = async () => {
+    try {
+      let res: Sphere = await request('GET', `/spheres/${sphereInput}/join`);
+      $state.spheres[res.id] = res;
+      let channelId = 0;
+      state.update((state) => {
+        state.spheres[res.id] = res;
+        res.categories.forEach((category) => {
+          state.categories[category.id] = category;
+          category.channels.forEach((channel) => {
+            if (!channelId) channelId = channel.id;
+            state.channels[channel.id] = channel;
+          })
+        });
+        return state;
       });
+      goto(`/channels/${channelId}`);
+    } catch (e) {
+      let err = e as RequestErr;
+      if (err.code == 404 || err.code == 401) {
+        error = "Supplied sphere name doesn't exist";
+      } else {
+        error = err.message;
+      }
     }
-  }
-
-  const autoScroll = async () => {
-    if (!browser) return;
-    await tick();
-    if (
-      messagesUList.scrollHeight - messagesUList.offsetHeight - messagesUList.scrollTop <
-      window.outerHeight / 4
-    )
-      messagesUList.scroll(0, messagesUList.scrollHeight);
-  };
-
-  const logOut = () => {
-    userData.set(null);
-    goto('/login');
-  };
-
-  const onSubmit = async () => {
-    if (value.trim()) {
-      if (value.startsWith('/shrug')) value = value.substring(7) + ' ¯\\\\\\_(ツ)_/¯';
-      fetch($userData?.instanceURL + '/messages', {
-        method: 'POST',
-        body: JSON.stringify({ author: $userData?.name, content: value }) // data?.name is fine here
-      }).then(() => messagesUList.scroll(0, messagesUList.scrollHeight));
-    }
-    value = '';
-    await tick();
-    input.focus(); // for mobiles
-  };
-
-  const onReply = async (e: CustomEvent<PenginMessage>) => {
-    const start = input.selectionStart;
-    const end = input.selectionEnd;
-
-    const reply = `${value.trim() ? '\n' : ''}${e.detail.content
-      .split('\n')
-      .map((l) => `> ${l}`)
-      .join('\n')}\n@${e.detail.author}\n\n`;
-    value = value.substring(0, start) + reply + value.substring(end);
-    await tick();
-
-    input.selectionStart = input.selectionEnd = start + reply.length;
-
-    input.focus();
   };
 </script>
 
-<svelte:window on:resize={autoScroll} />
-
-<div class="message-channel">
-  <div id="options-div">
-    <div id="instance-info">
-      <span id="instance-name">{$userData?.instanceInfo?.instance_name ?? 'Pengin - loading'}</span>
-      {#if $userData?.instanceInfo?.description}
-        <span id="instance-description">{$userData.instanceInfo.description}</span>
-        <span id="instance-markdown">
-          <Markdown content={$userData.instanceInfo.description} />
-        </span>
-      {/if}
-    </div>
-    <a id="settings-link" href="/settings"> Settings </a>
-    <button id="logout-button" on:click={logOut}> Logout </button>
-  </div>
-  <ul bind:this={messagesUList} id="messages">
-    {#if $messages}
-      {#each $messages as message, i (i)}
-        <MessageComponent {message} on:reply={onReply} />
-      {/each}
-    {/if}
-  </ul>
-  <form id="message-input-form" on:submit|preventDefault={onSubmit}>
-    <MessageInput bind:input bind:value on:submit={onSubmit} scrollContainer={messagesUList} />
-    <button id="send-button">Send</button>
+<div id="content">
+  <h1>Not much going on here...</h1>
+  <p>Hopefully this gets populated by more interesting things soon!</p>
+  <Thang />
+  <p>Why don't you go check some spheres for now?</p>
+  <form on:submit|preventDefault={joinSphere} id="sphere-form">
+    <input
+      id="sphere-input"
+      type="text"
+      placeholder="Sphere Slug"
+      autocomplete="off"
+      bind:value={sphereInput}
+    />
+    <button id="join-button">Join</button>
   </form>
 </div>
 
 <style>
-  .message-channel {
-    width: 100%;
-    height: 100%;
+  #content {
     display: flex;
+    align-items: center;
+    justify-content: center;
     flex-direction: column;
+    height: 100%;
   }
 
-  #messages {
-    flex-grow: 1;
-    padding: 10px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: 0;
-    margin-top: 0;
-    margin-bottom: 0; /* where is react native marginVertical when you need it? */
+  h1 {
+    margin: 10px;
   }
 
-  #message-input-form {
-    width: calc(100% - 10px);
-    display: flex;
-    background-color: var(--gray-200);
-    color: var(--gray-600);
-    padding: 2px;
-    margin: 0 5px 10px 5px;
+  #sphere-input,
+  #join-button {
     font-size: 18px;
-    height: auto;
-    border-radius: 10px;
-  }
-
-  #send-button {
-    background: none;
-    color: inherit;
-    border: none;
-    cursor: pointer;
-    margin: 3px 5px 3px 0;
-    font-size: inherit;
-    transition: color ease-in-out 125ms;
-    cursor: pointer;
-  }
-
-  #send-button:hover {
-    color: var(--gray-500);
-  }
-
-  #options-div {
-    display: flex;
-    background-color: var(--gray-200);
-    padding: 10px;
-    gap: 20px;
-  }
-
-  #instance-info {
-    display: flex;
-    flex-grow: 1;
-    overflow: hidden;
-  }
-
-  #instance-name {
-    margin-right: 15px;
-    font-size: 24px;
-    align-self: baseline;
-  }
-
-  #instance-description {
-    font-weight: 300;
-    align-self: baseline;
-    white-space: nowrap;
-  }
-
-  #instance-markdown {
-    display: none;
-    position: absolute;
-    top: 35px;
-    left: 0;
-    background-color: var(--gray-300);
-    margin: 20px;
-    padding: 10px;
-    border-radius: 10px;
-    max-width: 90%;
-  }
-
-  #instance-info:hover > #instance-markdown {
-    display: inline;
-  }
-
-  #settings-link {
-    text-decoration: none;
-    align-self: center;
-    border: unset;
-  }
-
-  #logout-button {
     padding: 5px 10px;
     outline: none;
+    border: 2px solid var(--pink-200);
+    border-radius: 10px;
+    background-color: var(--purple-200);
+    color: inherit;
+    resize: none;
+  }
+
+  #join-button {
     border: unset;
-    border-radius: 25px;
     background-color: var(--pink-500);
-    color: var(--purple-100);
-    box-shadow: 0 2px 4px var(--purple-200);
-    transition: box-shadow ease-in-out 200ms, color ease-in-out 200ms,
-      background-color ease-in-out 200ms;
+    padding: 5px 20px;
     cursor: pointer;
   }
 
-  #logout-button:hover {
-    box-shadow: 0 5px 20px var(--purple-200);
+  #join-button:hover {
     background-color: var(--pink-600);
   }
 </style>

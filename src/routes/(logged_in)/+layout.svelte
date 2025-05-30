@@ -2,8 +2,11 @@
   import { onMount } from 'svelte';
   import userData from '$lib/user_data';
   import { goto } from '$app/navigation';
-  import messages from '$lib/ws';
+  import state from '$lib/ws';
   import type { PageData } from './$types';
+  import Navbar from '$lib/components/Navbar.svelte';
+  import { page } from '$app/stores';
+  import SphereBar from '$lib/components/SphereBar.svelte';
 
   onMount(() => {
     if (!$userData) goto('/login');
@@ -22,8 +25,16 @@
   };
 </script>
 
-{#if $userData && $messages}
-  <slot />
+{#if $userData && $state.connected}
+  <Navbar />
+  <div id="page">
+    {#if !$page.url.pathname.startsWith('/settings')}
+      <SphereBar />
+    {/if}
+    <span id="page-content">
+      <slot />
+    </span>
+  </div>
 {:else}
   <div id="fact">
     <h1>Fun Fact</h1>
@@ -36,13 +47,23 @@
       <a class="help-option" href="https://discord.gg/vV6v2DhWQB" target="_blank" rel="noreferrer"
         >Get help</a
       >
-      <span id="seperator" />
+      <span id="separator" />
       <button class="help-option" on:click={logOut}>Log out</button>
     </div>
   {/if}
 {/if}
 
 <style>
+  #page {
+    display: flex;
+    height: calc(100% - 60px);
+  }
+
+  #page-content {
+    flex-grow: 1;
+    min-width: 0;
+  }
+
   #fact {
     width: 100%;
     height: 100%;
@@ -77,7 +98,7 @@
     padding: 10px;
   }
 
-  #seperator {
+  #separator {
     display: inline-block;
     height: 1px;
     width: 7px;
@@ -89,9 +110,9 @@
     background-color: transparent;
     color: var(--gray-500);
     font-size: inherit;
-    cursor: pointer;
     align-self: baseline;
     transition: color ease-in-out 125ms;
+    text-decoration: underline;
   }
 
   .help-option:hover {

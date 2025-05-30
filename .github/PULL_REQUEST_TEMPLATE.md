@@ -15,5 +15,5 @@ Use keywords from https://docs.github.com/en/get-started/writing-on-github/worki
 
 <!--
 ## This is a **UI Change**
-- [ ] This has been previewed and looks as intended
+- [ ] This has been previewed and looks as intended.
 -->

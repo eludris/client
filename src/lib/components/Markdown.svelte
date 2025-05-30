@@ -17,7 +17,10 @@
         import('prismjs/components/prism-go.js');
         // @ts-expect-error: this is untyped :(
         import('prismjs/components/prism-json.js');
+        // @ts-expect-error: this is untyped :(
+        import('prismjs/components/prism-bash.js');
         Prism.languages['rs'] = Prism.languages['rust'];
+        Prism.languages['bash'] = Prism.languages['sh'];
       });
     } catch (e) {
       console.error('Could not load prism syntax highlighting');
@@ -46,16 +49,6 @@
   {/await}
 {/if}
 
-<svelte:head>
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css"
-    integrity="sha384-Xi8rHCmBmhbuyyhbI88391ZKP2dmfnOl4rT9ZfRI7mLTdk1wblIUnrIq35nqwEvC"
-    crossorigin="anonymous"
-  />
-  <link rel="stylesheet" href="/lazerwave.css" />
-</svelte:head>
-
 <style>
   :global(.md *) {
     white-space: pre-wrap;
@@ -64,6 +57,7 @@
   }
 
   :global(.md blockquote) {
+    display: inline-block;
     border-left: 5px solid var(--gray-300);
     margin: 0;
     padding: 0 20px; /* switcheroo */
@@ -81,11 +75,13 @@
   }
 
   :global(.md pre, pre[class*='language-'][class*='language-']) {
-    width: calc(100% - 90px);
+    display: block;
+    width: 80%;
     background-color: var(--gray-200);
     padding: 20px;
     margin: 10px;
     border-radius: 10px;
+    overflow-y: auto;
   }
 
   :global(.md code, code[class*='language-'][class*='language-']) {
@@ -99,12 +95,23 @@
   }
 
   :global(.md img) {
-    max-width: calc(100% - 10px);
+    max-width: 30%;
+    max-height: 80vw;
     border-radius: 5px;
+  }
+
+  :global(.md .katex *) {
+    white-space: pre;
   }
 
   :global(.md:has(.math)) {
     overflow-x: auto;
+  }
+
+  :global(.md .math *) {
+    white-space: nowrap;
+    line-break: unset;
+    word-wrap: unset;
   }
 
   :global(.md table) {
@@ -152,13 +159,56 @@
   }
 
   :global(.md ul) {
+    display: inline-block;
     padding: 0 20px;
   }
 
+  :global(.md li) {
+    white-space: initial;
+  }
+
   :global(.md .spoiler) {
+    display: inline;
     background-color: var(--purple-100);
     color: transparent;
     cursor: pointer;
     padding: 2px;
+  }
+
+  :global(.md .spoiler img) {
+    filter: blur(10px);
+  }
+
+  :global(.md .spoiler.unspoilered) {
+    color: inherit;
+    cursor: default;
+  }
+
+  :global(.md .spoiler.unspoilered img) {
+    filter: none;
+  }
+
+  :global(.md .mention) {
+    display: inline-block;
+    background-color: color-mix(in srgb, var(--pink-400) 50%, transparent);
+    padding: 2px 5px;
+    border-radius: 5px;
+  }
+
+  :global(.md .emoji) {
+    height: 22px;
+    aspect-ratio: 1;
+    object-fit: contain;
+    vertical-align: bottom;
+  }
+
+  :global(.md .emoji.big) {
+    height: 100px;
+  }
+
+  @media only screen and (max-width: 1000px) {
+    :global(.md img) {
+      max-width: 100%;
+    }
   }
 </style>

@@ -45,13 +45,17 @@ body {
 }
 
 a {
-  text-decoration: none;
+  text-decoration: underline;
   color: var(--gray-500);
-  border-bottom: 2px solid var(--gray-300);
-  transition: border-bottom ease-in-out 200ms, color ease-in-out 200ms;
+  /* border-bottom: 2px solid var(--gray-300); */
+  transition: /* border-bottom ease-in-out 200ms, */ color ease-in-out 200ms;
 }
 
 a:hover {
   color: var(--gray-400);
-  border-bottom: 2px solid var(--purple-400);
+  /* border-bottom: 2px solid var(--purple-400); */
+}
+
+button:not([disabled]) {
+  cursor: pointer;
 }

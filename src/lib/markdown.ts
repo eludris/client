@@ -9,12 +9,17 @@ import rehypeStringify from 'rehype-stringify';
 
 import { visit } from 'unist-util-visit';
 import data from '$lib/user_data';
+import state from './ws';
+import { get } from 'svelte/store';
+import { emojiDictionary, EMOJI_REGEX, toUrl } from './emoji';
 
 let effisHost: string | undefined = undefined;
+let effisUrl: string | undefined = undefined;
 
 data.subscribe((value) => {
   if (value?.instanceInfo?.effis_url) {
     try {
+      effisUrl = value.instanceInfo.effis_url;
       const url = new URL(value.instanceInfo.effis_url);
       effisHost = url.hostname;
     } catch {
@@ -32,24 +37,36 @@ const remarkTextifyHtml: Plugin = () => {
 
 const remarkKillImages: Plugin = () => {
   return (tree) =>
-    visit(tree, 'image', (node: { type: string; alt: string; value: string; url: string }) => {
+    visit(tree, 'image', (node: { url: string }) => {
       try {
         const url = new URL(node.url);
         if (url.hostname != effisHost) {
-          node.type = 'text';
-          node.value = node.alt;
+          node.url = `${effisUrl}/proxy?url=${encodeURIComponent(node.url)}`;
         }
-      } catch {
-        node.type = 'text';
-        node.value = node.alt;
+      } catch (e) {
+        node.url = `${effisUrl}/proxy?url=${encodeURIComponent(node.url)}`;
       }
     });
 };
 
 const rehypeExternalAnchors: Plugin = () => {
   return (tree) =>
-    visit(tree, 'element', (node: { tagName: string; properties: { target: string } }) => {
+    visit(tree, 'element', (node: { tagName: string; properties: { target: string, href: string } }) => {
       if (node.tagName == 'a') {
+        try {
+          const url = new URL(node.properties.href);
+          if (url.hostname == 'tenor.com' || url.hostname == 'media1.tenor.com') {
+            const gif = node as any; //typing hack for my sanity
+            gif.tagName = 'img';
+            gif.properties.src = node.properties.href;
+            if (!gif.properties.src.endsWith('.gif')) {
+              gif.properties.src += '.gif';
+            }
+            gif.properties.href = undefined;
+            gif.children = [];
+            return;
+          }
+        } catch { }
         node.properties.target = '_blank';
       }
     });
@@ -71,24 +88,30 @@ const unScrewHtml = (html: string): string => {
     // make blockquotes only one line long
     .replace(/^>.*$/gm, '$&\n\n')
     // solve weird bug with whitespace getting magically removed sometimes
-    .replace(/`( +[^`\s]+? +)`/gm, '` $1 `');
+    .replace(/`( +[^`\s]+? +)`/gm, '` $1 `')
+    // ensure backslashes escaping mentions etc are retained
+    .replace(/\\([:@<>#|])/gm, '\\\\$1');
 
   // we have to reassign to get the updated string
   // ensure ``` s have a new line before and after them
-  html = html.replace(/(\S+)```(\S+ ?)?/gm, (_, p1, p2, offset) => {
-    p1 = p1 ?? '';
-    p2 = p2 ?? '';
-    offset = offset + p1.length;
-    const codeFencesBefore = html.substring(0, offset).split('```').length - 1;
-    const lastCodeFence = !html.substring(offset + 3).includes('```');
-    if (codeFencesBefore % 2 == 1 && html[offset - 1] != '\n') {
-      return `${p1}\n\`\`\`${p2 ? `\n${p2}` : ''}`;
-    }
-    if (codeFencesBefore % 2 == 0 && !lastCodeFence && html[offset + p2.length + 3] != '\n') {
-      return `${p1 ? `${p1}\n` : ''}\`\`\`${p2}\n`;
-    }
-    return `\`\`\`${p2}`;
-  });
+  // html = html.replace(/(\S+)```(\S+ ?)?/gm, (_, p1, p2, offset) => {
+  //   p1 = p1 ?? '';
+  //   p2 = p2 ?? '';
+  //   offset += p1.length;
+
+  //   console.log("hello")
+  //   console.log("hi", p1, p2, offset);
+
+  //   const codeFencesBefore = html.substring(0, offset).split('```').length - 1;
+  //   const lastCodeFence = !html.substring(offset + 3).includes('```');
+  //   if (codeFencesBefore % 2 == 1 && html[offset - 1] != '\n') {
+  //     return `${p1}\n\`\`\`${p2 ? `\n${p2}` : ''}`;
+  //   }
+  //   if (codeFencesBefore % 2 == 0 && !lastCodeFence && html[offset + p2.length + 3] != '\n') {
+  //     return `${p1 ? `${p1}\n` : ''}\`\`\`${p2}\n`;
+  //   }
+  //   return `\`\`\`${p2}`;
+  // });
 
   // number list supremacy
   html = html.replace(/^(\+ |\* )/gm, (match, _, offset) => {
@@ -110,8 +133,10 @@ const unScrewHtml = (html: string): string => {
     const currentLine = preNewline.substring(preNewline.lastIndexOf('\n')).trim();
     if (/^(?:>|#|- |\d+\. )/.test(currentLine)) return match;
     if (
-      preNewline.split('```').length % 2 == 1 &&
-      preNewline.replace(/```/gm, '').split('`').length % 2 == 1
+      (preNewline.split(/\n```\S?/gm).length + +preNewline.startsWith('```')) % 2 == 1 &&
+      preNewline.replace(/```/gm, '').split('`').length % 2 == 1 &&
+      preNewline.split('$$').length % 2 == 1 &&
+      preNewline.replace(/$$/gm, '').split('`').length % 2 == 1
     ) {
       return match.substring(0, 2) + match.substring(2).replace(/\n/g, '\\\n');
     }
@@ -119,13 +144,13 @@ const unScrewHtml = (html: string): string => {
   });
 
   // add trailing line after lists to make them not merge
-  html = html.replace(/^((?:\d+ |- ).+)(\n[^- ]|$)/g, '$1\n$2');
+  html = html.replace(/^((?:\d+\. |- ).+)(\n[^- ]|$)/g, '$1\n$2');
 
   // trailing ```s leading to an entire code block is...annoying
   if (html.includes('```')) {
     const lastCodeFence = html.lastIndexOf('```');
     const preCodeFence = html.substring(0, lastCodeFence);
-    if (preCodeFence.split('```').length % 2 == 1) {
+    if ((preCodeFence.split(/\n```\S?/gm).length + +preCodeFence.startsWith('```')) % 2 == 1) {
       html = preCodeFence + '\\`\\`\\`' + html.substring(lastCodeFence + 3);
     }
   }
@@ -147,5 +172,48 @@ const renderer = unified()
   .use(rehypePrism);
 
 export default async (content: string): Promise<string> => {
-  return await renderer.process(unScrewHtml(content)).then((res) => res.toString()).then((res) => res.replace(/\|\|(.+?)\|\|/gm, '<span class="spoiler" onclick="this.style.color = \'var(--color-text)\';this.style.cursor = \'unset\'">$1</span>'));
+  return await renderer
+    .process(unScrewHtml(content))
+    .then((res) => res.toString())
+    .then((res) =>
+      // Parse spoilers (||spoiler||)
+      res.replace(
+        /(?<!\\)\|\|(.+?)\|\|/gm,
+        '<span class="spoiler" onclick="this.classList.add(\'unspoilered\')">$1</span>'
+      )
+    )
+    .then((res) =>
+      // Prevent backslashes from rendering in newline markdown before tables/katex blocks etc.
+      res.replace(/\n\\<\/p>\n<(table|div|h[1-6]|pre)/gm, '\n<br>\n</p>\n<$1')
+    )
+    .then((res) => {
+      // Parse mentions (<@id>)
+      return res.replace(/(?<!\\)&#x3C;@(\d+)>/gm, (m, id, offset) => {
+        let user = get(state).users[id];
+        if (user && res.substring(0, offset).split(/<\\?code>/gm).length % 2 == 1) {
+          return `<span class="mention">@${user.display_name ?? user.username}</span>`;
+        }
+        return m;
+      });
+    })
+    .then((res) => {
+      // Parse emoji (:name:), render them big if there's max 10 emoji and no
+      // further text in a message
+      let big = !content.replace(EMOJI_REGEX, '').trim() ? ' big' : '';
+      if (big && content.split(':').length > 21) {
+        big = '';
+      }
+      return res.replace(EMOJI_REGEX, (m, emojiName, offset) => {
+        let emoji = emojiDictionary[emojiName];
+        if (emoji && res.substring(0, offset).split(/<\/?code>/gm).length % 2 == 1) {
+          return `<img class="emoji${big}" draggable="false" alt="${emoji}"
+            src="${toUrl(emojiName)}" title="${emoji}"/>`;
+        }
+        return m;
+      });
+    })
+    .then((res) =>
+      // Remove leading backslashes before special characters
+      res.replace(/\\([:@&#x3C;>#|])/gm, '$1')
+    );
 };

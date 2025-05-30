@@ -2,49 +2,78 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import userData from '$lib/user_data';
+  import { request, type RequestErr } from '$lib/request';
+  import type { InstanceInfo } from '$lib/types/instance';
+  import type { User } from '$lib/types/user';
+  import type { SessionCreated } from '$lib/types/session';
+  import { env } from '$env/dynamic/public';
+  import getPlatform from '$lib/platform';
 
-  let value = '';
-  let instanceURL = '';
+  const INSTANCE_URL = env.PUBLIC_INSTANCE_URL ?? 'https://cdn.eludris.com/';
+
+  let username = '';
+  let password = '';
   let error = '';
+  let requesting = false;
 
   onMount(() => {
     if ($userData) goto('/');
   });
 
-  const onSubmit = () => {
-    if (!error && value) {
-      const url: string = instanceURL.startsWith('http') ? instanceURL : 'https://' + instanceURL; // I could one line this but I like my codebases sane
-      userData.set({
-        name: value,
-        instanceURL: instanceURL ? url : 'https://eludris.tooty.xyz'
-      });
-      goto('/');
+  const onSubmit = async () => {
+    if (!error && username) {
       if ('Notification' in window && Notification.permission == 'default') {
         Notification.requestPermission();
+      }
+      error = 'Loading...';
+      requesting = true;
+      try {
+        let instanceInfo: InstanceInfo = await request('GET', '', null, { apiUrl: INSTANCE_URL });
+        let session: SessionCreated = await request(
+          'POST',
+          'sessions',
+          { identifier: username, password, platform: getPlatform(), client: 'eludris' },
+          { apiUrl: INSTANCE_URL }
+        );
+        let user: User = await request('GET', 'users/@me', null, {
+          apiUrl: INSTANCE_URL,
+          token: session.token
+        });
+        userData.set({
+          user,
+          session,
+          instanceInfo
+        });
+        goto('/');
+      } catch (e) {
+        let err = e as RequestErr;
+        if (err.code == 404 || err.code == 401) {
+          error = 'Incorrect username or password';
+        } else {
+          error = err.message;
+        }
+        requesting = false;
       }
     }
   };
 
   const onUsernameInput = () => {
-    value = value.trim();
-    if (value.length < 2 || value.length > 32) {
-      error = 'Your username must be between 2 and 32 characters in length';
-    } else {
-      error = '';
-    }
+    validateInputs();
   };
 
-  const onURLInput = () => {
-    if (!instanceURL) {
-      error = '';
+  const onPasswordInput = () => {
+    validateInputs();
+  };
+
+  const validateInputs = () => {
+    if (requesting) {
       return;
     }
-    const url: string = instanceURL.startsWith('http') ? instanceURL : 'https://' + instanceURL;
-    try {
-      new URL(url);
+    username = username.trim();
+    if (password.length < 8) {
+      error = 'Your password must be at least 8 characters long';
+    } else {
       error = '';
-    } catch {
-      error = 'Invalid instance url';
     }
   };
 </script>
@@ -52,19 +81,31 @@
 <div id="login-div">
   <form id="login-form" on:submit|preventDefault={onSubmit}>
     <h1>Log in to Eludris</h1>
-    <label for="username">Username</label>
-    <input bind:value on:input={onUsernameInput} name="username" placeholder="Username" />
-    <label for="instanceUrl">Instance URL</label>
+    <label for="username">Username / Email</label>
     <input
-      bind:value={instanceURL}
-      on:input={onURLInput}
-      name="instanceUrl"
-      placeholder="https://eludris.tooty.xyz"
+      bind:value={username}
+      on:input={onUsernameInput}
+      name="username"
+      placeholder="Username / Email"
+    />
+    <label for="password">Password</label>
+    <input
+      bind:value={password}
+      on:input={onPasswordInput}
+      name="password"
+      placeholder="Password"
+      type="password"
     />
     {#if error}
       <span class="error">{error}</span>
     {/if}
     <button type="submit" disabled={!!error}>Log in</button>
+    <a id="signup-prompt" href="/signup">Don't have an account? Sign up!</a>
+    <a
+      id="password-reset-prompt"
+      href={username.indexOf('@') != -1 ? `/reset-password?email=${username}` : '/reset-password'}
+      >Forgot your password?</a
+    >
   </form>
 </div>
 
@@ -85,11 +126,11 @@
     background-color: var(--purple-100);
     border-radius: 10px;
     padding: 40px;
-    width: 400px;
+    width: min(400px, 95%);
   }
 
   #login-form > h1 {
-    font-size: 42px;
+    font-size: 34px;
   }
 
   #login-form > label {
@@ -100,7 +141,7 @@
   #login-form > input {
     margin: 20px;
     margin-top: 0;
-    width: 100%;
+    width: 90%;
     font-size: 18px;
     padding: 5px 10px;
     outline: none;
@@ -112,7 +153,6 @@
 
   #login-form > button {
     margin: 20px;
-    margin-bottom: 10px;
     font-size: 20px;
     padding: 13px 20px;
     outline: none;
@@ -121,10 +161,11 @@
     background-color: var(--pink-500);
     color: var(--purple-100);
     box-shadow: 0 2px 4px var(--purple-200);
-    transition: box-shadow ease-in-out 200ms, color ease-in-out 200ms,
+    transition:
+      box-shadow ease-in-out 200ms,
+      color ease-in-out 200ms,
       background-color ease-in-out 200ms;
     width: 200px;
-    cursor: pointer;
   }
 
   #login-form > button:hover {
@@ -135,11 +176,16 @@
   #login-form > button:disabled {
     background-color: var(--pink-300);
     box-shadow: 0 2px 2px var(--gray-100);
+    cursor: default;
   }
 
   .error {
-    color: var(--pink-700);
+    color: var(--pink-600);
     text-align: center;
+  }
+
+  #signup-prompt {
+    font-weight: 300;
   }
 
   @media only screen and (max-width: 1200px) {

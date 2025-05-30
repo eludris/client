@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Navbar from '$lib/components/Navbar.svelte';
   import config from '$lib/user_config';
 </script>
 
@@ -9,6 +10,26 @@
       {@html `<style>${$config.styles}</style>`}
     {/if}
   {/if}
+  {#if $config.showSpoilers}
+    <style>
+      .md .spoiler {
+        color: inherit;
+        cursor: default;
+      }
+
+      .md .spoiler img {
+        filter: none;
+      }
+    </style>
+  {/if}
+  <style>
+    #fact .emoji {
+      height: 22px;
+      aspect-ratio: 1;
+      object-fit: contain;
+      vertical-align: bottom;
+    }
+  </style>
 </svelte:head>
 
 <div id="bg" />
@@ -29,7 +50,7 @@
   }
 
   #app {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
