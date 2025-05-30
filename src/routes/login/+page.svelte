@@ -9,9 +9,10 @@
   import { env } from '$env/dynamic/public';
   import getPlatform from '$lib/platform';
 
+  const INSTANCE_URL = env.PUBLIC_INSTANCE_URL ?? 'https://cdn.eludris.com/';
+
   let username = '';
   let password = '';
-  let instanceURL = env.PUBLIC_INSTANCE_URL ?? 'https://eludris.tooty.xyz/next';
   let error = '';
   let requesting = false;
 
@@ -27,15 +28,15 @@
       error = 'Loading...';
       requesting = true;
       try {
-        let instanceInfo: InstanceInfo = await request('GET', '', null, { apiUrl: instanceURL });
+        let instanceInfo: InstanceInfo = await request('GET', '', null, { apiUrl: INSTANCE_URL });
         let session: SessionCreated = await request(
           'POST',
           'sessions',
           { identifier: username, password, platform: getPlatform(), client: 'eludris' },
-          { apiUrl: instanceURL }
+          { apiUrl: INSTANCE_URL }
         );
         let user: User = await request('GET', 'users/@me', null, {
-          apiUrl: instanceURL,
+          apiUrl: INSTANCE_URL,
           token: session.token
         });
         userData.set({

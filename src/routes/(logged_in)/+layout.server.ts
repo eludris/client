@@ -11,7 +11,7 @@ const facts = [
   'I am the storm that is approaching',
   'Coffee is kinda pog',
   'Faust knows all outcomes',
-  'The name pengin (old client name) originally started as a joke about linux users while watching <a href="https://cdn.eludris.gay/static/pengin.mp4" target="_blank">this video</a> on loop',
+  'The name pengin (old client name) originally started as a joke about linux users while watching <a href="https://cdn.eludris.com/static/pengin.mp4" target="_blank">this video</a> on loop',
   'ggVG is a sensible keybind.',
   "It's been a long night and I can feel your anger",
   'wei wei wei wei',
