@@ -1923,7 +1923,7 @@ export const emojiDictionary: { [emoji: string]: string } = {
     halal: 'https://cdn.discordapp.com/emojis/1098216622621200464.webp?quality=lossless',
     haram: 'https://cdn.discordapp.com/emojis/1098216666745282670.webp?quality=lossless',
     woof: 'https://media.tenor.com/ljcdej9JsBsAAAAd/vanitas-vanitas-no-carte.gif',
-    uwoogh: 'https://cdn.eludris.com/4266150985739',
+    uwoogh: 'https://cdn.eludris.com/6462051123201',
     kaldance: 'https://media.discordapp.net/stickers/1143840253476614144.png',
     flushedd: 'https://cdn.discordapp.com/emojis/1012407508901580821.webp?quality=lossless',
     pog: 'https://cdn.discordapp.com/emojis/989499974775631873.webp?quality=lossless',
