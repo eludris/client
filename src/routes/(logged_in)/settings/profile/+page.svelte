@@ -175,8 +175,8 @@
   };
 
   const verifyBio = () => {
-    if (bio && bio.length > $userData!.instanceInfo.bio_limit) {
-      errors.bio = `Bio must be less than ${$userData?.instanceInfo.bio_limit} characters long`;
+    if (bio && bio.length > 4096) {
+      errors.bio = `Bio must be less than 4096 characters long`;
     } else {
       delete errors.bio;
       errors = errors; // wake up svelte
