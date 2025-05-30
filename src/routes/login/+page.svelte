@@ -9,7 +9,7 @@
   import { env } from '$env/dynamic/public';
   import getPlatform from '$lib/platform';
 
-  const INSTANCE_URL = env.PUBLIC_INSTANCE_URL ?? 'https://cdn.eludris.com/';
+  const INSTANCE_URL = env.PUBLIC_INSTANCE_URL ?? 'https://api.eludris.com/';
 
   let username = '';
   let password = '';
