@@ -3,6 +3,9 @@
   import Markdown from '$lib/components/Markdown.svelte';
   import { request } from '$lib/request';
   import userData from '$lib/user_data';
+  import userConfig from '$lib/user_config';
+
+  let backUrl = $userConfig.lastChannel ? `/channels/${$userConfig.lastChannel}` : '/';
 
   let statusIndicatorFocused = false;
   let statuses = [
@@ -77,6 +80,7 @@
       </ul>
     {/if}
     <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
     <span class="user-avatar-container" on:click|stopPropagation={showStatusSwitcher}>
       <img
         class="user-avatar"
@@ -95,7 +99,7 @@
         <span class="user-status">{$userData?.user.status.text}</span>
       {/if}
     </div>
-    <a id="settings-link" href={$page.url.pathname.startsWith('/settings') ? '/' : '/settings'}>
+    <a id="settings-link" href={$page.url.pathname.startsWith('/settings') ? backUrl : '/settings'}>
       <!--- https://icon-sets.iconify.design/mdi/cog/ --->
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
         ><path
