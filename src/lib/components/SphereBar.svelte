@@ -67,7 +67,7 @@
             </h4>
           {/if}
           {#each category.channels as channel (channel.id)}
-            <a href="/channels/{channel.id}" class="channel">
+            <a href="/channels/{channel.id}" class="channel" class:current={Number.parseInt($page.params.channel_id ?? '0') == channel.id}>
               # {channel.name}
             </a>
           {/each}
@@ -138,8 +138,13 @@
   }
 
   .channel {
-    padding-left: 5px;
     text-decoration: none;
+    padding: 5px;
+    border-radius: 5px;
+  }
+
+  .channel.current {
+    background-color: var(--purple-400);
   }
 
   #sphere-banner {
