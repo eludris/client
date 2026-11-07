@@ -1,13 +1,13 @@
-import { browser } from '$app/environment';
-import { get, writable } from 'svelte/store';
-import data from '$lib/user_data';
-import config from '$lib/user_config';
-import { PayloadOP, type IncomingPayload } from '$lib/types/event';
-import markdown from '$lib/markdown';
-import type { UserData } from './types/ui/user';
-import type { State } from './types/ui/state';
-import { request } from './request';
-import type { InstanceInfo } from './types/instance';
+import { browser } from "$app/environment";
+import { get, writable } from "svelte/store";
+import data from "$lib/user_data";
+import config from "$lib/user_config";
+import { type IncomingPayload, PayloadOP } from "$lib/types/event";
+import markdown from "$lib/markdown";
+import type { UserData } from "./types/ui/user";
+import type { State } from "./types/ui/state";
+import { request } from "./request";
+import type { InstanceInfo } from "./types/instance";
 
 const state = writable<State>({
   connected: false,
@@ -21,7 +21,10 @@ const state = writable<State>({
 let ws: WebSocket | null = null;
 let pingInterval: NodeJS.Timeout | null = null;
 let lastAuthorID: { [name: number]: number } = {};
-let lastAuthorData: { [name: number]: { name: string, avatar: string | number | undefined } } = {};
+let lastAuthorTimestamp: { [name: number]: bigint } = {};
+let lastAuthorData: {
+  [name: number]: { name: string; avatar: string | number | undefined };
+} = {};
 let notification: Notification;
 let notification_opt: number;
 let connected = false;
@@ -52,8 +55,8 @@ const connect = async (userData: UserData) => {
 
   const innerWs = new WebSocket(userData.instanceInfo.pandemonium_url);
 
-  innerWs.addEventListener('open', () => {
-    innerWs?.addEventListener('message', (msg: MessageEvent) => {
+  innerWs.addEventListener("open", () => {
+    innerWs?.addEventListener("message", (msg: MessageEvent) => {
       const payload: IncomingPayload = JSON.parse(msg.data);
 
       let instanceInfo: InstanceInfo;
@@ -62,12 +65,17 @@ const connect = async (userData: UserData) => {
           ws?.send(JSON.stringify({ op: PayloadOP.PING }));
           pingInterval = setInterval(
             () => ws?.send(JSON.stringify({ op: PayloadOP.PING })),
-            payload.d.heartbeat_interval
+            payload.d.heartbeat_interval,
           );
         }, payload.d.heartbeat_interval * Math.random());
         ws = innerWs;
         instanceInfo = payload.d.instance_info;
-        ws?.send(JSON.stringify({ op: PayloadOP.AUTHENTICATE, d: userData.session.token }));
+        ws?.send(
+          JSON.stringify({
+            op: PayloadOP.AUTHENTICATE,
+            d: userData.session.token,
+          }),
+        );
       } else if (payload.op == PayloadOP.AUTHENTICATED) {
         state.update((state) => {
           state.connected = true;
@@ -83,8 +91,8 @@ const connect = async (userData: UserData) => {
               state.categories[c.id] = c;
               c.channels.forEach((c) => {
                 state.channels[c.id] = c;
-              })
-            })
+              });
+            });
             state.spheres[u.id] = u;
           });
           state.users[payload.d.user.id] = payload.d.user;
@@ -115,7 +123,7 @@ const connect = async (userData: UserData) => {
         state.update((s) => {
           s.connected = true;
           if (!s.users[payload.d.user_id]) {
-            request('GET', `/users/${payload.d.user_id}`).then((u) => {
+            request("GET", `/users/${payload.d.user_id}`).then((u) => {
               state.update((state) => {
                 state.users[payload.d.user_id] = u;
                 return state;
@@ -134,50 +142,60 @@ const connect = async (userData: UserData) => {
             return d;
           });
         }
-      } else if (payload.op == PayloadOP.MESSAGE_CREATE)
-        markdown(payload.d.content ?? '').then((content) => {
+      } else if (payload.op == PayloadOP.MESSAGE_CREATE) {
+        markdown(payload.d.content ?? "").then((content) => {
           let channelID = payload.d.channel.id;
           const authorData = {
-            name:
-              payload.d._disguise?.name ??
+            name: payload.d._disguise?.name ??
               payload.d.author.display_name ?? payload.d.author.username,
-            avatar:
-              payload.d._disguise?.avatar ??
-              payload.d.author.avatar
+            avatar: payload.d._disguise?.avatar ??
+              payload.d.author.avatar,
           };
           if (!lastAuthorData[channelID]) {
             let lastMessage = get(state).messages[channelID].messages.at(-1);
             if (lastMessage) {
+              lastAuthorTimestamp[channelID] = BigInt(lastMessage.id) >> 16n;
               lastAuthorData[channelID] = {
                 name: lastMessage?._disguise?.name ??
-                  lastMessage.author.display_name ?? lastMessage.author.username,
-                avatar: lastMessage?._disguise?.avatar ?? lastMessage?.author.avatar
+                  lastMessage.author.display_name ??
+                  lastMessage.author.username,
+                avatar: lastMessage?._disguise?.avatar ??
+                  lastMessage?.author.avatar,
               };
               lastAuthorID[channelID] = lastMessage?.author.id;
             }
           }
-          let sameData = authorData?.name == lastAuthorData[channelID]?.name && authorData?.avatar == lastAuthorData[channelID].avatar;
+          let sameData = authorData?.name == lastAuthorData[channelID]?.name &&
+            authorData?.avatar == lastAuthorData[channelID].avatar;
+          const messageTimestamp = BigInt(payload.d.id) >> 16n;
           const message = {
             renderedContent: content,
-            showAuthor: !sameData || payload.d.author.id != lastAuthorID[channelID],
-            mentioned: new RegExp(`(?<!\\\\)<@${userData.user.id}>`, 'gm').test(payload.d.content ?? ''),
-            ...payload.d
+            showAuthor: !sameData ||
+              payload.d.author.id != lastAuthorID[channelID] ||
+              messageTimestamp - lastAuthorTimestamp[channelID] > 900,
+            mentioned: new RegExp(`(?<!\\\\)<@${userData.user.id}>`, "gm").test(
+              payload.d.content ?? "",
+            ),
+            ...payload.d,
           };
           lastAuthorData[channelID] = authorData;
           lastAuthorID[channelID] = payload.d.author.id;
+          lastAuthorTimestamp[channelID] = messageTimestamp;
           if (
-            'Notification' in window &&
-            Notification.permission == 'granted' &&
+            "Notification" in window &&
+            Notification.permission == "granted" &&
             message.author.id != userData.user.id &&
             !document.hasFocus() &&
             notification_opt > 0
           ) {
             if (notification_opt >= 3 || message.mentioned) {
               let icon = message._disguise?.avatar
-                ? `${userData.instanceInfo.effis_url}/proxy?url=${encodeURIComponent(message._disguise?.avatar)}`
+                ? `${userData.instanceInfo.effis_url}/proxy?url=${
+                  encodeURIComponent(message._disguise?.avatar)
+                }`
                 : message.author.avatar
-                  ? `${userData.instanceInfo.effis_url}/avatars/${message.author.avatar}`
-                  : 'https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true';
+                ? `${userData.instanceInfo.effis_url}/avatars/${message.author.avatar}`
+                : "https://github.com/eludris/.github/blob/main/assets/thang-big.png?raw=true";
               notification = new Notification(
                 message.mentioned
                   ? `New mention from ${authorData.name}`
@@ -186,31 +204,35 @@ const connect = async (userData: UserData) => {
                   body: message.content,
                   icon,
                   silent: false,
-                  tag: 'NewMessage'
-                }
+                  tag: "NewMessage",
+                },
               );
               // new Audio('...').play();
-            };
+            }
           }
           state.update((state) => {
             if (state.messages[message.channel.id]) {
               state.messages[message.channel.id].messages.push(message);
             } else {
-              state.messages[message.channel.id] = { messages: [message], hasEveryMessage: false };
+              state.messages[message.channel.id] = {
+                messages: [message],
+                hasEveryMessage: false,
+              };
             }
             return state;
           });
         });
+      }
     });
 
-    innerWs?.addEventListener('close', () => {
-      console.warn('WebSocket connection closed, reconnecting');
+    innerWs?.addEventListener("close", () => {
+      console.warn("WebSocket connection closed, reconnecting");
       retryConnect(7_000);
     });
   });
 
-  innerWs.addEventListener('error', () => {
-    console.error('Encountered an error while connecting to WebSocket');
+  innerWs.addEventListener("error", () => {
+    console.error("Encountered an error while connecting to WebSocket");
     retryConnect();
   });
 };
@@ -238,7 +260,7 @@ if (browser) {
     notification_opt = conf.notifications;
   });
 
-  document.addEventListener('focus', () => {
+  document.addEventListener("focus", () => {
     notification?.close();
   });
 }

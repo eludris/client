@@ -82,6 +82,7 @@
     populatingMessages = true;
     let lastAuthorID: number | null = null;
     let lastAuthorData: { name: string; avatar: string | number | undefined } | null = null;
+    let lastMessageTimestamp: bigInt = 0n;
     let fetchedMessages: ClientMessage[] = [];
     if (!$state.messages[channel.id]) {
       $state.messages[channel.id] = { messages: [], hasEveryMessage: false };
@@ -94,16 +95,18 @@
           name: m._disguise?.name ?? m.author.display_name ?? m.author.username,
           avatar: m._disguise?.avatar ?? m.author.avatar
         };
+        let messageTimestamp = BigInt(m.id) >> 16n;
         let sameData =
           authorData.name == lastAuthorData?.name && authorData.avatar == lastAuthorData?.avatar;
         const message = {
           renderedContent: content,
-          showAuthor: !sameData || m.author.id != lastAuthorID,
+          showAuthor: !sameData || m.author.id != lastAuthorID || messageTimestamp - lastMessageTimestamp > 900,
           mentioned: new RegExp(`(?<!\\\\)<@${$userData?.user.id}>`, 'gm').test(m.content ?? ''),
           ...m
         };
         lastAuthorData = authorData;
         lastAuthorID = m.author.id;
+        lastMessageTimestamp = messageTimestamp;
         fetchedMessages.push(message);
       }
       if (fetchedMessages.length < 50) {
