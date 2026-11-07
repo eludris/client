@@ -24,6 +24,7 @@
   --gray-600: hsl(249, 81%, 85%);
 
   --color-text: hsl(0, 0%, 93%); /* actually #eeeeee in disguise */
+  --color-text-secondary: hsl(0, 0%, 50%);
   --color-code-bg: hsl(260, 32%, 18%);
   --color-bg: var(--gray-100);
   --color-border: var(--purple-300);

@@ -75,6 +75,24 @@
   const showProfile = () => {
     dispatch('showProfile', message.author.id);
   };
+
+  const showDate = () => {
+  const sentAt = new Date(Number(((BigInt(message.id) >> 16n) + 1650000000n) * 1000n));
+  const now = new Date();
+
+  const timeString = sentAt.toLocaleTimeString([], {hour: 'numeric', minute: '2-digit'});
+
+  if(sentAt.getDate() == now.getDate() && sentAt.getMonth() == now.getMonth() && sentAt.getFullYear() == now.getFullYear()) // if today
+    return timeString;
+
+  if (sentAt.getDate() == now.getDate() - 1 && sentAt.getMonth() == now.getMonth() && sentAt.getFullYear() == now.getFullYear())
+    return `Yesterday at ${timeString}`
+
+  if (sentAt.getFullYear() == now.getFullYear())
+    return `${sentAt.toLocaleDateString([], {month: 'short', day: 'numeric'})} ${timeString}`
+
+    return `${sentAt.toLocaleDateString([], {year: 'numeric', month: 'short', day: 'numeric'})} ${timeString}`
+  }
 </script>
 
 <div
@@ -114,6 +132,7 @@
         {#if message._disguise}
           <span class="bridge-indicator">BRIDGE</span>
         {/if}
+        <span class="message-time">{showDate()}</span>
       </span>
     {/if}
     <div class="content"><Markdown content={message.renderedContent} preRendered /></div>
@@ -193,5 +212,11 @@
 
   .mentioned {
     background-color: var(--pink-200);
+  }
+
+  .message-time {
+    padding: 0 5px;
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
   }
 </style>
