@@ -34,7 +34,6 @@
   },
   "type": "module",
   "dependencies": {
-    "@sveltejs/vite-plugin-svelte": "^3.0.0",
     "eludris-wasm-cropper": "eludris/wasm-cropper#semver:^0.1.1",
     "prismjs": "^1.29.0",
     "rehype-katex": "^7.0.1",
